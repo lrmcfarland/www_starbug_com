@@ -1,0 +1,1 @@
+# needed for "from app import create_app" to work in tests.
