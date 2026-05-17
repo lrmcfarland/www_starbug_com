@@ -1,6 +1,6 @@
 import pytest
 
-from app import create_app
+from www_starbug_com import create_app
 
 @pytest.fixture
 def app():
@@ -10,4 +10,4 @@ def app():
 def test_hello(app):
     response = app.test_client().get('/')
     assert response.status_code == 200
-    assert response.data == b"Hello, World with tests!"
+    assert response.data == b"Hello, World with src tests!"

@@ -16,13 +16,13 @@ RUN pip install --no-cache-dir ".[dev]"
 # copy the rest of the application code
 COPY . .
 
-# RUN pytest
+RUN PYTHONPATH=/www_starbug_com/src pytest
 
 # TODO: Consider separating test dependencies and running tests in a separate stage or command to avoid bloating the final image with test-related packages.
 # Run tests, then start the application
 # CMD ["sh", "-c", "pytest && flask --app app run --host=0.0.0.0"]
 
 # Expose the internal port for Nginx to reach
-WORKDIR /www_starbug_com/app
+WORKDIR /www_starbug_com/src
 EXPOSE 5000
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "home:home"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "www_starbug_com.main:app"]

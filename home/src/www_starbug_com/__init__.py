@@ -10,6 +10,6 @@ def create_app(config_class=None):
 
     @app.route("/")
     def hello():
-        return "Hello, World with tests!"
+        return "Hello, World with src tests!"
 
     return app
