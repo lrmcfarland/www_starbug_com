@@ -1,20 +1,24 @@
-[project]
+[tool.poetry]
 name = "www_starbug_com"
-version = "2026.5.9"
+version = "0.1.0"
 description = "This is the source for the starbug.com web site"
-readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-    "flask",
-    "gunicorn",
-]
+authors = ["Lincoln McFarland <lrm@starbug.com>"]
+packages = [{include = "www_starbug_com", from = "src"}]
 
-[project.optional-dependencies]
-dev = [
-    "pytest",
-]
+[tool.poetry.dependencies]
+python = "^3.10"
+flask = "^3.1.3"
+gunicorn = "^26.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-flask = "^1.3.0"
 
 [tool.pytest.ini_options]
-pythonpath = ["app"]
+pythonpath = ["src"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
