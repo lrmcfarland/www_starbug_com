@@ -19,4 +19,4 @@ RUN poetry run pytest
 
 # Expose the internal port for Nginx to reach
 EXPOSE 5000
-CMD ["poetry", "run", "gunicorn", "-b", "0.0.0.0:5000", "www_starbug_com.main:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "www_starbug_com:app"]

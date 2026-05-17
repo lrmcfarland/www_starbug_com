@@ -10,6 +10,9 @@ def create_app(config_class=None):
 
     @app.route("/")
     def hello():
-        return "Hello, World with poetry tests!"
+        return "Hello, World with main tests!"
 
     return app
+
+# Export for WSGI servers
+app = create_app()

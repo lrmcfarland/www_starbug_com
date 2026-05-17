@@ -2,7 +2,7 @@ services:
   home:
     build: ./home
     platform: linux/amd64
-    command: gunicorn --bind 0.0.0.0:5000 www_starbug_com.main:app
+    command: gunicorn --bind 0.0.0.0:5000 www_starbug_com:app
     expose:
       - 5000
 
