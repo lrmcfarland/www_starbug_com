@@ -3,8 +3,18 @@ name = "www_starbug_com"
 version = "2026.5.9"
 description = "This is the source for the starbug.com web site"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "flask",
     "gunicorn",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["app"]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
