@@ -23,6 +23,27 @@ docker compose up -d --remove-orphans
 docker compose down
 ```
 
+# Python formatting
+
+To run locally, install [poetry](https://python-poetry.org/docs/).
+In the `home` directory, where `pyproject.toml` is located, run:
+
+## isort
+
+```
+poetry run isort .
+```
+
+## lint
+```
+poetry run flake8 .
+```
+
+## Format
+```
+poetry run black .
+```
+
 # Flask unit testing
 
 In the `home` directory
