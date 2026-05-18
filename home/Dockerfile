@@ -14,6 +14,16 @@ COPY . .
 # Install dependencies (including dev)
 RUN poetry install --no-interaction --no-ansi
 
+# sort imports
+RUN poetry run isort .
+
+# Lint the code
+RUN poetry run flake8 .
+
+# Format the code
+RUN poetry run black .
+
+
 # Run tests
 RUN poetry run pytest
 
