@@ -35,12 +35,18 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/www_starbug_com || mkdir -p ~/www_starbug_com && cd ~/www_starbug_com
+            INSTALL_ROOT=/opt/starbug
+            if [ ! -d "$INSTALL_ROOT" ]; then
+              mkdir -p $INSTALL_ROOT
+            fi
+            STARBUG_DIR=$INSTALL_ROOT/www_starbug_com
+            DEPLOY_BRANCH=deploy
+            cd $STARBUG_DIR || mkdir -p $STARBUG_DIR && cd $STARBUG_DIR
             git init
             git remote add origin https://github.com{{ github.repository }}.git || true
             git fetch --all
-            git checkout deploy
-            git reset --hard origin/deploy
+            git checkout $DEPLOY_BRANCH
+            git reset --hard origin/$DEPLOY_BRANCH
             docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
 
       # 3. Remove the IP from the firewall after deployment
