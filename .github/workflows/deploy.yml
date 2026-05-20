@@ -41,12 +41,18 @@ jobs:
             fi
             STARBUG_DIR=$INSTALL_ROOT/www_starbug_com
             DEPLOY_BRANCH=deploy
-            cd $STARBUG_DIR || mkdir -p $STARBUG_DIR && cd $STARBUG_DIR
-            git init
-            git remote add origin https://github.com{{ github.repository }}.git || true
-            git fetch --all
-            git checkout $DEPLOY_BRANCH
-            git reset --hard origin/$DEPLOY_BRANCH
+            if [ -d "$STARBUG_DIR" ]; then
+              echo "Directory ${{ github.repository  }} exists, pulling latest changes..."
+              cd $STARBUG_DIR
+              git fetch --all
+              git reset --hard origin/deploy
+            else
+              cd $INSTALL_ROOT
+              echo "Directory ${{ github.repository  }} does not exist, cloning repository..."
+              git clone https://github.com/${{ github.repository  }}.git $STARBUG_DIR
+              cd $STARBUG_DIR
+              git checkout $DEPLOY_BRANCH
+            fi
             docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
 
       # 3. Remove the IP from the firewall after deployment
