@@ -23,7 +23,6 @@ RUN poetry run flake8 .
 # Format the code
 RUN poetry run black .
 
-
 # Run tests
 RUN poetry run pytest
 

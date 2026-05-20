@@ -12,4 +12,4 @@ def app():
 def test_hello(app):
     response = app.test_client().get("/")
     assert response.status_code == 200
-    assert response.data == b"Hello, World with github actions deploy!"
+    assert response.data == b"Hello, World with docker cleanup!"

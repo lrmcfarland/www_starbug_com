@@ -11,7 +11,7 @@ def create_app(config_class=None):
 
     @app.route("/")
     def hello():
-        return "Hello, World with github actions deploy!"
+        return "Hello, World with docker cleanup!"
 
     return app
 
