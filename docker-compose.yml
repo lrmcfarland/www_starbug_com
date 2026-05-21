@@ -1,17 +1,25 @@
+networks:
+  starbug_network:
+    driver: bridge
+
 services:
   home:
     build: ./home
-    platform: linux/amd64
     command: gunicorn --bind 0.0.0.0:5000 www_starbug_com:app
     expose:
       - 5000
+    networks:
+      - starbug_network
+    platform: linux/amd64
 
   nginx:
     build: ./nginx
-    platform: linux/amd64
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    ports:
-      - "80:80"
     depends_on:
       - home
+    networks:
+      - starbug_network
+    platform: linux/amd64
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
