@@ -156,7 +156,7 @@ For example
 
 ```
 lrm@lrmz-Mac-mini-2023 home % poetry run pytest
-================================================ test session starts =================================================
+================ test session starts =================
 platform darwin -- Python 3.14.5, pytest-8.4.2, pluggy-1.6.0
 rootdir: /Users/lrm/Library/Mobile Documents/com~apple~CloudDocs/Documents/Computer/src/starbug.2026/www_starbug_com/home
 configfile: pyproject.toml
@@ -165,8 +165,8 @@ plugins: flask-1.3.0
 collected 1 item
 tests/test_home.py F                                                                                           [100%]
 
-====================================================== FAILURES ======================================================
-_____________________________________________________ test_hello _____________________________________________________
+====================== FAILURES ======================
+______________________ test_hello ____________________
 
 app = <Flask 'www_starbug_com'>
 
@@ -174,15 +174,15 @@ app = <Flask 'www_starbug_com'>
         response = app.test_client().get("/")
         assert response.status_code == 200
 >       assert response.data == b"Hello, World with /opt/starbug!"
-E       AssertionError: assert b'Hello, Worl...rbug_network!' == b'Hello, Worl.../opt/starbug!'
+E       AssertionError: assert b'Hello, World...starbug_network!' == b'Hello, World.../opt/starbug!'
 E
 E         At index 18 diff: b's' != b'/'
 E         Use -v to get more diff
 
 tests/test_home.py:15: AssertionError
-============================================== short test summary info ===============================================
-FAILED tests/test_home.py::test_hello - AssertionError: assert b'Hello, Worl...rbug_network!' == b'Hello, Worl.../opt/starbug!'
-================================================= 1 failed in 0.88s ==================================================
+============== short test summary info ===============
+FAILED tests/test_home.py::test_hello - AssertionError: assert b'Hello, World...starbug_network!' == b'Hello, World.../opt/starbug!'
+================= 1 failed in 0.88s ==================
 ```
 
 # Deploy
@@ -642,3 +642,5 @@ Add the certs to in GitHub under Settings > Secrets and variables > Actions.
 - NGINX_CRT
 - NGINX_KEY
 - NGINX_DHPARAM
+
+[deploy.yml](.github/workflows/deploy.yml) uses these to configure the AWS instance.
