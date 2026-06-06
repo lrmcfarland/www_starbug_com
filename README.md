@@ -61,8 +61,7 @@ running locally helpful for
         - [logs](#logs)
   - [GitHub CI/CD](#github-cicd)
     - [GitHub Secrets](#github-secrets)
-    - [Actions](#actions)
-      - [deploy](#deploy-1)
+    - [Deploy](#deploy-1)
   - [Self Signed Certificate](#self-signed-certificate)
     - [Generate a key](#generate-a-key)
     - [Configure Nginx](#configure-nginx)
@@ -562,7 +561,7 @@ to store the keys referenced in [deploy.yml](.github/workflows/deploy.yml)
 
 ### GitHub Secrets
 
-Add these variables in GitHub under Settings > Secrets and variables > Actions:
+In the GitHub under Settings > Secrets and variables > Actions, add these repository secrets:
 
 1. AWS_ACCESS_KEY_ID: from [Access Key](#access-key).
 1. AWS_SECRET_ACCESS_KEY: from [Access Key](#access-key).
@@ -573,11 +572,9 @@ Add these variables in GitHub under Settings > Secrets and variables > Actions:
 
 Note: EC2_HOST changes on restart. Update as needed.
 
-### Actions
+### Deploy
 
-[GitHub actions](https://github.com/features/actions)
-
-#### deploy
+Use [GitHub actions](https://github.com/features/actions)
 
 Create initial deployment buy clone-ing this repo on the host
 where [deploy.yml](.github/workflows/deploy.yml) expects it.
@@ -641,3 +638,8 @@ This is going to take a long time
 ### Configure Nginx
 
 Use the stand alone file bind secrets instead of swarm.
+
+Add the certs to in GitHub under Settings > Secrets and variables > Actions.
+
+NGINX_CRT
+NGINX_KEY
