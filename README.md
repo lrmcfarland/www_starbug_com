@@ -63,6 +63,9 @@ running locally helpful for
     - [GitHub Secrets](#github-secrets)
     - [Actions](#actions)
       - [deploy](#deploy-1)
+  - [Self Signed Certificate](#self-signed-certificate)
+    - [Generate a key](#generate-a-key)
+    - [Configure Nginx](#configure-nginx)
 
 
 # Hello world
@@ -586,3 +589,55 @@ A `git push -f` will trigger a deployment to the configured EC2 host.
 
 The public DNS http (no s) version of the web site should now be available.
 
+## Self Signed Certificate
+
+### Generate a key
+
+Create a key in a cert directory docker-compose can see but git ignores, e.g. ./nginx/certs.
+
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.key -out starbug.selfsigned.crt
+```
+
+```
+lrm@lrmz-Mac-mini-2023 certs % openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.key -out starbug.selfsigned.crt
+
+Generating a 2048 bit RSA private key
+.......+++++
+.......................+++++
+writing new private key to 'starbug.selfsigned.key'
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) []:US
+State or Province Name (full name) []:CA
+Locality Name (eg, city) []:Mountain View
+Organization Name (eg, company) []:Starbug
+Organizational Unit Name (eg, section) []:DevOps
+Common Name (eg, fully qualified host name) []:starbug.com
+Email Address []:lrm@starbug.com
+lrm@lrmz-Mac-mini-2023 certs %
+```
+
+add dhparam for [Forward Security](https://en.wikipedia.org/wiki/Forward_secrecy)
+
+```
+openssl dhparam -out dhparam.pem 2048
+```
+
+```
+lrm@lrmz-Mac-mini-2023 certs % openssl dhparam -out dhparam.pem 2048
+
+Generating DH parameters, 2048 bit long safe prime, generator 2
+This is going to take a long time
+......................................
+```
+
+### Configure Nginx
+
+Use the stand alone file bind secrets instead of swarm.

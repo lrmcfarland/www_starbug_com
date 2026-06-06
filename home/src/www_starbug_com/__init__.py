@@ -11,7 +11,7 @@ def create_app(config_class=None):
 
     @app.route("/")
     def hello():
-        return "Hello, World with starbug_network!"
+        return "Hello, World with self signed certificates!"
 
     return app
 
