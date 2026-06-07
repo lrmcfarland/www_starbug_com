@@ -11,7 +11,7 @@ def create_app(config_class=None):
 
     @app.route("/")
     def hello():
-        return "Hello, World with self signed certificates!"
+        return "Hello, World with self signed certificates and dhparam!"
 
     return app
 

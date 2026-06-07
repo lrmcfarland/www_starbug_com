@@ -598,10 +598,9 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.k
 
 ```
 lrm@lrmz-Mac-mini-2023 certs % openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.key -out starbug.selfsigned.crt
-
 Generating a 2048 bit RSA private key
-.......+++++
-.......................+++++
+..................................................................................................................+++++
+................+++++
 writing new private key to 'starbug.selfsigned.key'
 -----
 You are about to be asked to enter information that will be incorporated
@@ -614,11 +613,10 @@ If you enter '.', the field will be left blank.
 Country Name (2 letter code) []:US
 State or Province Name (full name) []:CA
 Locality Name (eg, city) []:Mountain View
-Organization Name (eg, company) []:Starbug
+Organization Name (eg, company) []:Jupyter Mining Corp
 Organizational Unit Name (eg, section) []:DevOps
 Common Name (eg, fully qualified host name) []:starbug.com
 Email Address []:lrm@starbug.com
-lrm@lrmz-Mac-mini-2023 certs %
 ```
 
 add dhparam for [Forward Security](https://en.wikipedia.org/wiki/Forward_secrecy)
@@ -641,5 +639,6 @@ Use the stand alone file bind secrets instead of swarm.
 
 Add the certs to in GitHub under Settings > Secrets and variables > Actions.
 
-NGINX_CRT
-NGINX_KEY
+- NGINX_CRT
+- NGINX_KEY
+- NGINX_DHPARAM

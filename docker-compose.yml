@@ -27,9 +27,12 @@ services:
     secrets:
       - nginx_crt
       - nginx_key
+      - nginx_dhparam
 
 secrets:
   nginx_crt:
     file: ./nginx/certs/starbug.selfsigned.crt
   nginx_key:
     file: ./nginx/certs/starbug.selfsigned.key
+  nginx_dhparam:
+    file: ./nginx/certs/dhparam.pem
