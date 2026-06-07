@@ -11,11 +11,11 @@ def create_app(config_class=None):
 
     @app.route("/")
     def hello():
-        return "Hello, World!"
+        return "Hello, starbug navigator!"
 
     @app.route("/api/")
     def hello_api():
-        return "Hello, api!"
+        return "Hello, starbug API!"
 
     return app
 

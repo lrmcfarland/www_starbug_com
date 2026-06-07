@@ -12,10 +12,10 @@ def app():
 def test_hello(app):
     response = app.test_client().get("/")
     assert response.status_code == 200
-    assert response.data == b"Hello, World!"
+    assert response.data == b"Hello, starbug navigator!"
 
 
 def test_api(app):
     response = app.test_client().get("/api/")
     assert response.status_code == 200
-    assert response.data == b"Hello, api!"
+    assert response.data == b"Hello, starbug API!"

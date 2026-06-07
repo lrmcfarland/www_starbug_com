@@ -33,7 +33,6 @@ running locally helpful for
     - [black](#black)
   - [Unit testing](#unit-testing)
     - [Docker](#docker)
-    - [Poetry](#poetry)
 - [Deploy](#deploy)
   - [AWS EC2](#aws-ec2)
     - [Create](#create)
@@ -103,7 +102,7 @@ docker compose down
 ## Python formatting
 
 To run locally, install [poetry](https://python-poetry.org/docs/).
-In the `home` directory, where `pyproject.toml` is located, run:
+In the `navigator` directory, where `pyproject.toml` is located, run:
 
 ### isort
 
@@ -136,57 +135,13 @@ poetry run black .
 
 ### Docker
 
-In the `home` directory
+In the `navigator` directory
 
 ```
-docker build -t www_starbug_com-home .
-```
-
-### Poetry
-
-Install [poetry](https://python-poetry.org/)
-
-Also in the `home/`
-
-```
-poetry run pytest
-```
-
-For example
-
-```
-lrm@lrmz-Mac-mini-2023 home % poetry run pytest
-================ test session starts =================
-platform darwin -- Python 3.14.5, pytest-8.4.2, pluggy-1.6.0
-rootdir: /Users/lrm/Library/Mobile Documents/com~apple~CloudDocs/Documents/Computer/src/starbug.2026/www_starbug_com/home
-configfile: pyproject.toml
-testpaths: tests
-plugins: flask-1.3.0
-collected 1 item
-tests/test_home.py F                                                                                           [100%]
-
-====================== FAILURES ======================
-______________________ test_hello ____________________
-
-app = <Flask 'www_starbug_com'>
-
-    def test_hello(app):
-        response = app.test_client().get("/")
-        assert response.status_code == 200
->       assert response.data == b"Hello, World with /opt/starbug!"
-E       AssertionError: assert b'Hello, World...starbug_network!' == b'Hello, World.../opt/starbug!'
-E
-E         At index 18 diff: b's' != b'/'
-E         Use -v to get more diff
-
-tests/test_home.py:15: AssertionError
-============== short test summary info ===============
-FAILED tests/test_home.py::test_hello - AssertionError: assert b'Hello, World...starbug_network!' == b'Hello, World.../opt/starbug!'
-================= 1 failed in 0.88s ==================
+docker build -t www_starbug_com-navigator .
 ```
 
 # Deploy
-
 
 ## AWS EC2
 
