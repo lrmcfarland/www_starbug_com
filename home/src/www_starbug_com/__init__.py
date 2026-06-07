@@ -11,7 +11,11 @@ def create_app(config_class=None):
 
     @app.route("/")
     def hello():
-        return "Hello, World with api example!"
+        return "Hello, World!"
+
+    @app.route("/api/")
+    def hello_api():
+        return "Hello, api!"
 
     return app
 
