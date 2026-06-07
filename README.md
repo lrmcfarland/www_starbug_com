@@ -61,8 +61,10 @@ running locally helpful for
         - [logs](#logs)
   - [GitHub CI/CD](#github-cicd)
     - [GitHub Secrets](#github-secrets)
-    - [Actions](#actions)
-      - [deploy](#deploy-1)
+    - [Deploy](#deploy-1)
+  - [Self Signed Certificate](#self-signed-certificate)
+    - [Generate a key](#generate-a-key)
+    - [Configure Nginx](#configure-nginx)
 
 
 # Hello world
@@ -154,7 +156,7 @@ For example
 
 ```
 lrm@lrmz-Mac-mini-2023 home % poetry run pytest
-================================================ test session starts =================================================
+================ test session starts =================
 platform darwin -- Python 3.14.5, pytest-8.4.2, pluggy-1.6.0
 rootdir: /Users/lrm/Library/Mobile Documents/com~apple~CloudDocs/Documents/Computer/src/starbug.2026/www_starbug_com/home
 configfile: pyproject.toml
@@ -163,8 +165,8 @@ plugins: flask-1.3.0
 collected 1 item
 tests/test_home.py F                                                                                           [100%]
 
-====================================================== FAILURES ======================================================
-_____________________________________________________ test_hello _____________________________________________________
+====================== FAILURES ======================
+______________________ test_hello ____________________
 
 app = <Flask 'www_starbug_com'>
 
@@ -172,15 +174,15 @@ app = <Flask 'www_starbug_com'>
         response = app.test_client().get("/")
         assert response.status_code == 200
 >       assert response.data == b"Hello, World with /opt/starbug!"
-E       AssertionError: assert b'Hello, Worl...rbug_network!' == b'Hello, Worl.../opt/starbug!'
+E       AssertionError: assert b'Hello, World...starbug_network!' == b'Hello, World.../opt/starbug!'
 E
 E         At index 18 diff: b's' != b'/'
 E         Use -v to get more diff
 
 tests/test_home.py:15: AssertionError
-============================================== short test summary info ===============================================
-FAILED tests/test_home.py::test_hello - AssertionError: assert b'Hello, Worl...rbug_network!' == b'Hello, Worl.../opt/starbug!'
-================================================= 1 failed in 0.88s ==================================================
+============== short test summary info ===============
+FAILED tests/test_home.py::test_hello - AssertionError: assert b'Hello, World...starbug_network!' == b'Hello, World.../opt/starbug!'
+================= 1 failed in 0.88s ==================
 ```
 
 # Deploy
@@ -559,7 +561,7 @@ to store the keys referenced in [deploy.yml](.github/workflows/deploy.yml)
 
 ### GitHub Secrets
 
-Add these variables in GitHub under Settings > Secrets and variables > Actions:
+In the GitHub under Settings > Secrets and variables > Actions, add these repository secrets:
 
 1. AWS_ACCESS_KEY_ID: from [Access Key](#access-key).
 1. AWS_SECRET_ACCESS_KEY: from [Access Key](#access-key).
@@ -570,11 +572,9 @@ Add these variables in GitHub under Settings > Secrets and variables > Actions:
 
 Note: EC2_HOST changes on restart. Update as needed.
 
-### Actions
+### Deploy
 
-[GitHub actions](https://github.com/features/actions)
-
-#### deploy
+Use [GitHub actions](https://github.com/features/actions)
 
 Create initial deployment buy clone-ing this repo on the host
 where [deploy.yml](.github/workflows/deploy.yml) expects it.
@@ -586,3 +586,61 @@ A `git push -f` will trigger a deployment to the configured EC2 host.
 
 The public DNS http (no s) version of the web site should now be available.
 
+## Self Signed Certificate
+
+### Generate a key
+
+Create a key in a cert directory docker-compose can see but git ignores, e.g. ./nginx/certs.
+
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.key -out starbug.selfsigned.crt
+```
+
+```
+lrm@lrmz-Mac-mini-2023 certs % openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.key -out starbug.selfsigned.crt
+Generating a 2048 bit RSA private key
+..................................................................................................................+++++
+................+++++
+writing new private key to 'starbug.selfsigned.key'
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) []:US
+State or Province Name (full name) []:CA
+Locality Name (eg, city) []:Mountain View
+Organization Name (eg, company) []:Jupyter Mining Corp
+Organizational Unit Name (eg, section) []:DevOps
+Common Name (eg, fully qualified host name) []:starbug.com
+Email Address []:lrm@starbug.com
+```
+
+add dhparam for [Forward Security](https://en.wikipedia.org/wiki/Forward_secrecy)
+
+```
+openssl dhparam -out dhparam.pem 2048
+```
+
+```
+lrm@lrmz-Mac-mini-2023 certs % openssl dhparam -out dhparam.pem 2048
+
+Generating DH parameters, 2048 bit long safe prime, generator 2
+This is going to take a long time
+......................................
+```
+
+### Configure Nginx
+
+Use the stand alone file bind secrets instead of swarm.
+
+Add the certs to in GitHub under Settings > Secrets and variables > Actions.
+
+- NGINX_CRT
+- NGINX_KEY
+- NGINX_DHPARAM
+
+[deploy.yml](.github/workflows/deploy.yml) uses these to configure the AWS instance.
