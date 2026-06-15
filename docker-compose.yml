@@ -3,6 +3,15 @@ networks:
     driver: bridge
 
 services:
+  holly:
+    build:
+      context: ./holly
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - starbug_network
+    platform: linux/amd64
   holly-dev:
     build:
       context: ./holly
@@ -25,7 +34,7 @@ services:
     build: ./nginx
     depends_on:
       - navigator
-      - holly-dev
+      - holly
     networks:
       - starbug_network
     platform: linux/amd64
