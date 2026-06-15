@@ -46,6 +46,8 @@ npm create vite@latest home -- --template react-ts
 
 ## To run
 
+Stand alone from the command line
+
 ```
 npm run dev
 ```
@@ -73,6 +75,8 @@ lrm@lrmz-Mac-mini-2023 holly %
 [Containerize a React.js Application](https://docs.docker.com/guides/reactjs/containerize/)
 
 [How to Dockerize a React App](https://www.docker.com/blog/how-to-dockerize-react-app/)
+
+Warning: The production Dockerfile of this example at this time (2026-06-14) has "two entirely separate, competing Docker setups pasted back-to-back.
 
 ## Add
 
