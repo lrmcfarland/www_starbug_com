@@ -12,15 +12,6 @@ services:
     networks:
       - starbug_network
     platform: linux/amd64
-  holly-dev:
-    build:
-      context: ./holly
-      dockerfile: Dockerfile.dev
-    ports:
-      - "5173:5173"
-    networks:
-      - starbug_network
-    platform: linux/amd64
   navigator:
     build: ./navigator
     command: gunicorn --bind 0.0.0.0:5000 www_starbug_com:app
