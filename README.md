@@ -23,16 +23,6 @@ running locally helpful for
 [debugging format fails](#pythonformatting).
 
 - [www.starbug.com](#wwwstarbugcom)
-- [Hello world](#hello-world)
-  - [Start](#start)
-  - [Stop](#stop)
-- [Test](#test)
-  - [Python formatting](#python-formatting)
-    - [isort](#isort)
-    - [flake8](#flake8)
-    - [black](#black)
-  - [Unit testing](#unit-testing)
-    - [Docker](#docker)
 - [Deploy](#deploy)
   - [AWS EC2](#aws-ec2)
     - [Create](#create)
@@ -52,7 +42,7 @@ running locally helpful for
       - [Mount](#mount)
       - [/etc/fstab](#etcfstab)
       - [chown](#chown)
-    - [Docker](#docker-1)
+    - [Docker](#docker)
       - [Install docker](#install-docker)
       - [Post install](#post-install)
         - [Docker user](#docker-user)
@@ -61,85 +51,13 @@ running locally helpful for
   - [GitHub CI/CD](#github-cicd)
     - [GitHub Secrets](#github-secrets)
     - [Deploy](#deploy-1)
-  - [Self Signed Certificate](#self-signed-certificate)
-    - [Generate a key](#generate-a-key)
-    - [Configure Nginx](#configure-nginx)
+- [Configure Nginx](#configure-nginx)
+- [React](#react)
+  - [Scaffold](#scaffold)
+    - [Create](#create-1)
+    - [Run](#run)
 
 
-# Hello world
-
-To run on a development host, clone this repo.
-Use docker compose to start the services from the root directory.
-This requires [docker](https://www.docker.com/get-started/)
-to be installed on your host.
-
-## Start
-
-From the command line
-
-```
-docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
-```
-
-The web page should now be visible using a browser here
-
-
-[http://0.0.0.0](http://0.0.0.0)
-
-
-or
-
-[http://localhost](http://localhost)
-
-
-## Stop
-```
-docker compose down
-```
-
-# Test
-
-## Python formatting
-
-To run locally, install [poetry](https://python-poetry.org/docs/).
-In the `navigator` directory, where `pyproject.toml` is located, run:
-
-### isort
-
-[isort](https://isort.readthedocs.io/en/latest/):
-isort your imports, so you don't have to.
-
-```
-poetry run isort .
-```
-
-### flake8
-
-[flake8](https://flake8.pycqa.org/en/latest/):
-Your Tool For Style Guide Enforcement.
-
-```
-poetry run flake8 .
-```
-
-### black
-
-[black](https://pypi.org/project/black/):
-The uncompromising code formatter.
-
-```
-poetry run black .
-```
-
-## Unit testing
-
-### Docker
-
-In the `navigator` directory
-
-```
-docker build -t www_starbug_com-navigator .
-```
 
 # Deploy
 
@@ -541,54 +459,8 @@ A `git push -f` will trigger a deployment to the configured EC2 host.
 
 The public DNS http (no s) version of the web site should now be available.
 
-## Self Signed Certificate
 
-### Generate a key
-
-Create a key in a cert directory docker-compose can see but git ignores, e.g. ./nginx/certs.
-
-```
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.key -out starbug.selfsigned.crt
-```
-
-```
-lrm@lrmz-Mac-mini-2023 certs % openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.key -out starbug.selfsigned.crt
-Generating a 2048 bit RSA private key
-..................................................................................................................+++++
-................+++++
-writing new private key to 'starbug.selfsigned.key'
------
-You are about to be asked to enter information that will be incorporated
-into your certificate request.
-What you are about to enter is what is called a Distinguished Name or a DN.
-There are quite a few fields but you can leave some blank
-For some fields there will be a default value,
-If you enter '.', the field will be left blank.
------
-Country Name (2 letter code) []:US
-State or Province Name (full name) []:CA
-Locality Name (eg, city) []:Mountain View
-Organization Name (eg, company) []:Jupyter Mining Corp
-Organizational Unit Name (eg, section) []:DevOps
-Common Name (eg, fully qualified host name) []:starbug.com
-Email Address []:lrm@starbug.com
-```
-
-add dhparam for [Forward Security](https://en.wikipedia.org/wiki/Forward_secrecy)
-
-```
-openssl dhparam -out dhparam.pem 2048
-```
-
-```
-lrm@lrmz-Mac-mini-2023 certs % openssl dhparam -out dhparam.pem 2048
-
-Generating DH parameters, 2048 bit long safe prime, generator 2
-This is going to take a long time
-......................................
-```
-
-### Configure Nginx
+# Configure Nginx
 
 Use the stand alone file bind secrets instead of swarm.
 
@@ -599,3 +471,28 @@ Add the certs to in GitHub under Settings > Secrets and variables > Actions.
 - NGINX_DHPARAM
 
 [deploy.yml](.github/workflows/deploy.yml) uses these to configure the AWS instance.
+
+# React
+
+Create a react app to manage the holly page inside a docker container.
+
+## Scaffold
+
+### Create
+
+Use [vite](https://vite.dev/) to create a TypeScript scaffold in a new `holly` directory
+in the `www_starbug_com` development repo.
+
+```
+npm create vite@latest holly -- --template react-ts
+```
+
+### Run
+
+In the `holly` directory
+
+```
+holly % npm run dev
+```
+
+The app will be available on http://localhost:5174/
