@@ -1,13 +1,19 @@
 # nginx
 
-This is the gateway to the starbug services.
+[nginx](https://nginx.org/) is the gateway to the starbug services.
 
 It is a TLS endpoint so it can accept geo-location data from
 the user's browser.
 
+- [nginx](#nginx)
+- [Self Signed Certificate](#self-signed-certificate)
+  - [Generate](#generate)
+  - [dhparam](#dhparam)
+
+
 # Self Signed Certificate
 
-## Generate a key
+## Generate
 
 Create a key in a cert directory docker-compose can see but git ignores, e.g. ./nginx/certs.
 
@@ -37,6 +43,8 @@ Organizational Unit Name (eg, section) []:DevOps
 Common Name (eg, fully qualified host name) []:starbug.com
 Email Address []:lrm@starbug.com
 ```
+
+## dhparam
 
 add dhparam for [Forward Security](https://en.wikipedia.org/wiki/Forward_secrecy)
 

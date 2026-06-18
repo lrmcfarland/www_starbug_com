@@ -5,6 +5,16 @@ It implements Astronomical Algorithms by Jean Meeus among others.
 
 It uses pyproject.toml instead of requirements.txt.
 
+The docker build uses python formatters,
+[isort](https://isort.readthedocs.io/en/latest/),
+[flake8](https://flake8.pycqa.org/en/latest/), and
+[black](https://pypi.org/project/black/).
+This runs in docker containers.
+Nothing else needs to be installed on your development host,
+but I found having [poetry](https://python-poetry.org/)
+running locally helpful for
+[debugging format fails](#pythonformatting).
+
 - [Navigation](#navigation)
   - [Start](#start)
   - [Stop](#stop)

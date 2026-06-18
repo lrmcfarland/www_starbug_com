@@ -1,82 +1,64 @@
 # www.starbug.com
 
 This is the source for the www.starbug.com website.
-It is implemented as two
+It is implemented as
 [docker](https://www.docker.com/) microservices:
 [nginx](https://nginx.org/) as a
 [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy)
-SSL endpoint and
-[flask](https://flask.palletsprojects.com/en/stable/) as the web server.
-The docker build uses python formatters,
-[isort](https://isort.readthedocs.io/en/latest/),
-[flake8](https://flake8.pycqa.org/en/latest/), and
-[black](https://pypi.org/project/black/).
-[GitHub actions](https://github.com/features/actions) in the
+TLS endpoint,
+[React](https://react.dev/) as a frontend and
+[flask](https://flask.palletsprojects.com/en/stable/) as a backend.
+It uses
+[GitHub actions](https://github.com/features/action)
 [deploy.yml](.github/workflows/deploy.yml) workflow
-are set to update a pre-existing AWS EC2 ubuntu instance
-configured using
+to set up and to update a pre-existing AWS EC2 ubuntu instance.
+It is configured using
 [GitHub secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
-This runs in docker containers.
-Nothing else needs to be installed on your development host,
-but I found having [poetry](https://python-poetry.org/)
-running locally helpful for
-[debugging format fails](#pythonformatting).
+
 
 - [www.starbug.com](#wwwstarbugcom)
+- [Create](#create)
+    - [Application and OS Images](#application-and-os-images)
+  - [Instance Type](#instance-type)
+    - [KeyPair](#keypair)
+    - [ssh login](#ssh-login)
+  - [Network settings](#network-settings)
+  - [Firewall](#firewall)
+  - [Access](#access)
+  - [Volumes](#volumes)
+- [Launch](#launch)
+- [Configure](#configure)
+  - [Volumes](#volumes-1)
+  - [Format](#format)
+  - [Mount](#mount)
+  - [/etc/fstab](#etcfstab)
+  - [chown](#chown)
+- [Docker](#docker)
+  - [Install docker](#install-docker)
+  - [Post install](#post-install)
+    - [Docker user](#docker-user)
+    - [Start on boot](#start-on-boot)
+    - [logs](#logs)
+  - [docker-compose](#docker-compose)
 - [Deploy](#deploy)
-  - [AWS EC2](#aws-ec2)
-    - [Create](#create)
-      - [Application and OS Images](#application-and-os-images)
-      - [Instance Type](#instance-type)
-        - [KeyPair](#keypair)
-        - [ssh login](#ssh-login)
-      - [Network settings](#network-settings)
-      - [Firewall](#firewall)
-      - [Access](#access)
-        - [Access Key](#access-key)
-      - [Volumes](#volumes)
-    - [Launch](#launch)
-    - [Configure](#configure)
-      - [Volumes](#volumes-1)
-      - [Format](#format)
-      - [Mount](#mount)
-      - [/etc/fstab](#etcfstab)
-      - [chown](#chown)
-    - [Docker](#docker)
-      - [Install docker](#install-docker)
-      - [Post install](#post-install)
-        - [Docker user](#docker-user)
-        - [Start on boot](#start-on-boot)
-        - [logs](#logs)
   - [GitHub CI/CD](#github-cicd)
-    - [GitHub Secrets](#github-secrets)
-    - [Deploy](#deploy-1)
-- [Configure Nginx](#configure-nginx)
-- [React](#react)
-  - [Scaffold](#scaffold)
-    - [Create](#create-1)
-    - [Run](#run)
+  - [GitHub Secrets](#github-secrets)
+- [Actions](#actions)
 
+# Create
 
+This example creates an AWS EC2 instance to host this web site.
 
-# Deploy
-
-## AWS EC2
-
-How to deploy www_starbug_com an AWS EC2 instance.
-
-### Create
-
-#### Application and OS Images
+### Application and OS Images
 
 [EC2 console](https://us-west-1.console.aws.amazon.com/ec2/home?region=us-west-1#Home:) `Launch instance`.
 
-#### Instance Type
+## Instance Type
 
 Ubuntu, t3.micro type.
 
 
-##### KeyPair
+### KeyPair
 
 Generate a [KeyPair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)
 and save the pem file, e.g. KeyPairs/www.starbug.com-2026-05-10.pem.
@@ -86,7 +68,7 @@ ec2-54-176-196-103.us-west-1.compute.amazonaws.com in this example,
 and add it to the command line with the pem file and user ubuntu like
 this:
 
-##### ssh login
+### ssh login
 
 ```
 % ssh -i "KeyPairs/www.starbug.com-2026-05-10.pem" ubuntu@ec2-54-176-196-103.us-west-1.compute.amazonaws.com
@@ -98,7 +80,7 @@ will need to update this as needed.
 Note: Make sure to add a line feed at the end when adding this
 to GitHub secrets.
 
-#### Network settings
+## Network settings
 
 How to Find Your SG ID
 
@@ -106,49 +88,46 @@ How to Find Your SG ID
 2. On the left-hand navigation pane, under Network & Security, click Security Groups.
 3. Review the Group ID column (next to the Group Name) to find your alphanumeric ID.
 
-#### Firewall
+## Firewall
 
 Only allow ssh from my IP. Use what is my IP or similar to find.
 Allow http and https from anywhere.
 
-#### Access
+## Access
 
-Create these credentials for ssh access
-and [GitHub secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
-for CI/CD.
-
-##### Access Key
-
-Create [IAM access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
-to allow the GitHub CI/CD to access the instance to update the
-source use AWS access keys.
+For ssh access, create [IAM access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
+Also use this in 
+[GitHub secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
+to allow the GitHub CI/CD to update the instance.
 
 1. Sign in to the AWS Management Console and open the IAM console.
-1. Select "Users" from the navigation pane.
-1. Choose the specific user name for whom you want to create keys.
-1. Click the "Security credentials" tab.
-1. Scroll to "Access keys" and click Create access key.
-1. Follow the prompts (typically selecting "Other" or "Command Line Interface") to generate the pair.
-1. Download the .csv file or copy the keys immediately. This is the only time the Secret Access Key will be displayed.
+2. Select "Users" from the navigation pane.
+3. Choose the specific user name for whom you want to create keys.
+4. Click the "Security credentials" tab.
+5. Scroll to "Access keys" and click Create access key.
+6. Follow the prompts (typically selecting "Other" or "Command Line Interface") to generate the pair.
+7. Download the .csv file or copy the keys immediately. This is the only time the Secret Access Key will be displayed.
 
 Note: Do not add a line feed to these values when adding them to 
 GitHub secrets.
 
-#### Volumes
+## Volumes
 
 Add two 8 GB extra volume to for `/opt` and `/var`
 The extra volumes will need to be mounted.
 [Make an Amazon EBS volume available for use](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-using-volumes.html)
 
-### Launch
+# Launch
 
-### Configure
+Launch the instance.
+
+# Configure
 
 Once it is running login to finish configuration.
 
 [ssh login](#ssh-login)
 
-#### Volumes
+## Volumes
 
 Initialize and mount the extra disks for `/opt` and `/var`.
 
@@ -193,7 +172,7 @@ ubuntu@ip-172-31-9-157:~$ sudo file -s /dev/nvme1n1
 /dev/nvme1n1: data
 ```
 
-#### Format
+## Format
 
 "Warning:
 Do not use this command if you're mounting a volume that already has data on it (for example, a volume that was created from a snapshot). Otherwise, you'll format the volume and delete the existing data."
@@ -228,7 +207,7 @@ ubuntu@ip-172-31-9-157:~$ sudo file -s /dev/nvme1n1
 ```
 
 
-#### Mount
+## Mount
 
 `/opt` already exists and is empty.
 We will mount the starbug application here.
@@ -264,7 +243,7 @@ tmpfs             91M  8.0K   91M   1% /run/user/1000
 /dev/nvme2n1     7.8G  2.1M  7.4G   1% /data
 ```
 
-#### /etc/fstab
+## /etc/fstab
 
 Update `/etc/fstab` to re-mount this directory after a reboot.
 
@@ -298,7 +277,7 @@ UUID=ac496379-39f0-49a3-a295-06b2e8a74feb /data	ext4	defaults,nofail	0	2
 UUID=0516d848-b2a6-49ad-b851-a6e50459fb2b /data	ext4	defaults,nofail	0	2
 ```
 
-#### chown
+## chown
 
 Don't forget to make it writeable for user ubuntu.
 
@@ -307,32 +286,32 @@ sudo chown ubuntu:ubuntu /data
 sudo chown ubuntu:ubuntu /opt
 ```
 
-### Docker
+# Docker
 
 [ssh login](#ssh-login)
 
-#### Install docker
+## Install docker
 
 Follow the [ubuntu install instructions](https://docs.docker.com/engine/install/ubuntu/)
 
-#### Post install
+## Post install
 
 Continue with the [post install](https://docs.docker.com/engine/install/linux-postinstall/)
 
-##### Docker user
+### Docker user
 
 ```
 sudo usermod -aG docker $USER
 ```
 
-##### Start on boot
+### Start on boot
 
 ```
 sudo systemctl enable docker.service
 sudo systemctl enable containerd.service
 ```
 
-##### logs
+### logs
 
 The default docker logging driver does not rotate logs which will
 fill up the disk over time.
@@ -361,69 +340,18 @@ Check docker info
 
 ```
 docker info
-
-Client: Docker Engine - Community
- Version:    29.5.2
- Context:    default
- Debug Mode: false
- Plugins:
-  buildx: Docker Buildx (Docker Inc.)
-    Version:  v0.34.0
-    Path:     /usr/libexec/docker/cli-plugins/docker-buildx
-  compose: Docker Compose (Docker Inc.)
-    Version:  v5.1.4
-    Path:     /usr/libexec/docker/cli-plugins/docker-compose
-
-Server:
- Containers: 0
-  Running: 0
-  Paused: 0
-  Stopped: 0
- Images: 1
- Server Version: 29.5.2
- Storage Driver: overlayfs
-  driver-type: io.containerd.snapshotter.v1
- Logging Driver: local
- Cgroup Driver: systemd
- Cgroup Version: 2
- Plugins:
-  Volume: local
-  Network: bridge host ipvlan macvlan null overlay
-  Log: awslogs fluentd gcplogs gelf journald json-file local splunk syslog
- CDI spec directories:
-  /etc/cdi
-  /var/run/cdi
- Swarm: inactive
- Runtimes: io.containerd.runc.v2 runc
- Default Runtime: runc
- Init Binary: docker-init
- containerd version: 77c84241c7cbdd9b4eca2591793e3d4f4317c590
- runc version: v1.3.5-0-g488fc13e
- init version: de40ad0
- Security Options:
-  apparmor
-  seccomp
-   Profile: builtin
-  cgroupns
- Kernel Version: 7.0.0-1004-aws
- Operating System: Ubuntu 26.04 LTS
- OSType: linux
- Architecture: x86_64
- CPUs: 2
- Total Memory: 908.7MiB
- Name: ip-172-31-1-227
- ID: 45c2bb10-fa81-4170-9e4f-87b384ce633e
- Docker Root Dir: /var/lib/docker
- Debug Mode: false
- Experimental: false
- Insecure Registries:
-  ::1/128
-  127.0.0.0/8
- Live Restore Enabled: false
- Firewall Backend: iptables
-  EnableUserlandProxy: true
-  UserlandProxyPath: /usr/bin/docker-proxy
 ```
+
+## docker-compose
+
+Use docker-compose to launch the serivces
+
+```
+docker compose -f 'docker-compose.yml' up -d --build
+```
+
+
+# Deploy
 
 ## GitHub CI/CD
 
@@ -432,7 +360,7 @@ Use [GitHub secrets](https://docs.github.com/en/actions/how-tos/write-workflows/
 to store the keys referenced in [deploy.yml](.github/workflows/deploy.yml)
 
 
-### GitHub Secrets
+## GitHub Secrets
 
 In the GitHub under Settings > Secrets and variables > Actions, add these repository secrets:
 
@@ -442,10 +370,13 @@ In the GitHub under Settings > Secrets and variables > Actions, add these reposi
 1. EC2_HOST: The public IP address of your EC2 instance.
 1. EC2_USERNAME: Usually ubuntu.
 1. SSH_PRIVATE_KEY: The contents of your .pem launch key.
+1. NGINX_CRT: see [Nginx README](./nginx/README.md)
+1. NGINX_KEY
+1. NGINX_DHPARAM
 
 Note: EC2_HOST changes on restart. Update as needed.
 
-### Deploy
+# Actions
 
 Use [GitHub actions](https://github.com/features/actions)
 
@@ -457,42 +388,7 @@ To trigger the deployment checkout the deploy branch and
 `git rebase --onto main main`.
 A `git push -f` will trigger a deployment to the configured EC2 host.
 
-The public DNS http (no s) version of the web site should now be available.
-
-
-# Configure Nginx
-
-Use the stand alone file bind secrets instead of swarm.
-
-Add the certs to in GitHub under Settings > Secrets and variables > Actions.
-
-- NGINX_CRT
-- NGINX_KEY
-- NGINX_DHPARAM
+The public DNS version of the web site should now be available, 
+e.g. https://ec2-13-52-213-74.us-west-1.compute.amazonaws.com/
 
 [deploy.yml](.github/workflows/deploy.yml) uses these to configure the AWS instance.
-
-# React
-
-Create a react app to manage the holly page inside a docker container.
-
-## Scaffold
-
-### Create
-
-Use [vite](https://vite.dev/) to create a TypeScript scaffold in a new `holly` directory
-in the `www_starbug_com` development repo.
-
-```
-npm create vite@latest holly -- --template react-ts
-```
-
-### Run
-
-In the `holly` directory
-
-```
-holly % npm run dev
-```
-
-The app will be available on http://localhost:5174/

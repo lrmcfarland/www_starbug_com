@@ -4,27 +4,32 @@ This is the starbug.com home page.
 It is built with React and Vite, running in a Docker container.
 
 - [Holly](#holly)
-- [Setup on OSX](#setup-on-osx)
-  - [Brew install nvm](#brew-install-nvm)
+- [Setup React](#setup-react)
+  - [On OSX](#on-osx)
   - [Install latest stable](#install-latest-stable)
-- [Create a React App](#create-a-react-app)
-  - [To run](#to-run)
+  - [Install Vitest and jest](#install-vitest-and-jest)
+- [React](#react)
+  - [Create](#create)
+  - [Run](#run)
 - [Dockerize the React App](#dockerize-the-react-app)
   - [Add](#add)
   - [Production](#production)
     - [Build](#build)
-    - [Run](#run)
+    - [Run](#run-1)
   - [Development](#development)
     - [Build](#build-1)
-    - [Run](#run-1)
-- [React + TypeScript + Vite](#react--typescript--vite)
-  - [React Compiler](#react-compiler)
-  - [Expanding the ESLint configuration](#expanding-the-eslint-configuration)
+    - [Run](#run-2)
+- [Test](#test)
+  - [Build the test image](#build-the-test-image)
+  - [Run the unit tests](#run-the-unit-tests)
+- [Deploy](#deploy)
 
 
-# Setup on OSX
+# Setup React
 
-## Brew install nvm
+## On OSX
+
+Use [brew](https://brew.sh/)
 
 ```
 brew install nvm
@@ -36,21 +41,34 @@ brew install nvm
 nvm install --lts
 ```
 
-# Create a React App
-
-Initial typescript react in a new repo
+## Install Vitest and jest
 
 ```
-npm create vite@latest home -- --template react-ts
+npm install --save-dev vitest @testing-library/react @testing-library/jest-dom jsdom
+```
+# React
+
+Create a react app to manage the holly page inside a docker container.
+
+## Create
+
+Use [vite](https://vite.dev/) to create a TypeScript scaffold in a new `holly` directory
+in the `www_starbug_com` development repo.
+
+```
+npm create vite@latest holly -- --template react-ts
 ```
 
-## To run
+## Run
 
-Stand alone from the command line
+In the `holly` directory
 
 ```
 npm run dev
 ```
+
+The app will be available on http://localhost:5173/
+
 
 ```
 VITE v8.0.16  ready in 537 ms
@@ -67,7 +85,6 @@ h
   press c + enter to clear console
   press q + enter to quit
 q
-lrm@lrmz-Mac-mini-2023 holly % 
 ```
 
 # Dockerize the React App
@@ -114,77 +131,22 @@ docker build -t holly-dev -f Dockerfile.dev .
 docker run -p 5173:5173 holly-dev
 ```
 
+# Test
 
-# React + TypeScript + Vite
+[Run React.js tests in a container](https://docs.docker.com/guides/reactjs/run-tests/#run-tests-during-development)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Build the test image
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+docker compose build holly-test
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Run the unit tests
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+docker compose run --rm holly-test
+```
+
+# Deploy
+
+TODO: hardcoded AWS EC2 instance in vite.config.tx allowedHosts
