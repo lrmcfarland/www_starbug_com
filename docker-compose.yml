@@ -3,19 +3,36 @@ networks:
     driver: bridge
 
 services:
-  home:
-    build: ./home
+  holly:
+    build:
+      context: ./holly
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - starbug_network
+    platform: linux/amd64
+  holly-test:
+    build:
+      context: ./holly
+      dockerfile: Dockerfile.dev
+    command: npm run test -- --watchAll=false
+    networks:
+      - starbug_network
+    platform: linux/amd64
+  navigator:
+    build: ./navigator
     command: gunicorn --bind 0.0.0.0:5000 www_starbug_com:app
     expose:
       - 5000
     networks:
       - starbug_network
     platform: linux/amd64
-
   nginx:
     build: ./nginx
     depends_on:
-      - home
+      - navigator
+      - holly
     networks:
       - starbug_network
     platform: linux/amd64
