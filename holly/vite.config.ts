@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 // Read string from environment, split by commas, or default to localhost
@@ -14,5 +14,10 @@ export default defineConfig({
   // If running "vite preview" on your deployment server, configure this too
   preview: {
     allowedHosts: allowedHostsEnv
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./vitest.setup.ts']
   }
 });

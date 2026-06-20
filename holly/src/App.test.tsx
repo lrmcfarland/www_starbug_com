@@ -1,6 +1,5 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
 import App from "./App";
 
 describe("App Component", () => {
@@ -13,5 +12,4 @@ describe("App Component", () => {
     render(<App />);
     expect(screen.getByText(/This web app is built with React\/Vite/i)).toBeInTheDocument();
   });
-
 });
