@@ -1,5 +1,5 @@
 # Stage 1: Build the React application
-FROM node:22-alpine AS build
+FROM node:24.16.0-alpine AS build
 WORKDIR /app
 
 # Install dependencies using cache optimization
