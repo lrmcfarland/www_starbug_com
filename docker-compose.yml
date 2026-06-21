@@ -7,8 +7,8 @@ services:
     build:
       context: ./holly
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+    expose:
+      - 3000
     networks:
       - starbug_network
     platform: linux/amd64
@@ -16,10 +16,16 @@ services:
     build:
       context: ./holly
       dockerfile: Dockerfile.dev
-    command: npm run test -- --watchAll=false
+    command: sh -c "npx vitest --run && touch /tmp/tests-passed || exit 1"
     networks:
       - starbug_network
     platform: linux/amd64
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/tests-passed"]
+      interval: 5s
+      timeout: 3s
+      retries: 2
+      start_period: 10s
   navigator:
     build: ./navigator
     command: gunicorn --bind 0.0.0.0:5000 www_starbug_com:app
@@ -31,8 +37,12 @@ services:
   nginx:
     build: ./nginx
     depends_on:
-      - navigator
-      - holly
+      holly:
+        condition: service_started
+      holly-test:
+        condition: service_completed_successfully
+      navigator:
+        condition: service_started
     networks:
       - starbug_network
     platform: linux/amd64

@@ -344,7 +344,7 @@ docker info
 
 ## docker-compose
 
-Use docker-compose to launch the serivces
+Use docker-compose to launch the services
 
 ```
 docker compose -f 'docker-compose.yml' up -d --build
@@ -373,6 +373,7 @@ In the GitHub under Settings > Secrets and variables > Actions, add these reposi
 1. NGINX_CRT: see [Nginx README](./nginx/README.md)
 1. NGINX_KEY
 1. NGINX_DHPARAM
+1. VITE_ALLOWED_HOSTS: Pass multiple as comma-separated strings without spaces, e.g. "my-app.com,.my-custom-domain.dev"
 
 Note: EC2_HOST changes on restart. Update as needed.
 

@@ -1,10 +1,23 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// Read string from environment, split by commas, or default to localhost
+const allowedHostsEnv = process.env.VITE_ALLOWED_HOSTS
+  ? process.env.VITE_ALLOWED_HOSTS.split(',')
+  : ['localhost'];
+
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: ['ec2-13-52-213-74.us-west-1.compute.amazonaws.com'],
+    allowedHosts: allowedHostsEnv
   },
-})
+  // If running "vite preview" on your deployment server, configure this too
+  preview: {
+    allowedHosts: allowedHostsEnv
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./vitest.setup.ts']
+  }
+});

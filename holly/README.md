@@ -149,4 +149,4 @@ docker compose run --rm holly-test
 
 # Deploy
 
-TODO: hardcoded AWS EC2 instance in vite.config.tx allowedHosts
+Set the VITE_ALLOWED_HOSTS in GitHub secrets to the AWS EC2 instance created to host this.
