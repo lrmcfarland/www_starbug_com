@@ -8,7 +8,6 @@ export const Layout: React.FC = () => {
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
       <main style={{ flex: 1, padding: '2rem', background: '#071625' }}>
-        <h1>www.starbug.com</h1>
         <Outlet />
       </main>
     </div>

@@ -2,9 +2,9 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import Home from './components/Home';
 
 // Mock Page Components
-const Home = () => <h1>Home Content</h1>;
 const Astronomy = () => <h1>Astronomy Content</h1>;
 const Resume = () => <h1>Resume Content</h1>;
 

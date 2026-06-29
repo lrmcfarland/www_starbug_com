@@ -9,8 +9,8 @@ describe("App Component", () => {
     expect(headings.length).toBeGreaterThan(0);
   });
 
-  // it("renders all major sections", () => {
-  //   render(<App />);
-  //   expect(screen.getByText(/This web app is built with React\/Vite/i)).toBeInTheDocument();
-  // });
+  it("renders Home sections", () => {
+    render(<App />);
+    expect(screen.getByText(/Lincoln Randall McFarland/i)).toBeInTheDocument();
+  });
 });
