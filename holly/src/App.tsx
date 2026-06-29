@@ -1,31 +1,27 @@
-import './App.css'
+// App.tsx
+import React from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Layout } from './components/Layout';
 
-function App() {
-  return (
-    <>
-      <section id="center">
-        <div>
-          <h1>www.starbug.com</h1>
-        </div>
-      </section>
+// Mock Page Components
+const Home = () => <h1>Home Content</h1>;
+const Astronomy = () => <h1>Astronomy Content</h1>;
+const Resume = () => <h1>Resume Content</h1>;
 
-      <section id="left">
-        <div>
-          <p>
-            This web app is built with React/Vite as the frontend, Flask as
-            the backend API, and Nginx as a TLS enabled, reverse proxy server.
-            It is deployed from a GitHub CI/CD pipeline to an AWS EC2 instance
-            as a collection of microservices running in Docker
-            containers.
-          </p>
-        </div>
-      </section>
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: 'astronomy', element: <Astronomy /> },
+      { path: 'resume', element: <Resume /> },
+    ],
+  },
+]);
 
-      <div className="ticks"></div>
+export const App: React.FC = () => {
+  return <RouterProvider router={router} />;
+};
 
-      <section id="spacer"></section>
-    </>
-  )
-}
-
-export default App
+export default App;
