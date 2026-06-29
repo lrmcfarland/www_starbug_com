@@ -5,3 +5,8 @@ export interface SidebarItem {
   path: string;
   icon?: ReactNode;
 }
+
+export interface SidebarProps {
+  isCollapsed: boolean;
+  onToggle: () => void;
+}
