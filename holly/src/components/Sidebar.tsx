@@ -4,10 +4,42 @@ import { NavLink } from "react-router-dom";
 import { sidebarItems } from "./sidebarLinkData";
 import { SidebarProps } from "../types";
 
-export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
-  const sidebarWidth = isCollapsed ? "80px" : "250px";
+interface ExtendedSidebarProps extends SidebarProps {
+  isMobile: boolean;
+}
+
+export const Sidebar: React.FC<ExtendedSidebarProps> = ({ isCollapsed, onToggle, isMobile }) => {
+  // Mobile forces 0px hidden menu or a minimal absolute action bar
+  const sidebarWidth = isMobile
+    ? (isCollapsed ? '20px' : '240px')
+    : (isCollapsed ? '80px' : '250px');
 
   return (
+    <>
+      {/* Mobile Floating Toggle Menu Overlay Button */}
+      {isMobile && isCollapsed && (
+        <button
+          onClick={onToggle}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 1000,
+            background: '#3b82f6',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '50%',
+            width: '50px',
+            height: '50px',
+            fontSize: '1.25rem',
+            cursor: 'pointer',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+          }}
+        >
+          ☰
+        </button>
+      )}
+
     <nav
       style={{
         width: sidebarWidth,
@@ -18,7 +50,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
         transition: 'width 0.2s ease-in-out',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        position: isMobile ? 'fixed' : 'sticky',
+        top: 0,
+        left: 0,
+        zIndex: 999,
+        overflowX: 'hidden'
       }}
       role="navigation"
     >
@@ -27,8 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
           marginBottom: "2rem",
           fontSize: '1.25rem',
           textAlign: isCollapsed ? 'center' : 'left',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap'
+          display: isMobile && isCollapsed ? 'none' : 'block'
         }}>
           {isCollapsed ? 'Holly' : 'www.starbug.com'}
         </h2>
@@ -38,32 +74,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             <li key={item.path} style={{ margin: "10px 0" }}>
               <NavLink
                 to={item.path}
-                style={({ isActive }: { isActive: boolean }) => ({
-                  color: "#fff",
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "10px",
-                  borderRadius: "4px",
-                  background: isActive ? "#3b82f6" : "transparent",
-                  justifyContent: isCollapsed ? 'center' : 'flex-start',
+                onClick={isMobile ? onToggle : undefined} // Close nav tray on choice for mobile
+                  style={({ isActive }) => ({
+                    color: '#fff',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '10px',
+                    borderRadius: '4px',
+                    background: isActive ? '#3b82f6' : 'transparent',
+                    justifyContent: isCollapsed ? 'center' : 'flex-start',
                 })}
               >
-                {/* Visual Icon Anchor Slot */}
                 <span style={{ fontSize: '1.25rem' }}>{item.icon || '▪'}</span>
-
-                {/* Dynamically strip or render layout names */}
-                {!isCollapsed && (
-                  <span style={{ marginLeft: '12px', whiteSpace: 'nowrap' }}>
-                    {item.title}
-                  </span>
-                )}
+                {!isCollapsed && <span style={{ marginLeft: '12px' }}>{item.title}</span>}
               </NavLink>
             </li>
           ))}
         </ul>
-
       </div>
 
       {/* Action Controller Container */}
@@ -77,13 +105,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
           borderRadius: '4px',
           cursor: 'pointer',
           width: '100%',
-          textAlign: 'center',
-          fontSize: '0.85rem'
+          display: isMobile && isCollapsed ? 'none' : 'block'
         }}
       >
         {isCollapsed ? '▶' : '◀ Collapse'}
       </button>
-
     </nav>
+
+      {/* Backdrop shadow mask overlay active during mobile drawer display */}
+      {isMobile && !isCollapsed && (
+        <div
+          onClick={onToggle}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.4)',
+            zIndex: 998
+          }}
+        />
+      )}
+    </>
   );
 };

@@ -6,6 +6,7 @@ export const Home: React.FC = () => {
       style={{
         maxWidth: "800px",
         margin: "0 auto",
+        marginLeft: "3rem",
         lineHeight: "1.6",
         color: "#ffffff",
         textAlign: "left",
