@@ -1,10 +1,12 @@
 // Layout.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
+import { useLocalStorage } from './useLocalStorage';
 
 export const Layout: React.FC = () => {
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  // Define a unique lookup key to lock configuration rules to the device
+  const [isCollapsed, setIsCollapsed] = useLocalStorage<boolean>('app_sidebar_collapsed', false);
 
   const handleSidebarToggle = () => {
     setIsCollapsed(prev => !prev);
