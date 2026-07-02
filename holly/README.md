@@ -23,6 +23,9 @@ It is built with React and Vite, running in a Docker container.
   - [Build the test image](#build-the-test-image)
   - [Run the unit tests](#run-the-unit-tests)
 - [Deploy](#deploy)
+- [npm](#npm)
+  - [TODO](#todo)
+  - [update](#update)
 
 
 # Setup React
@@ -150,3 +153,20 @@ docker compose run --rm holly-test
 # Deploy
 
 Set the VITE_ALLOWED_HOSTS in GitHub secrets to the AWS EC2 instance created to host this.
+
+
+# npm
+
+## TODO
+The initial deploy needs to be done manually.
+The first npm download takes several minutes.
+Deploy exits before this can complete.
+After the initial deploy CI updates work as expected.
+
+## update
+
+Delete all the images on the AWS host to force a rebuild.
+
+```
+docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
+```
