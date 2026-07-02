@@ -1,4 +1,5 @@
 import React from "react";
+import athens_2025 from "../assets/images/Athens_2025.jpeg";
 
 export const Home: React.FC = () => {
   return (
@@ -25,6 +26,11 @@ export const Home: React.FC = () => {
         deployed from a GitHub CI/CD pipeline to an AWS EC2 instance as a
         collection of microservices running in Docker containers.
       </p>
+      <img
+        src={athens_2025}
+        alt="Athens 2025"
+        style={{ width: "100%", marginTop: "1rem", borderRadius: "8px" }}
+      />
     </div>
   );
 };
