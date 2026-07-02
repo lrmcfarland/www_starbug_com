@@ -9,4 +9,5 @@ export interface SidebarItem {
 export interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
+  isMobile: boolean;
 }
