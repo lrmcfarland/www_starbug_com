@@ -1,5 +1,47 @@
 import React from "react";
 import athens_2025 from "../assets/images/Athens_2025.jpeg";
+import { FaFacebook, FaLinkedin } from 'react-icons/fa';
+
+function SocialLinks() {
+  return (
+    <div style={{ display: 'flex', gap: '12px' }}>
+      {/* Facebook Link */}
+      <a
+        href="https://www.facebook.com/lincoln.mcfarland"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={linkButtonStyle}
+      >
+        <FaFacebook color="#1877F2" size={20} />
+        <span>Facebook</span>
+      </a>
+
+      {/* LinkedIn Link */}
+      <a
+        href="https://www.linkedin.com/in/lrmcfarland/"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={linkButtonStyle}
+      >
+        <FaLinkedin color="#0A66C2" size={20} />
+        <span>LinkedIn</span>
+      </a>
+    </div>
+  );
+}
+
+const linkButtonStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '10px 16px',
+  textDecoration: 'none', // Removes default underline
+  color: '#d4d7e4',          // Text color
+  border: '1px solid #ccc',
+  borderRadius: '4px',
+  cursor: 'pointer',
+};
+
 
 export const Home: React.FC = () => {
   return (
@@ -31,6 +73,9 @@ export const Home: React.FC = () => {
         alt="Athens 2025"
         style={{ width: "100%", marginTop: "1rem", borderRadius: "8px" }}
       />
+      <div>
+        <SocialLinks />
+      </div>
     </div>
   );
 };
