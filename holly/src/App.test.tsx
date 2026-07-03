@@ -38,4 +38,17 @@ describe("App Component", () => {
       "https://www.linkedin.com/in/lrmcfarland/"
     );
   });
+
+  it("Has Resume page", () => {
+    render(<App />);
+    const link = screen.getByRole("link", {
+      name: /work/i,
+    });
+    expect(link).toHaveAttribute(
+      "href",
+      "/resume"
+    );
+  });
+
+
 });

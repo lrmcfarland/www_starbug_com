@@ -5,7 +5,6 @@ import Home from "./components/Home";
 import Resume from "./components/Resume";
 
 const Astronomy = () => <h1>Astronomy Content</h1>;
-const Resume = () => <h1>Resume Content</h1>;
 
 const router = createBrowserRouter([
   {
