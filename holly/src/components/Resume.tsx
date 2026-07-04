@@ -565,64 +565,72 @@ const jobs = [
 ];
 
 export const Resume: React.FC = () => {
-  const [showMore, setShowMore] = useState(false);
+  const [expandedJobs, setExpandedJobs] = (
+    useState<Record<number, boolean>>({})
+  );
 
-  const handleMoreClick = () => {
-    setShowMore(!showMore);
+  const toggleJob = (jobId: number) => {
+    setExpandedJobs((prev) => ({
+      ...prev,
+      [jobId]: !prev[jobId],
+    }));
   };
 
-  const jobList = jobs.map((job) => (
-    <div key={job.id} className="starbug-job-card">
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "2rem",
-        }}
-      >
-        <div style={{ flex: 1 }}>
-          <p>
-            <strong>{job.company}</strong>
-          </p>
-          <p>{job.department}</p>
-          <p>{job.title}</p>
-          <p>
-            {job.startDate} - {job.endDate}
-          </p>
+  const jobList = jobs.map((job) => {
+    const isExpanded = !!expandedJobs[job.id];
+    return (
+      <div key={job.id} className="starbug-job-card">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "2rem",
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            <p>
+              <strong>{job.company}</strong>
+            </p>
+            <p>{job.department}</p>
+            <p>{job.title}</p>
+            <p>
+              {job.startDate} - {job.endDate}
+            </p>
+          </div>
+          <div style={{ flex: 1, textAlign: "right" }}>
+            <a
+              href={job.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none" }}
+            >
+              <img
+                src={job.logo}
+                alt={`${job.company} logo`}
+                style={{
+                  width: "140px",
+                  border: "2px solid #5b84d7",
+                  borderRadius: "4px",
+                  flexShrink: 0,
+                }}
+              />
+            </a>
+          </div>
         </div>
-        <div style={{ flex: 1, textAlign: "right" }}>
-          <a
-            href={job.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ textDecoration: "none" }}
-          >
-            <img
-              src={job.logo}
-              alt={`${job.company} logo`}
-              style={{
-                width: "140px",
-                border: "2px solid #5b84d7",
-                borderRadius: "4px",
-                flexShrink: 0,
-              }}
-            />
-          </a>
-        </div>
+        <p>{job.description}</p>
+        {isExpanded && (
+          <ul>
+            {job.details.map((detail, index) => (
+              <li key={index}>{detail}</li>
+            ))}
+          </ul>
+        )}
+        <button onClick={() => toggleJob(job.id)}>
+          {isExpanded ? "Less" : "More"}
+        </button>
       </div>
-      <p>{job.description}</p>
-      {showMore && (
-        <ul>
-          {job.details.map((detail, index) => (
-            <li key={index}>{detail}</li>
-          ))}
-        </ul>
-      )}
-      <button onClick={handleMoreClick}>
-        {showMore ? "Less" : "More"}
-      </button>
-    </div>
-  ));
+    );
+  });
 
   return (
     <div className="starbug-div">
