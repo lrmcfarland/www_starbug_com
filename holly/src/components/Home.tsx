@@ -27,7 +27,7 @@ function SocialLinks() {
         <FaFacebook color="#1877F2" size={20} />
         <span>Facebook</span>
       </a>
-
+      <br />
       <a
         href="https://www.linkedin.com/in/lrmcfarland/"
         target="_blank"
@@ -69,6 +69,7 @@ export const Home: React.FC = () => {
         collection of microservices running in Docker
         containers.
       </p>
+      <br />
       <div>
         <SocialLinks />
       </div>
