@@ -50,5 +50,15 @@ describe("App Component", () => {
     );
   });
 
+  it("Has link to GitHub", () => {
+    render(<App />);
+    const link = screen.getByRole("link", {
+      name: /github/i,
+    });
+    expect(link).toHaveAttribute(
+      "href",
+      "https://github.com/lrmcfarland"
+    );
+  });
 
 });
