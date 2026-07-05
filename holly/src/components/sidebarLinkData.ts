@@ -2,7 +2,8 @@ import React from "react";
 import { SidebarItem } from "../types";
 import { BsPersonWorkspace } from "react-icons/bs";
 import { FcHome } from "react-icons/fc";
-import { IoTelescopeOutline } from "react-icons/io5";
+import { GiObservatory, GiSextant } from "react-icons/gi";
+import { MdKayaking } from "react-icons/md";
 
 export const sidebarItems: SidebarItem[] = [
   {
@@ -11,13 +12,23 @@ export const sidebarItems: SidebarItem[] = [
     icon: React.createElement(FcHome),
   },
   {
-    title: "Work",
+    title: "Resume",
     path: "/resume",
     icon: React.createElement(BsPersonWorkspace),
   },
   {
-    title: "Astronomy",
-    path: "/astronomy",
-    icon: React.createElement(IoTelescopeOutline),
+    title: "Observatories",
+    path: "/observatories",
+    icon: React.createElement(GiObservatory),
+  },
+  {
+    title: "Navigation",
+    path: "/navigation",
+    icon: React.createElement(GiSextant),
+  },
+  {
+    title: "Kayaking",
+    path: "/kayaking",
+    icon: React.createElement(MdKayaking),
   },
 ];

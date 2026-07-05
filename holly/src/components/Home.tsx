@@ -1,5 +1,5 @@
 import React from "react";
-import athens_2025 from "../assets/images/Athens_2025.jpeg";
+import athens_2025 from "../assets/images/Home/Athens_2025.jpeg";
 import { FaFacebook, FaGithub, FaLinkedin } from "react-icons/fa";
 import "../App.css";
 

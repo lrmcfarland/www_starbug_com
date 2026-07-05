@@ -39,17 +39,6 @@ describe("App Component", () => {
     );
   });
 
-  it("Has Resume page", () => {
-    render(<App />);
-    const link = screen.getByRole("link", {
-      name: /work/i,
-    });
-    expect(link).toHaveAttribute(
-      "href",
-      "/resume"
-    );
-  });
-
   it("Has link to GitHub", () => {
     render(<App />);
     const link = screen.getByRole("link", {
@@ -59,6 +48,22 @@ describe("App Component", () => {
       "href",
       "https://github.com/lrmcfarland"
     );
+  });
+
+  it("Has Resume page", () => {
+    render(<App />);
+    const resumeLink = Array.from(
+      screen.getAllByRole("link")
+    ).find((a) => a.getAttribute("href") === "/resume");
+    expect(resumeLink).toBeInTheDocument();
+  });
+
+  it("Has Observatories page", () => {
+    render(<App />);
+    const observatoriesLink = Array.from(
+      screen.getAllByRole("link")
+    ).find((a) => a.getAttribute("href") === "/observatories");
+    expect(observatoriesLink).toBeInTheDocument();
   });
 
 });

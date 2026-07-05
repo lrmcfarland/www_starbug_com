@@ -579,7 +579,7 @@ export const Resume: React.FC = () => {
   const jobList = jobs.map((job) => {
     const isExpanded = !!expandedJobs[job.id];
     return (
-      <div key={job.id} className="starbug-job-card">
+      <div key={job.id} className="starbug-card">
         <div
           style={{
             display: "flex",
@@ -620,8 +620,8 @@ export const Resume: React.FC = () => {
         <p>{job.description}</p>
         {isExpanded && (
           <ul>
-            {job.details.map((detail, index) => (
-              <li key={index}>{detail}</li>
+            {job.details.map((detail, id) => (
+              <li key={id}>{detail}</li>
             ))}
           </ul>
         )}
