@@ -4,10 +4,11 @@ This is the starbug.com home page.
 It is built with React and Vite, running in a Docker container.
 
 - [Holly](#holly)
-- [Setup React](#setup-react)
+- [Node Package Manager](#node-package-manager)
   - [On OSX](#on-osx)
   - [Install latest stable](#install-latest-stable)
   - [Install Vitest and jest](#install-vitest-and-jest)
+  - [React Icons](#react-icons)
 - [React](#react)
   - [Create](#create)
   - [Run](#run)
@@ -23,12 +24,14 @@ It is built with React and Vite, running in a Docker container.
   - [Build the test image](#build-the-test-image)
   - [Run the unit tests](#run-the-unit-tests)
 - [Deploy](#deploy)
-- [npm](#npm)
   - [TODO](#todo)
-  - [update](#update)
+  - [force an update](#force-an-update)
 
 
-# Setup React
+# Node Package Manager
+
+Install this in your build environment.
+
 
 ## On OSX
 
@@ -49,6 +52,14 @@ nvm install --lts
 ```
 npm install --save-dev vitest @testing-library/react @testing-library/jest-dom jsdom
 ```
+
+## React Icons
+
+```
+npm install react-icons
+```
+
+
 # React
 
 Create a react app to manage the holly page inside a docker container.
@@ -154,19 +165,27 @@ docker compose run --rm holly-test
 
 Set the VITE_ALLOWED_HOSTS in GitHub secrets to the AWS EC2 instance created to host this.
 
-
-# npm
-
 ## TODO
+
 The initial deploy needs to be done manually.
 The first npm download takes several minutes.
-Deploy exits before this can complete.
+My GitHub Deploy script currently exits before this can complete.
 After the initial deploy CI updates work as expected.
 
-## update
+## force an update
 
-Delete all the images on the AWS host to force a rebuild.
+Delete all the docker images on the AWS host to force a rebuild.
 
 ```
+# 1. Stop all the running containers
+docker compose -f 'docker-compose.yml' down
+
+# 2. Delete all the containers
+docker rm $(docker ps -a -q)
+
+# 3. Delete all the images safely
+docker rmi $(docker images -a -q)
+
+# 4. Restart the containers
 docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
 ```
