@@ -1,21 +1,19 @@
-// App.tsx
-import React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { Layout } from './components/Layout';
-import Home from './components/Home';
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Layout } from "./components/Layout";
+import Home from "./components/Home";
+import Resume from "./components/Resume";
 
-// Mock Page Components
 const Astronomy = () => <h1>Astronomy Content</h1>;
-const Resume = () => <h1>Resume Content</h1>;
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Layout />,
     children: [
       { index: true, element: <Home /> },
-      { path: 'astronomy', element: <Astronomy /> },
-      { path: 'resume', element: <Resume /> },
+      { path: "resume", element: <Resume /> },
+      { path: "astronomy", element: <Astronomy /> },
     ],
   },
 ]);

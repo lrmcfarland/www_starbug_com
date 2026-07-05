@@ -1,0 +1,16 @@
+.starbug-div {
+  max-width: 800px;
+  margin: 0 auto 0 2rem;
+  line-height: 1.6;
+}
+
+.starbug-job-card {
+  text-align: left;
+  color: #ffffff;
+  background-color: #020000;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}

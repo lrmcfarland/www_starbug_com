@@ -1,14 +1,15 @@
-// useWindowSize.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface WindowSize {
   width: number;
   isMobile: boolean;
 }
 
-export function useWindowSize(mobileBreakpoint: number = 768): WindowSize {
+export function useWindowSize(
+  mobileBreakpoint: number = 768
+): WindowSize {
   const [windowSize, setWindowSize] = useState<WindowSize>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       return {
         width: window.innerWidth,
         isMobile: window.innerWidth < mobileBreakpoint,
@@ -18,7 +19,7 @@ export function useWindowSize(mobileBreakpoint: number = 768): WindowSize {
   });
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const handleResize = () => {
       setWindowSize({
@@ -27,8 +28,9 @@ export function useWindowSize(mobileBreakpoint: number = 768): WindowSize {
       });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () =>
+      window.removeEventListener("resize", handleResize);
   }, [mobileBreakpoint]);
 
   return windowSize;
