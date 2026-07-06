@@ -9,6 +9,8 @@ It is built with React and Vite, running in a Docker container.
   - [Install latest stable](#install-latest-stable)
   - [Install Vitest and jest](#install-vitest-and-jest)
   - [React Icons](#react-icons)
+  - [React player](#react-player)
+    - [To convert quicktime](#to-convert-quicktime)
 - [React](#react)
   - [Create](#create)
   - [Run](#run)
@@ -57,6 +59,25 @@ npm install --save-dev vitest @testing-library/react @testing-library/jest-dom j
 
 ```
 npm install react-icons
+```
+
+## React player
+
+In the app root `holly`
+
+```
+npm install react-player
+```
+This was not needed after converting to quick time
+
+### To convert quicktime
+
+```
+brew install ffmpeg
+```
+
+```
+ffmpeg -i eskimo_roll.mov -vcodec h264 -acodec mp2 eskimo_roll.mp4
 ```
 
 

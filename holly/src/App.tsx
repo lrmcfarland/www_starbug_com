@@ -1,11 +1,11 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
-import Observatories from "./components/Observatories";
 import Home from "./components/Home";
+import Kayaking from "./components/Kayaking";
+import Observatories from "./components/Observatories";
 import Resume from "./components/Resume";
 
-const Kayaking = () => <h1>Kayaking Content</h1>;
 const Navigation = () => <h1>Navigation Content</h1>;
 
 const router = createBrowserRouter([
