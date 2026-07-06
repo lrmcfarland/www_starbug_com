@@ -1,10 +1,12 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import Observatories from "./components/Observatories";
 import Home from "./components/Home";
 import Resume from "./components/Resume";
 
-const Astronomy = () => <h1>Astronomy Content</h1>;
+const Kayaking = () => <h1>Kayaking Content</h1>;
+const Navigation = () => <h1>Navigation Content</h1>;
 
 const router = createBrowserRouter([
   {
@@ -13,7 +15,9 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "resume", element: <Resume /> },
-      { path: "astronomy", element: <Astronomy /> },
+      { path: "observatories", element: <Observatories /> },
+      { path: "kayaking", element: <Kayaking /> },
+      { path: "navigation", element: <Navigation /> },
     ],
   },
 ]);

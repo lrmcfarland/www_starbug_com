@@ -1,6 +1,19 @@
 import React, { useState } from "react";
+import { FaGithub } from "react-icons/fa";
 import "../App.css";
 import { logos } from "../assets/logos";
+
+const linkButtonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  padding: "10px 16px",
+  textDecoration: "none",
+  color: "#d4d7e4",
+  border: "1px solid #ccc",
+  borderRadius: "4px",
+  cursor: "pointer",
+};
 
 const jobs = [
   {
@@ -579,7 +592,7 @@ export const Resume: React.FC = () => {
   const jobList = jobs.map((job) => {
     const isExpanded = !!expandedJobs[job.id];
     return (
-      <div key={job.id} className="starbug-job-card">
+      <div key={job.id} className="starbug-card">
         <div
           style={{
             display: "flex",
@@ -620,8 +633,8 @@ export const Resume: React.FC = () => {
         <p>{job.description}</p>
         {isExpanded && (
           <ul>
-            {job.details.map((detail, index) => (
-              <li key={index}>{detail}</li>
+            {job.details.map((detail, id) => (
+              <li key={id}>{detail}</li>
             ))}
           </ul>
         )}
@@ -635,23 +648,38 @@ export const Resume: React.FC = () => {
   return (
     <div className="starbug-div">
       <h1>Lincoln Randall McFarland</h1>
-      <h2>Mountain View, California</h2>
-      <h2>University of California, Berkeley. B.A. Physics, 1985</h2>
-      <p>
-        I am a software engineer with over 30 years of
-        experience in software development, data analysis,
-        and systems engineering. I have worked on a wide
-        range of projects, from developing software for
-        testing spacecraft to controlling a fleet of generators.
-        I have a strong background in Python, C++, and
-        data analysis, and I am always looking for new
-        challenges and opportunities to learn and grow.
-        I have been fortunate to work on projects that
-        combine my interests in physics, engineering, and
-        computer science. I am excited about digging into the
-        details in the data to debug problems and find solutions
-        to problems that have an impact on the world.
-      </p>
+      <h2>Location: Mountain View, California</h2>
+      <h2>Education: University of California, Berkeley. B.A. Physics, 1985</h2>
+
+      <br />
+      <div className="starbug-card">
+        <p>
+            I am a software engineer with over 30 years of
+            experience in software development, data analysis,
+            and systems engineering. I have worked on a wide
+            range of projects, from developing software for
+            testing spacecraft to controlling a fleet of generators.
+            I have a strong background in Python, C++, and
+            data analysis, and I am always looking for new
+            challenges and opportunities to learn and grow.
+            I have been fortunate to work on projects that
+            combine my interests in physics, engineering, and
+            computer science. I am excited about digging into the
+            details in the data to debug problems and find solutions
+            to problems that have an impact on the world.
+        </p>
+      </div>
+      <div>
+        <a
+            href="https://github.com/lrmcfarland"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={linkButtonStyle}
+        >
+            <FaGithub color="#0A66C2" size={20} />
+            <span>GitHub</span>
+        </a>
+      </div>
       <br />
       {jobList}
     </div>

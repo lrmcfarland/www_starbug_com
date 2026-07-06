@@ -41,14 +41,18 @@ describe("App Component", () => {
 
   it("Has Resume page", () => {
     render(<App />);
-    const link = screen.getByRole("link", {
-      name: /work/i,
-    });
-    expect(link).toHaveAttribute(
-      "href",
-      "/resume"
-    );
+    const resumeLink = Array.from(
+      screen.getAllByRole("link")
+    ).find((a) => a.getAttribute("href") === "/resume");
+    expect(resumeLink).toBeInTheDocument();
   });
 
+  it("Has Observatories page", () => {
+    render(<App />);
+    const observatoriesLink = Array.from(
+      screen.getAllByRole("link")
+    ).find((a) => a.getAttribute("href") === "/observatories");
+    expect(observatoriesLink).toBeInTheDocument();
+  });
 
 });
