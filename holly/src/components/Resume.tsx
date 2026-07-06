@@ -1,6 +1,19 @@
 import React, { useState } from "react";
+import { FaGithub } from "react-icons/fa";
 import "../App.css";
 import { logos } from "../assets/logos";
+
+const linkButtonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  padding: "10px 16px",
+  textDecoration: "none",
+  color: "#d4d7e4",
+  border: "1px solid #ccc",
+  borderRadius: "4px",
+  cursor: "pointer",
+};
 
 const jobs = [
   {
@@ -635,8 +648,9 @@ export const Resume: React.FC = () => {
   return (
     <div className="starbug-div">
       <h1>Lincoln Randall McFarland</h1>
-      <h2>Mountain View, California</h2>
-      <h2>University of California, Berkeley. B.A. Physics, 1985</h2>
+      <h2>Location: Mountain View, California</h2>
+      <h2>Education: University of California, Berkeley. B.A. Physics, 1985</h2>
+
       <br />
       <div className="starbug-card">
         <p>
@@ -655,6 +669,18 @@ export const Resume: React.FC = () => {
             to problems that have an impact on the world.
         </p>
       </div>
+      <div>
+        <a
+            href="https://github.com/lrmcfarland"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={linkButtonStyle}
+        >
+            <FaGithub color="#0A66C2" size={20} />
+            <span>GitHub</span>
+        </a>
+      </div>
+      <br />
       {jobList}
     </div>
   );

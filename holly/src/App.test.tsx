@@ -39,17 +39,6 @@ describe("App Component", () => {
     );
   });
 
-  it("Has link to GitHub", () => {
-    render(<App />);
-    const link = screen.getByRole("link", {
-      name: /github/i,
-    });
-    expect(link).toHaveAttribute(
-      "href",
-      "https://github.com/lrmcfarland"
-    );
-  });
-
   it("Has Resume page", () => {
     render(<App />);
     const resumeLink = Array.from(

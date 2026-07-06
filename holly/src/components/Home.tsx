@@ -1,6 +1,6 @@
 import React from "react";
 import athens_2025 from "../assets/images/Home/Athens_2025.jpeg";
-import { FaFacebook, FaGithub, FaLinkedin } from "react-icons/fa";
+import { FaFacebook, FaLinkedin } from "react-icons/fa";
 import "../App.css";
 
 const linkButtonStyle = {
@@ -35,15 +35,6 @@ function SocialLinks() {
       >
         <FaLinkedin color="#0A66C2" size={20} />
         <span>LinkedIn</span>
-      </a>
-      <a
-        href="https://github.com/lrmcfarland"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={linkButtonStyle}
-      >
-        <FaGithub color="#0A66C2" size={20} />
-        <span>GitHub</span>
       </a>
     </div>
   );
