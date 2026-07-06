@@ -637,22 +637,24 @@ export const Resume: React.FC = () => {
       <h1>Lincoln Randall McFarland</h1>
       <h2>Mountain View, California</h2>
       <h2>University of California, Berkeley. B.A. Physics, 1985</h2>
-      <p>
-        I am a software engineer with over 30 years of
-        experience in software development, data analysis,
-        and systems engineering. I have worked on a wide
-        range of projects, from developing software for
-        testing spacecraft to controlling a fleet of generators.
-        I have a strong background in Python, C++, and
-        data analysis, and I am always looking for new
-        challenges and opportunities to learn and grow.
-        I have been fortunate to work on projects that
-        combine my interests in physics, engineering, and
-        computer science. I am excited about digging into the
-        details in the data to debug problems and find solutions
-        to problems that have an impact on the world.
-      </p>
       <br />
+      <div className="starbug-card">
+        <p>
+            I am a software engineer with over 30 years of
+            experience in software development, data analysis,
+            and systems engineering. I have worked on a wide
+            range of projects, from developing software for
+            testing spacecraft to controlling a fleet of generators.
+            I have a strong background in Python, C++, and
+            data analysis, and I am always looking for new
+            challenges and opportunities to learn and grow.
+            I have been fortunate to work on projects that
+            combine my interests in physics, engineering, and
+            computer science. I am excited about digging into the
+            details in the data to debug problems and find solutions
+            to problems that have an impact on the world.
+        </p>
+      </div>
       {jobList}
     </div>
   );
