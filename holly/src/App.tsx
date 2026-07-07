@@ -1,6 +1,7 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import Astronomy from "./components/Astronomy";
 import Home from "./components/Home";
 import Kayaking from "./components/Kayaking";
 import Observatories from "./components/Observatories";
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: "resume", element: <Resume /> },
       { path: "observatories", element: <Observatories /> },
+      { path: "astronomy", element: <Astronomy /> },
       { path: "kayaking", element: <Kayaking /> },
       { path: "navigation", element: <Navigation /> },
     ],
