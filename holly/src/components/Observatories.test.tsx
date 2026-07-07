@@ -52,9 +52,9 @@ describe("Observatories Component", () => {
 
     it("should render location and date information for observatories", () => {
       render(<Observatories />);
-      expect(screen.getByText(/Arecibo, Puerto Rico\. 2002 autumn/)).toBeInTheDocument();
-      expect(screen.getByText(/Greenwich Observatory\. Greenwich England\. 2002-ish/)).toBeInTheDocument();
-      expect(screen.getAllByText(/Jodrell Bank, Cheshire England\. 2003 spring/).length).toBeGreaterThan(0);
+      expect(screen.getByText(/Arecibo, Puerto Rico\. 2001 February/)).toBeInTheDocument();
+      expect(screen.getByText(/Greenwich Observatory\. Greenwich England\. 2002 November/)).toBeInTheDocument();
+      expect(screen.getAllByText(/Jodrell Bank, Cheshire England\. 2003 April/).length).toBeGreaterThan(0);
     });
 
     it("should render descriptions for each observatory", () => {
@@ -63,10 +63,10 @@ describe("Observatories Component", () => {
       expect(descriptions.length).toBeGreaterThan(0);
     });
 
-    it("should render the special description for 50th Anniversary", () => {
+    it("should render the special description for 45th Anniversary", () => {
       render(<Observatories />);
       expect(
-        screen.getByText(/Observing for the SETI Institute on the 50th Anniversary of Jodrell Bank\./)
+        screen.getByText(/Observing for the SETI Institute on the 45th Anniversary of Jodrell Bank\./)
       ).toBeInTheDocument();
     });
   });
@@ -182,7 +182,7 @@ describe("Observatories Component", () => {
 
     it("should render all observatory data without truncation", () => {
       render(<Observatories />);
-      expect(screen.getByText(/Arecibo, Puerto Rico\. 2002 autumn/)).toBeInTheDocument();
+      expect(screen.getByText(/Arecibo, Puerto Rico\. 2001 February/)).toBeInTheDocument();
       const setiElements = screen.getAllByText("Observing for the SETI Institute.");
       expect(setiElements.length).toBeGreaterThanOrEqual(1);
     });

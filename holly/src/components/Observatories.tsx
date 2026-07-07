@@ -7,7 +7,7 @@ const pictures = [
     id: 1,
     title: "Arecibo",
     location: "Arecibo, Puerto Rico.",
-    date: "2002 autumn",
+    date: "2001 February",
     description: "Observing for the SETI Institute.",
     details: [
         `"We are made of star-stuff." Carl Sagan`,
@@ -19,7 +19,7 @@ const pictures = [
     id: 2,
     title: "On the prime meridian",
     location: "Greenwich Observatory. Greenwich England.",
-    date: "2002-ish",
+    date: "2002 November",
     description: "Observing for the SETI Institute.",
     details: [
         `Verifying with my GPS they have moved the meridian.`,
@@ -30,7 +30,7 @@ const pictures = [
     id: 3,
     title: "Jodrell Bank with moon",
     location: "Jodrell Bank, Cheshire England.",
-    date: "2002-ish",
+    date: "2002 November",
     description: "Observing for the SETI Institute.",
     details: [
         `"It's not that kind of bank." - Mark Roberts`,
@@ -41,7 +41,7 @@ const pictures = [
     id: 4,
     title: "Jodrell Bank",
     location: "Jodrell Bank, Cheshire England.",
-    date: "2003 spring",
+    date: "2003 April",
     description: "Observing for the SETI Institute.",
     details: [
         `Explaining how to use my old digital camera.`,
@@ -52,8 +52,8 @@ const pictures = [
     id: 5,
     title: "Jodrell Bank",
     location: "Jodrell Bank, Cheshire England.",
-    date: "2003 spring",
-    description: "Observing for the SETI Institute on the 50th Anniversary of Jodrell Bank.",
+    date: "2003 April",
+    description: "Observing for the SETI Institute on the 45th Anniversary of Jodrell Bank.",
     details: [],
     image: images.pow,
   },
