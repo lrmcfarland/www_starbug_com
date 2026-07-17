@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-WORKDIR /www_starbug_com
+WORKDIR /app
 
 # Install Poetry
 RUN pip install --no-cache-dir poetry
@@ -11,8 +11,8 @@ ENV POETRY_VIRTUALENVS_CREATE=false
 # Copy all files first
 COPY . .
 
-# Install dependencies (including dev)
-RUN poetry install --no-interaction --no-ansi
+# Install dependencies (including dev and the local package)
+RUN poetry install --no-interaction --no-ansi && pip install -e .
 
 # sort imports
 RUN poetry run isort .
@@ -28,4 +28,4 @@ RUN poetry run pytest
 
 # Expose the internal port for Nginx to reach
 EXPOSE 5000
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "www_starbug_com:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "www:app"]

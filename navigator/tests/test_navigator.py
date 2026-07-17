@@ -1,6 +1,6 @@
 import pytest
 
-from www_starbug_com import create_app
+from www import create_app
 
 
 @pytest.fixture

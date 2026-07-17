@@ -1,9 +1,9 @@
 [tool.poetry]
-name = "www_starbug_com"
+name = "www"
 version = "0.1.0"
 description = "This is the source for the starbug.com web site"
 authors = ["Lincoln McFarland <lrm@starbug.com>"]
-packages = [{include = "www_starbug_com", from = "src"}]
+packages = [{include = "www", from = "src"}]
 
 [tool.poetry.dependencies]
 flask = "^3.1.3"
