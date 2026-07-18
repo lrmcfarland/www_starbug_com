@@ -24,6 +24,7 @@ running locally helpful for
     - [flake8](#flake8)
     - [black](#black)
   - [Unit testing](#unit-testing)
+    - [poetry](#poetry)
     - [Docker](#docker)
 
 
@@ -63,6 +64,43 @@ docker compose down
 To run locally, install [poetry](https://python-poetry.org/docs/).
 In the `navigator` directory, where `pyproject.toml` is located, run:
 
+```
+brew install poetry
+```
+
+```
+poetry add --group dev isort flake8 black
+
+lrm@lrmz-Mac-mini-2023 navigator % poetry add --group dev isort flake8 black
+The following packages are already present in the pyproject.toml and will be skipped:
+
+  - isort
+  - flake8
+  - black
+
+If you want to update it to the latest compatible version, you can use
+`poetry update package`.
+If you prefer to upgrade it to the latest available version, you can use
+`poetry add package@latest`.
+
+Nothing to add.
+```
+
+This issue happens because Flake8 is listed in your pyproject.toml,
+but its files are missing from your local virtual environment.
+Run this command to force Poetry to install the missing package
+
+```
+poetry install
+```
+
+Poetry reads your pyproject.toml file and sees that flake8 is technically
+part of the project configuration, which is why poetry add skipped it.
+However, the actual virtual environment folder on your Mac mini is out of
+sync or was never fully installed. Running poetry install downloads and
+symlinks all missing tool
+
+
 ### isort
 
 [isort](https://isort.readthedocs.io/en/latest/):
@@ -92,9 +130,16 @@ poetry run black .
 
 ## Unit testing
 
+In the `navigator` directory
+
+### poetry
+
+```
+poetry run pytest
+```
+
 ### Docker
 
-In the `navigator` directory
 
 ```
 docker build -t www_starbug_com-navigator .
