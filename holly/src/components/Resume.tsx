@@ -648,9 +648,20 @@ export const Resume: React.FC = () => {
   return (
     <div className="starbug-div">
       <h1>Lincoln Randall McFarland</h1>
+      <div>
+        <a
+            href="https://github.com/lrmcfarland"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={linkButtonStyle}
+        >
+            <FaGithub color="#0A66C2" size={20} />
+            <span>GitHub</span>
+        </a>
+      </div>
+      <br />
       <h2>Location: Mountain View, California</h2>
       <h2>Education: University of California, Berkeley. B.A. Physics, 1985</h2>
-
       <br />
       <div className="starbug-card">
         <p>
@@ -668,17 +679,6 @@ export const Resume: React.FC = () => {
             details in the data to debug problems and find solutions
             to problems that have an impact on the world.
         </p>
-      </div>
-      <div>
-        <a
-            href="https://github.com/lrmcfarland"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={linkButtonStyle}
-        >
-            <FaGithub color="#0A66C2" size={20} />
-            <span>GitHub</span>
-        </a>
       </div>
       <br />
       {jobList}
