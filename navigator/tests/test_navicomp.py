@@ -171,3 +171,23 @@ class TestSphericalStableAtPoles:
         assert starbug.ρ == 16.0
         assert starbug.θ == np.pi/2.0
         assert starbug.φ == -Space.π/2
+
+
+class TestGeographyStandardSphericalCoordinates:
+    """Test geography / MATLAB standard spherical coordinates."""
+
+    def test_spherical_00(self):
+        starbug = Space(3, 4, 0)
+        assert starbug.ρ == 5
+        assert starbug.r == 5
+        assert starbug.h == 5
+        assert starbug.az == 0.9272952180016122
+        assert starbug.el == 0
+
+    def test_spherical_01(self):
+        starbug = Space(1, 1, 1)
+        assert starbug.ρ == 1.7320508075688772
+        assert starbug.r == 1.7320508075688772
+        assert starbug.h == 1.7320508075688774  # rounding difference!
+        assert starbug.az == Space.π/4
+        assert starbug.el == 0.6154797086703873

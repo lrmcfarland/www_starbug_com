@@ -20,8 +20,8 @@ class Space:
         return f"Space(x={self.x}, y={self.y}, z={self.z})"
 
     def __eq__(self, other: object) -> bool:
-        # Handle Enum members with Space values
-        if hasattr(other, 'value') and isinstance(other.value, Space):
+        # Handle UnitVector Enum members with Space values
+        if hasattr(other, "value") and isinstance(other.value, Space):
             other = other.value
         if not isinstance(other, Space):
             return False
@@ -66,6 +66,28 @@ class Space:
     @property
     def phi(self) -> np.float64:
         return self.φ
+
+    # Geography / MATLAB Standard
+
+    @property
+    def h(self) -> np.float64:
+        """Height or altitude.
+
+        This is has a rounding difference from r and ρ
+        """
+        hxy = np.hypot(self.x, self.y)
+        return np.hypot(hxy, self.z)
+
+    @property
+    def az(self) -> np.float64:
+        """Azimuth."""
+        return np.arctan2(self.y, self.x)
+
+    @property
+    def el(self) -> np.float64:
+        """Elevation."""
+        hxy = np.hypot(self.x, self.y)
+        return np.arctan2(self.z, hxy)
 
 
 class UnitVectors(Enum):
