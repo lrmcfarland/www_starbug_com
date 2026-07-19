@@ -158,7 +158,7 @@ In the `navigator` directory
 ### poetry
 
 ```
-poetry run pytest
+poetry run pytest -s -v
 ```
 
 ### Docker
