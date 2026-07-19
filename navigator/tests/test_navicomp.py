@@ -18,7 +18,6 @@ class TestConstructors:
     def test_eval_repr_01(self):
         space_0 = Space(2, -3, 5)
         space_1 = eval(repr(space_0))
-        print("*****", space_0, space_1)
         assert space_0 == space_1
 
     def test_str_01(self):
@@ -28,7 +27,6 @@ class TestConstructors:
     def test_eval_str_01(self):
         space_0 = Space(2, -3, 5)
         space_1 = eval(str(space_0))
-        print("*****", space_0, space_1)
         assert space_0 == space_1
 
     def test_space_accessors(self):
