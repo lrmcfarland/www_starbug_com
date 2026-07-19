@@ -1,7 +1,7 @@
-import datetime
 import pytest
+import numpy as np
 
-import navicomp
+from navicomp import Space, UnitVectors
 
 
 class TestConstructors:
@@ -66,60 +66,110 @@ class TestOperators:
 class TestUnitVectors:
     """Test unit vectors."""
 
-    assert space.x == 1.23
-    with pytest.raises(AttributeError):
-        space.x = 4.5
+    def test_unit_vector_o(self):
+        """Test unit vector x."""
+        assert UnitVectors.Uo.value.x == 0
+        assert UnitVectors.Uo.value.y == 0
+        assert UnitVectors.Uo.value.z == 0
 
-    assert space.y == 2
-    with pytest.raises(AttributeError):
-        space.y = -14.5
+        with pytest.raises(AttributeError):
+            UnitVectors.Uo = UnitVectors.Ux
 
-    assert space.z == 3.0
-    with pytest.raises(AttributeError):
-        space.z = 404.5346
+    def test_unit_vector_x(self):
+        """Test unit vector x."""
+        assert UnitVectors.Ux.value.x == 1
+        assert UnitVectors.Ux.value.y == 0
+        assert UnitVectors.Ux.value.z == 0
 
+        with pytest.raises(AttributeError):
+            UnitVectors.Ux = Space(0, 0, 0)
 
-def test_unit_vector_o():
-    """Test unit vector x."""
-    assert navicomp.UnitVectors.Uo.value.x == 0
-    assert navicomp.UnitVectors.Uo.value.y == 0
-    assert navicomp.UnitVectors.Uo.value.z == 0
+    def test_unit_vector_y(self):
+        """Test unit vector y."""
+        assert UnitVectors.Uy.value.x == 0
+        assert UnitVectors.Uy.value.y == 1
+        assert UnitVectors.Uy.value.z == 0
 
-    with pytest.raises(AttributeError):
-        navicomp.UnitVectors.Uo = navicomp.UnitVectors.Ux
+        with pytest.raises(AttributeError):
+            UnitVectors.Uy = UnitVectors.Ux
 
+    def test_unit_vector_z(self):
+        """Test unit vector z."""
+        assert UnitVectors.Uz.value.x == 0
+        assert UnitVectors.Uz.value.y == 0
+        assert UnitVectors.Uz.value.z == 1
 
-def test_unit_vector_x():
-    """Test unit vector x."""
-    assert navicomp.UnitVectors.Ux.value.x == 1
-    assert navicomp.UnitVectors.Ux.value.y == 0
-    assert navicomp.UnitVectors.Ux.value.z == 0
-
-    with pytest.raises(AttributeError):
-        navicomp.UnitVectors.Ux = navicomp.Space(0, 0, 0)
-
-
-def test_unit_vector_y():
-    """Test unit vector y."""
-    assert navicomp.UnitVectors.Uy.value.x == 0
-    assert navicomp.UnitVectors.Uy.value.y == 1
-    assert navicomp.UnitVectors.Uy.value.z == 0
-
-    with pytest.raises(AttributeError):
-        navicomp.UnitVectors.Uy = navicomp.UnitVectors.Ux
+        with pytest.raises(AttributeError):
+            UnitVectors.Uz = UnitVectors.Ux
 
 
-def test_unit_vector_z():
-    """Test unit vector z."""
-    assert navicomp.UnitVectors.Uz.value.x == 0
-    assert navicomp.UnitVectors.Uz.value.y == 0
-    assert navicomp.UnitVectors.Uz.value.z == 1
+class TestPhysicsStandardSphericalCoordinates:
+    """Test physics standard spherical coordinates."""
 
-    with pytest.raises(AttributeError):
-        navicomp.UnitVectors.Uz = navicomp.UnitVectors.Ux
+    def test_spherical_00(self):
+        starbug = Space(3, 4, 0)
+        assert starbug.ρ == 5
+        assert starbug.r == 5
+        assert starbug.θ == 1.5707963267948966
+        assert starbug.theta == 1.5707963267948966
+        assert starbug.φ == 0.9272952180016122
+        assert starbug.phi == 0.9272952180016122
+
+    def test_spherical_01(self):
+        starbug = Space(1, 1, 1)
+        assert starbug.ρ == 1.7320508075688772
+        assert starbug.r == 1.7320508075688772
+        assert starbug.θ == 0.9553166181245093
+        assert starbug.theta == 0.9553166181245093
+        assert starbug.φ == 0.7853981633974483
+        assert starbug.phi == 0.7853981633974483
+
+    def test_spherical_02(self):
+        starbug = Space(-1, -1, -1)
+        assert starbug.ρ == 1.7320508075688772
+        assert starbug.r == 1.7320508075688772
+        assert starbug.θ == 2.186276035465284
+        assert starbug.theta == 2.186276035465284
+        assert starbug.φ == -2.356194490192345
+        assert starbug.phi == -2.356194490192345
 
 
-def test_hello_time():
-    bday = datetime.datetime(1962, 7, 10)
-    dday = navicomp.toModifiedJulianDateAPC(bday)
-    assert str(dday) == "1962-07-10 00:00:00"
+class TestSphericalStableAtPoles:
+    """Test spherical coordinates are numerically stable at the poles."""
+
+    def test_spherical_front(self):
+        starbug = Space(1, 0, 0)
+        assert starbug.ρ == 1
+        assert starbug.θ == np.pi/2.0
+        assert starbug.φ == 0
+
+    def test_spherical_back(self):
+        starbug = Space(-1, 0, 0)
+        assert starbug.ρ == 1
+        assert starbug.θ == starbug.π/2
+        assert starbug.φ == Space.π
+
+    def test_spherical_up(self):
+        starbug = Space(0, 0, 1)
+        assert starbug.ρ == 1
+        assert starbug.θ == 0
+        assert starbug.φ == 0
+
+    def test_spherical_down(self):
+        starbug = Space(0, 0, -10.0)
+        assert starbug.ρ == 10.0
+        assert starbug.θ == np.pi
+        assert starbug.θ == starbug.π
+        assert starbug.φ == 0
+
+    def test_spherical_port(self):
+        starbug = Space(0, 8, 0.0)
+        assert starbug.ρ == 8.0
+        assert starbug.θ == np.pi/2.0
+        assert starbug.φ == starbug.π/2
+
+    def test_spherical_starboard(self):
+        starbug = Space(0, -16.0, 0.0)
+        assert starbug.ρ == 16.0
+        assert starbug.θ == np.pi/2.0
+        assert starbug.φ == -Space.π/2

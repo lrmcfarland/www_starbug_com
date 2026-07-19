@@ -1,6 +1,5 @@
 """Starbug navigational computer."""
 
-import datetime
 from enum import Enum
 
 import numpy as np
@@ -8,6 +7,8 @@ import numpy as np
 
 class Space:
     """Space coordinate."""
+
+    π = np.pi
 
     def __init__(self, x: np.float64 = 0, y: np.float64 = 0, z: np.float64 = 0):
         self._space = np.array([x, y, z])
@@ -41,9 +42,30 @@ class Space:
     def z(self) -> np.float64:
         return self._space[2]
 
-    def __str__(self):
-        """Print"""
-        return f"({self.x}, {self.y}, {self.z})"
+    # Physics Standard (ISO 80000-2:2019
+    @property
+    def ρ(self) -> np.float64:
+        return np.sqrt(self.x**2 + self.y**2 + self.z**2)
+
+    @property
+    def r(self) -> np.float64:
+        return self.ρ
+
+    @property
+    def θ(self) -> np.float64:
+        return np.arctan2(np.sqrt(self.x**2 + self.y**2), self.z)
+
+    @property
+    def theta(self) -> np.float64:
+        return self.θ
+
+    @property
+    def φ(self) -> np.float64:
+        return np.arctan2(self.y, self.x)
+
+    @property
+    def phi(self) -> np.float64:
+        return self.φ
 
 
 class UnitVectors(Enum):
@@ -53,7 +75,3 @@ class UnitVectors(Enum):
     Ux = Space(1, 0, 0)
     Uy = Space(0, 1, 0)
     Uz = Space(0, 0, 1)
-
-
-def toModifiedJulianDateAPC(a_datetime: datetime.datetime):
-    return a_datetime
