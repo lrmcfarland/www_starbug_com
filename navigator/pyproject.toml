@@ -8,7 +8,10 @@ packages = [{include = "www", from = "src"}]
 [tool.poetry.dependencies]
 flask = "^3.1.3"
 gunicorn = "^26.0.0"
-python = "^3.10"
+numpy = "^2.5.1"
+python = "^3.14"
+scipy = "^1.18.0"
+
 
 [tool.poetry.group.dev.dependencies]
 black = "^26.3.1"

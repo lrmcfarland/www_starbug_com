@@ -20,12 +20,15 @@ running locally helpful for
   - [Stop](#stop)
 - [Test](#test)
   - [Python formatting](#python-formatting)
+  - [Update libraries](#update-libraries)
+    - [Add numpy and scipy to poetry](#add-numpy-and-scipy-to-poetry)
     - [isort](#isort)
     - [flake8](#flake8)
     - [black](#black)
   - [Unit testing](#unit-testing)
     - [poetry](#poetry)
     - [Docker](#docker)
+- [Adding numpy scipy](#adding-numpy-scipy)
 
 
 To run on a development host, clone this repo.
@@ -86,6 +89,13 @@ If you prefer to upgrade it to the latest available version, you can use
 Nothing to add.
 ```
 
+## Update libraries
+
+```
+% poetry run isort .
+Command not found: isort
+```
+
 This issue happens because Flake8 is listed in your pyproject.toml,
 but its files are missing from your local virtual environment.
 Run this command to force Poetry to install the missing package
@@ -100,6 +110,19 @@ However, the actual virtual environment folder on your Mac mini is out of
 sync or was never fully installed. Running poetry install downloads and
 symlinks all missing tool
 
+### Add numpy and scipy to poetry
+
+```
+rm@lrmz-Mac-mini-2023 navigator % poetry install
+Installing dependencies from lock file
+
+Package operations: 2 installs, 0 updates, 0 removals
+
+  - Installing numpy (2.5.1)
+  - Installing scipy (1.18.0)
+
+Installing the current project: www (0.1.0)
+```
 
 ### isort
 
@@ -144,3 +167,7 @@ poetry run pytest
 ```
 docker build -t www_starbug_com-navigator .
 ```
+
+# Adding numpy scipy
+
+Update poetry lock for new pyproject.toml file.
