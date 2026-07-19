@@ -10,6 +10,16 @@ class Space:
 
     π = np.pi
 
+    @classmethod
+    def deg2rad(cls, an_angle: np.float64) -> np.float64:
+        """Convert degrees to radians."""
+        return an_angle * cls.π / 180.0
+
+    @classmethod
+    def rad2deg(cls, an_angle: np.float64) -> np.float64:
+        """Convert radians to degrees."""
+        return an_angle * 180.0 / cls.π
+
     def __init__(self, x: np.float64 = 0, y: np.float64 = 0, z: np.float64 = 0):
         self._space = np.array([x, y, z])
 
@@ -19,6 +29,9 @@ class Space:
     def __str__(self):
         return f"Space(x={self.x}, y={self.y}, z={self.z})"
 
+    def __hash__(self):
+        return hash((float(self.x), float(self.y), float(self.z)))
+
     def __eq__(self, other: object) -> bool:
         # Handle UnitVector Enum members with Space values
         if hasattr(other, "value") and isinstance(other.value, Space):
@@ -26,9 +39,6 @@ class Space:
         if not isinstance(other, Space):
             return False
         return self.x == other.x and self.y == other.y and self.z == other.z
-
-    def __hash__(self):
-        return hash((float(self.x), float(self.y), float(self.z)))
 
     @property
     def x(self) -> np.float64:

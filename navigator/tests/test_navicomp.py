@@ -46,6 +46,54 @@ class TestConstructors:
             space.z = 404.5346
 
 
+class TestDegrees2Radians:
+
+    def test_deg2rad_00(self):
+        assert Space.deg2rad(0) == 0
+
+    def test_deg2rad_01(self):
+        assert Space.deg2rad(180) == Space.π
+
+    def test_deg2rad_02(self):
+        assert Space.deg2rad(90) == Space.π/2.0
+
+    def test_deg2rad_03(self):
+        assert Space.deg2rad(-90) == -Space.π/2.0
+
+    def test_deg2rad_04(self):
+        assert Space.deg2rad(360) == 2*Space.π
+
+    def test_deg2rad_05(self):
+        assert Space.deg2rad(270) == 1.5*Space.π
+
+    def test_deg2rad_06(self):
+        assert Space.deg2rad(45) == Space.π/4
+
+
+class TestRadians2Degrees:
+
+    def test_rad2deg_00(self):
+        assert Space.rad2deg(0) == 0
+
+    def test_rad2deg_01(self):
+        assert Space.rad2deg(Space.π) == 180.0
+
+    def test_rad2deg_02(self):
+        assert Space.rad2deg(Space.π/2) == 90.0
+
+    def test_rad2deg_03(self):
+        assert Space.rad2deg(-Space.π/2) == -90.0
+
+    def test_rad2deg_04(self):
+        assert Space.rad2deg(2.0*Space.π) == 360.0
+
+    def test_rad2deg_05(self):
+        assert Space.rad2deg(3/2*Space.π) == 270.0
+
+    def test_rad2deg_06(self):
+        assert Space.rad2deg(-Space.π/4.0) == -45.0
+
+
 class TestOperators:
 
     def test_equality_00(self):
