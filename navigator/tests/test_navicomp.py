@@ -108,6 +108,30 @@ class TestOperators:
         space = Space()
         assert space == UnitVectors.Uo
 
+    def test_scalar_multiply_00(self):
+        space = 0.0 * UnitVectors.Ux.value
+        assert space.x == 0.0
+        assert space.y == 0.0
+        assert space.z == 0
+
+    def test_scalar_multiply_01(self):
+        space = 2 * Space(1, 1, 1)
+        assert space.x == 2
+        assert space.y == 2
+        assert space.z == 2
+        assert space.ρ == np.sqrt(2*2+2*2+2*2)  # 3.4641016151377544
+        assert space.θ == 0.9553166181245093
+        assert space.φ == 0.7853981633974483
+        assert space.h == 3.464101615137755  # rounding difference with ρ
+        assert space.az == space.φ  # 0.7853981633974483
+        assert space.el == 0.6154797086703873
+
+    def test_scalar_multiply_02(self):
+        space = Space.π * UnitVectors.Uz.value
+        assert space.x == 0.0
+        assert space.y == 0.0
+        assert space.z == space.π
+
 
 class TestUnitVectors:
     """Test unit vectors."""

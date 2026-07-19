@@ -40,6 +40,16 @@ class Space:
             return False
         return self.x == other.x and self.y == other.y and self.z == other.z
 
+    def __mul__(self, other):
+        """Scalar multiplication."""
+        if isinstance(other, (int, float, np.float64)):
+            return Space(other * self.x, other * self.y, other * self.z)
+        return NotImplemented  # Try commute.
+
+    def __rmul__(self, other):
+        """Commute scalar multiplication."""
+        return self.__mul__(other)
+
     @property
     def x(self) -> np.float64:
         return self._space[0]
