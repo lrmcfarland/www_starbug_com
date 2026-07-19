@@ -3,7 +3,10 @@ name = "www"
 version = "0.1.0"
 description = "This is the source for the starbug.com web site"
 authors = ["Lincoln McFarland <lrm@starbug.com>"]
-packages = [{include = "www", from = "src"}]
+packages = [
+    {include = "www", from = "src"},
+    {include = "navicomp", from = "src"}
+]
 
 [tool.poetry.dependencies]
 flask = "^3.1.3"
