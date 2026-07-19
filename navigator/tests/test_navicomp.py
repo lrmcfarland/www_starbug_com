@@ -4,7 +4,7 @@ import numpy as np
 from navicomp import Space, UnitVectors
 
 
-class TestConstructors:
+class TestCartesianConstructors:
 
     def test_default_space_constructor(self):
         """Test default space constructor."""
@@ -46,6 +46,76 @@ class TestConstructors:
             space.z = 404.5346
 
 
+class TestSphericalPhysicsConstructors:
+
+    def test_physics_1_2_combo_exception_00(self):
+        with pytest.raises(ValueError):
+            Space(ρ=1, r=2)
+
+    def test_physics_1_2_combo_exception_01(self):
+        with pytest.raises(ValueError):
+            Space(θ=0, r=2)
+
+    def test_physics_geo_combo_exception_01(self):
+        with pytest.raises(ValueError):
+            Space(h=10, r=2)
+
+    def test_cartesian_geo_combo_exception_01(self):
+        with pytest.raises(ValueError):
+            Space(h=10, x=2)
+
+    def test_cartesian_physics_combo_exception_01(self):
+        with pytest.raises(ValueError):
+            Space(theta=10, z=2)
+
+    def test_spherical_physics_1_00(self):
+        space = Space(ρ=1)
+        assert space == Space(z=1.0)
+
+    def test_spherical_physics_1_01(self):
+        space = Space(θ=Space.π)
+        assert space.z == -1.0
+        assert space.y == 0
+        assert space.x == pytest.approx(0, abs=1e-15)
+        # TODO assert space == Space(z=-1.0)
+
+    def test_spherical_physics_2_00(self):
+        space = Space(r=2)
+        assert space == Space(z=2.0)
+
+    def test_spherical_physics_2_01(self):
+        space = Space(r=2, theta=Space.π/3.0)
+        assert space.x == 1.7320508075688772
+        assert space.y == 0.0
+        assert space.z == pytest.approx(1.0, abs=1e-15)
+        # TODO assert space == Space(x=1.7320508075688772, z=1.0)
+
+
+class TestSphericalGeoConstructors:
+
+    def test_cartesian_geo_combo_exception_01(self):
+        with pytest.raises(ValueError):
+            Space(el=10, z=2)
+
+    def test_spherical_geo_00(self):
+        space = Space(az=Space.π)
+        assert space.z == 0.0
+        assert space.y == pytest.approx(0, abs=1e-15)
+        assert space.x == -1
+
+    def test_spherical_geo_01(self):
+        space = Space(az=0, el=Space.π / 4)
+        assert space.z == 0.7071067811865475
+        assert space.y == pytest.approx(0, abs=1e-15)
+        assert space.x == 0.7071067811865476
+
+    def test_spherical_geo_02(self):
+        space = Space(az=Space.π, el=Space.π / 4)
+        assert space.z == 0.7071067811865475
+        assert space.y == pytest.approx(0, abs=1e-15)
+        assert space.x == -0.7071067811865476
+
+
 class TestDegrees2Radians:
 
     def test_deg2rad_00(self):
@@ -55,19 +125,19 @@ class TestDegrees2Radians:
         assert Space.deg2rad(180) == Space.π
 
     def test_deg2rad_02(self):
-        assert Space.deg2rad(90) == Space.π/2.0
+        assert Space.deg2rad(90) == Space.π / 2.0
 
     def test_deg2rad_03(self):
-        assert Space.deg2rad(-90) == -Space.π/2.0
+        assert Space.deg2rad(-90) == -Space.π / 2.0
 
     def test_deg2rad_04(self):
-        assert Space.deg2rad(360) == 2*Space.π
+        assert Space.deg2rad(360) == 2 * Space.π
 
     def test_deg2rad_05(self):
-        assert Space.deg2rad(270) == 1.5*Space.π
+        assert Space.deg2rad(270) == 1.5 * Space.π
 
     def test_deg2rad_06(self):
-        assert Space.deg2rad(45) == Space.π/4
+        assert Space.deg2rad(45) == Space.π / 4
 
 
 class TestRadians2Degrees:
@@ -79,19 +149,19 @@ class TestRadians2Degrees:
         assert Space.rad2deg(Space.π) == 180.0
 
     def test_rad2deg_02(self):
-        assert Space.rad2deg(Space.π/2) == 90.0
+        assert Space.rad2deg(Space.π / 2) == 90.0
 
     def test_rad2deg_03(self):
-        assert Space.rad2deg(-Space.π/2) == -90.0
+        assert Space.rad2deg(-Space.π / 2) == -90.0
 
     def test_rad2deg_04(self):
-        assert Space.rad2deg(2.0*Space.π) == 360.0
+        assert Space.rad2deg(2.0 * Space.π) == 360.0
 
     def test_rad2deg_05(self):
-        assert Space.rad2deg(3/2*Space.π) == 270.0
+        assert Space.rad2deg(3 / 2 * Space.π) == 270.0
 
     def test_rad2deg_06(self):
-        assert Space.rad2deg(-Space.π/4.0) == -45.0
+        assert Space.rad2deg(-Space.π / 4.0) == -45.0
 
 
 class TestOperators:
@@ -119,7 +189,7 @@ class TestOperators:
         assert space.x == 2
         assert space.y == 2
         assert space.z == 2
-        assert space.ρ == np.sqrt(2*2+2*2+2*2)  # 3.4641016151377544
+        assert space.ρ == np.sqrt(2 * 2 + 2 * 2 + 2 * 2)  # 3.4641016151377544
         assert space.θ == 0.9553166181245093
         assert space.φ == 0.7853981633974483
         assert space.h == 3.464101615137755  # rounding difference with ρ
@@ -210,13 +280,13 @@ class TestSphericalStableAtPoles:
     def test_spherical_front(self):
         starbug = Space(1, 0, 0)
         assert starbug.ρ == 1
-        assert starbug.θ == np.pi/2.0
+        assert starbug.θ == np.pi / 2.0
         assert starbug.φ == 0
 
     def test_spherical_back(self):
         starbug = Space(-1, 0, 0)
         assert starbug.ρ == 1
-        assert starbug.θ == starbug.π/2
+        assert starbug.θ == starbug.π / 2
         assert starbug.φ == Space.π
 
     def test_spherical_up(self):
@@ -235,14 +305,14 @@ class TestSphericalStableAtPoles:
     def test_spherical_port(self):
         starbug = Space(0, 8, 0.0)
         assert starbug.ρ == 8.0
-        assert starbug.θ == np.pi/2.0
-        assert starbug.φ == starbug.π/2
+        assert starbug.θ == np.pi / 2.0
+        assert starbug.φ == starbug.π / 2
 
     def test_spherical_starboard(self):
         starbug = Space(0, -16.0, 0.0)
         assert starbug.ρ == 16.0
-        assert starbug.θ == np.pi/2.0
-        assert starbug.φ == -Space.π/2
+        assert starbug.θ == np.pi / 2.0
+        assert starbug.φ == -Space.π / 2
 
 
 class TestGeographyStandardSphericalCoordinates:
@@ -261,5 +331,5 @@ class TestGeographyStandardSphericalCoordinates:
         assert starbug.ρ == 1.7320508075688772
         assert starbug.r == 1.7320508075688772
         assert starbug.h == 1.7320508075688774  # rounding difference!
-        assert starbug.az == Space.π/4
+        assert starbug.az == Space.π / 4
         assert starbug.el == 0.6154797086703873
