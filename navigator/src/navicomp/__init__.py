@@ -286,6 +286,18 @@ class Space:
             f"unsupported operand type(s) for /=: 'Space' and '{type(other).__name__}'"
         )
 
+    def __ifloordiv__(self, other):
+        if other == 0:
+            raise ZeroDivisionError("Inplace division by zero")
+        if isinstance(other, (int, float, np.float64)):
+            self._space[0] //= other
+            self._space[1] //= other
+            self._space[2] //= other
+            return self
+        raise TypeError(
+            f"unsupported operand type(s) for /=: 'Space' and '{type(other).__name__}'"
+        )
+
     # ----------------------
     # ----- properties -----
     # ----------------------

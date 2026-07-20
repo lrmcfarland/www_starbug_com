@@ -380,6 +380,31 @@ class TestOperators:
         space = 1.0 / Space(-1.0, 2.0, 3.5)
         assert space == Space(-1.0, 0.5, 0.2857142857142857)
 
+    def test_scalar_ifloordiv_00(self):
+        with pytest.raises(ZeroDivisionError):
+            s1 = Space(1, 1, 1)
+            s1 //= 0.0
+
+    def test_scalar_ifloordiv_000(self):
+        with pytest.raises(TypeError):
+            s1 = Space(1, 1, 1)
+            s1 //= Space(2, 3, 4)
+
+    def test_scalar_ifloordiv_01(self):
+        s1 = Space(1, 1, 1)
+        s1 //= 3
+        assert s1 == Space(0, 0, 0)
+
+    def test_scalar_ifloordiv_02(self):
+        s1 = Space(10, 10, 10)
+        s1 //= 3
+        assert s1 == Space(3, 3, 3)
+
+    def test_scalar_ifloordiv_03(self):
+        s1 = Space(100, -99, 10)
+        s1 //= 7
+        assert s1 == Space(14, -15, 1)
+
 
 class TestUnitVectors:
     """Test unit vectors."""
