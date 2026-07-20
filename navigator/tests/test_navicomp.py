@@ -307,6 +307,21 @@ class TestOperators:
         s3 = s1 + s0
         assert s3 == Space(3, 5, 7)
 
+    def test_vector_iadd_str_error_00(self):
+        with pytest.raises(TypeError):
+            s0 = Space(1, 2, 3)
+            s0 += "asdf"
+
+    def test_vector_iadd_00(self):
+        s0 = Space(1, 2, 3)
+        s0 += UnitVectors.Uz.value
+        assert s0 == Space(1, 2, 4)
+
+    def test_vector_iadd_01(self):
+        s0 = Space(1, 2, 3)
+        s0 += -3
+        assert s0 == Space(-2, -1)
+
     def test_vector_add_float_error_00(self):
         with pytest.raises(TypeError):
             Space(1, 2, 3) + Space.π
@@ -350,6 +365,20 @@ class TestOperators:
         s1 = s0 - UnitVectors.Uy.value
         assert s1 == Space(1, 1, 3)
 
+    def test_vector_isub_str_error_00(self):
+        with pytest.raises(TypeError):
+            s0 = Space(1, 2, 3)
+            s0 -= "asdf"
+
+    def test_vector_isub_00(self):
+        s0 = Space(1, -4, 3)
+        s0 -= UnitVectors.Uy.value
+        assert s0 == Space(1, -5, 3)
+
+    def test_vector_isub_00(self):
+        s0 = Space(1, -4, 3)
+        s0 -= 4
+        assert s0 == Space(-3, -8, -1)
 
 class TestUnitVectors:
     """Test unit vectors."""
