@@ -162,14 +162,26 @@ class Space:
         if hasattr(other, "value") and isinstance(other.value, Space):
             other = other.value
         if not isinstance(other, Space):
-            return False
+            return NotImplemented
         return self.x == other.x and self.y == other.y and self.z == other.z
 
     def __mul__(self, other: np.float64) -> Space:
         """Scalar multiplication."""
         if isinstance(other, (int, float, np.float64)):
             return Space(other * self.x, other * self.y, other * self.z)
-        return NotImplemented  # Try commute.
+        raise TypeError(
+            f"unsupported operand type(s) for *: 'Space' and '{type(other).__name__}'"
+        )
+
+    def __imul__(self, other) -> Space:
+        if isinstance(other, (int, float, np.float64)):
+            self._space[0] *= other
+            self._space[1] *= other
+            self._space[2] *= other
+            return self
+        raise TypeError(
+            f"unsupported operand type(s) for *=: 'Space' and '{type(other).__name__}'"
+        )
 
     def __rmul__(self, other: np.float64):
         """Commute scalar multiplication."""
@@ -181,6 +193,21 @@ class Space:
             raise ZeroDivisionError("Division by zero")
         if isinstance(other, (int, float, np.float64)):
             return Space(self.x / other, self.y / other, self.z / other)
+        raise TypeError(
+            f"unsupported operand type(s) for /: 'Space' and '{type(other).__name__}'"
+        )
+
+    def __itruediv__(self, other) -> Space:
+        if other == 0:
+            raise ZeroDivisionError("Inplace division by zero")
+        if isinstance(other, (int, float, np.float64)):
+            self._space[0] /= other
+            self._space[1] /= other
+            self._space[2] /= other
+            return self
+        raise TypeError(
+            f"unsupported operand type(s) for /=: 'Space' and '{type(other).__name__}'"
+        )
 
     def __rtruediv__(self, other) -> Space:
         """Scalar division other / self."""
@@ -188,6 +215,9 @@ class Space:
             raise ZeroDivisionError("Division by zero")
         if isinstance(other, (int, float, np.float64)):
             return Space(other / self.x, other / self.y, other / self.z)
+        raise TypeError(
+            f"unsupported operand type(s) for /: '{type(other).__name__}' and 'Space'"
+        )
 
     def __add__(self, other) -> Space:
         if isinstance(other, Space):

@@ -178,13 +178,13 @@ class TestOperators:
         space = Space()
         assert space == UnitVectors.Uo
 
-    def test_scalar_multiply_00(self):
+    def test_scalar_mul_00(self):
         space = 0.0 * UnitVectors.Ux.value
         assert space.x == 0.0
         assert space.y == 0.0
         assert space.z == 0
 
-    def test_scalar_multiply_01(self):
+    def test_scalar_mul_01(self):
         space = Space(1, 1, 1) * 2
         assert space.x == 2
         assert space.y == 2
@@ -196,41 +196,82 @@ class TestOperators:
         assert space.az == space.φ  # 0.7853981633974483
         assert space.el == 0.6154797086703873
 
-    def test_scalar_multiply_02(self):
+    def test_scalar_mul_02(self):
         space = Space.π * UnitVectors.Uz.value
         assert space.x == 0.0
         assert space.y == 0.0
         assert space.z == space.π
 
-    def test_scalar_divide_00(self):
+    def test_scalar_imul_exception_00(self):
+        """Test scalar inplace multiply exception.
+
+        Not dot or cross product.
+        """
+        with pytest.raises(TypeError):
+            s0 = Space(1, -2, 3)
+            s0 *= Space(2)
+
+    def test_scalar_imul_00(self):
+        space = Space(1, -2, 3)
+        space *= 3
+        assert space.x == 3
+        assert space.y == -6
+        assert space.z == 9
+
+    def test_scalar_itruediv_exception_00(self):
+        """Test scalar inplace div exception."""
+        with pytest.raises(ZeroDivisionError):
+            s0 = Space(-1, -2, 3)
+            s0 /= 0
+
+    def test_scalar_itruediv_exception_01(self):
+        """Test scalar inplace multiply exception.
+
+        Not dot or cross product.
+        """
+        with pytest.raises(TypeError):
+            s0 = Space(1, -2, 3)
+            s0 /= Space(2, 4, 6)
+
+    def test_scalar_itruediv_00(self):
+        s0 = Space(2, 4, 6)
+        s0 /= 2
+        assert s0 == Space(1, 2, 3)
+
+    def test_scalar_itruediv_01(self):
+        s0 = Space(2, 4, 6)
+        s0 /= 2
+        assert s0 == Space(1, 2, 3)
+
+    def test_scalar_div_00(self):
         with pytest.raises(ZeroDivisionError):
             Space(1, 1, 1) / 0.0
 
-    def test_scalar_divide_000(self):
+    def test_scalar_div_000(self):
         with pytest.raises(ZeroDivisionError):
             1.0 / Space(0, 0, 0)
 
-    def test_scalar_divide_01(self):
+    def test_scalar_div_01(self):
         space = Space(1, 1, 1) / 1.0
         assert space == Space(1.0, 1.0, 1.0)
 
-    def test_scalar_divide_02(self):
+    def test_scalar_div_02(self):
         space = Space(1, 1, 1) / 2.0
         assert space == Space(0.5, 0.5, 0.5)
 
-    def test_scalar_divide_03(self):
+    def test_scalar_div_03(self):
         space = Space(ρ=1, θ=Space.π / 4, φ=-Space.π / 4) / 2.0
         assert space == Space(0.25, -0.24999999999999994, 0.3535533905932738)
 
-    def test_scalar_divide_04(self):
+    def test_scalar_div_04(self):
         space = Space(1.2, -31.5, -2.71) / 2.0
         assert space == Space(0.6, -15.75, -1.355)
 
-    def test_scalar_divide_05(self):
+    def test_scalar_div_05(self):
         space = 1.0 / Space(0.5, 0.5, 0.5)
         assert space == Space(2, 2, 2)
 
-    def test_scalar_divide_06(self):
+    def test_scalar_div_06(self):
         space = 1.0 / Space(-1.0, 2.0, 3.5)
         assert space == Space(-1.0, 0.5, 0.2857142857142857)
 
