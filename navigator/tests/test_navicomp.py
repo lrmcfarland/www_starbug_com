@@ -185,7 +185,7 @@ class TestOperators:
         assert space.z == 0
 
     def test_scalar_multiply_01(self):
-        space = 2 * Space(1, 1, 1)
+        space = Space(1, 1, 1) * 2
         assert space.x == 2
         assert space.y == 2
         assert space.z == 2
@@ -201,6 +201,38 @@ class TestOperators:
         assert space.x == 0.0
         assert space.y == 0.0
         assert space.z == space.π
+
+    def test_scalar_divide_00(self):
+        with pytest.raises(ZeroDivisionError):
+            Space(1, 1, 1) / 0.0
+
+    def test_scalar_divide_000(self):
+        with pytest.raises(ZeroDivisionError):
+            1.0 / Space(0, 0, 0)
+
+    def test_scalar_divide_01(self):
+        space = Space(1, 1, 1) / 1.0
+        assert space == Space(1.0, 1.0, 1.0)
+
+    def test_scalar_divide_02(self):
+        space = Space(1, 1, 1) / 2.0
+        assert space == Space(0.5, 0.5, 0.5)
+
+    def test_scalar_divide_03(self):
+        space = Space(ρ=1, θ=Space.π/4, φ=-Space.π/4) / 2.0
+        assert space == Space(0.25, -0.24999999999999994, 0.3535533905932738)
+
+    def test_scalar_divide_04(self):
+        space = Space(1.2, -31.5, -2.71) / 2.0
+        assert space == Space(0.6, -15.75, -1.355)
+
+    def test_scalar_divide_05(self):
+        space = 1.0 / Space(0.5, 0.5, 0.5)
+        assert space == Space(2, 2, 2)
+
+    def test_scalar_divide_06(self):
+        space = 1.0 / Space(-1.0, 2.0, 3.5)
+        assert space == Space(-1.0, 0.5, 0.2857142857142857)
 
 
 class TestUnitVectors:

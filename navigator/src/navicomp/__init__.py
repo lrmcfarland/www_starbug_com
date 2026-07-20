@@ -163,15 +163,29 @@ class Space:
             return False
         return self.x == other.x and self.y == other.y and self.z == other.z
 
-    def __mul__(self, other):
+    def __mul__(self, other: np.float64) -> Space:
         """Scalar multiplication."""
         if isinstance(other, (int, float, np.float64)):
             return Space(other * self.x, other * self.y, other * self.z)
         return NotImplemented  # Try commute.
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: np.float64):
         """Commute scalar multiplication."""
         return self.__mul__(other)
+
+    def __truediv__(self, other) -> Space:
+        """Scalar division self / other."""
+        if other == 0:
+            raise ZeroDivisionError("Division by zero")
+        if isinstance(other, (int, float, np.float64)):
+            return Space(self.x/other, self.y/other, self.z/other)
+
+    def __rtruediv__(self, other) -> Space:
+        """Scalar division other / self."""
+        if self.x == 0 or self.y == 0 or self.z == 0:
+            raise ZeroDivisionError("Division by zero")
+        if isinstance(other, (int, float, np.float64)):
+            return Space(other/self.x, other/self.y, other/self.z)
 
     @property
     def x(self) -> np.float64:
