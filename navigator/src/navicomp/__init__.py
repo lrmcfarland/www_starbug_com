@@ -178,14 +178,27 @@ class Space:
         if other == 0:
             raise ZeroDivisionError("Division by zero")
         if isinstance(other, (int, float, np.float64)):
-            return Space(self.x/other, self.y/other, self.z/other)
+            return Space(self.x / other, self.y / other, self.z / other)
 
     def __rtruediv__(self, other) -> Space:
         """Scalar division other / self."""
         if self.x == 0 or self.y == 0 or self.z == 0:
             raise ZeroDivisionError("Division by zero")
         if isinstance(other, (int, float, np.float64)):
-            return Space(other/self.x, other/self.y, other/self.z)
+            return Space(other / self.x, other / self.y, other / self.z)
+
+    def __add__(self, other) -> Space:
+        if isinstance(other, Space):
+            return Space(self.x + other.x, self.y + other.y, self.z + other.z)
+        return NotImplemented  # try commute
+
+    def __neg__(self) -> Space:
+        return Space(x=-self.x, y=-self.y, z=-self.z)
+
+    def __sub__(self, other) -> Space:
+        if isinstance(other, Space):
+            return Space(self.x - other.x, self.y - other.y, self.z - other.z)
+        return NotImplemented
 
     @property
     def x(self) -> np.float64:

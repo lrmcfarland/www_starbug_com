@@ -84,7 +84,7 @@ class TestSphericalPhysicsConstructors:
         assert space == Space(z=2.0)
 
     def test_spherical_physics_2_01(self):
-        space = Space(r=2, theta=Space.π/3.0)
+        space = Space(r=2, theta=Space.π / 3.0)
         assert space.x == 1.7320508075688772
         assert space.y == 0.0
         assert space.z == pytest.approx(1.0, abs=1e-15)
@@ -219,7 +219,7 @@ class TestOperators:
         assert space == Space(0.5, 0.5, 0.5)
 
     def test_scalar_divide_03(self):
-        space = Space(ρ=1, θ=Space.π/4, φ=-Space.π/4) / 2.0
+        space = Space(ρ=1, θ=Space.π / 4, φ=-Space.π / 4) / 2.0
         assert space == Space(0.25, -0.24999999999999994, 0.3535533905932738)
 
     def test_scalar_divide_04(self):
@@ -233,6 +233,58 @@ class TestOperators:
     def test_scalar_divide_06(self):
         space = 1.0 / Space(-1.0, 2.0, 3.5)
         assert space == Space(-1.0, 0.5, 0.2857142857142857)
+
+    def test_vector_add_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 + UnitVectors.Uo.value
+        assert s1 == s0
+
+    def test_vector_add_01(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Uo.value + s0
+        assert s1 == s0
+
+    def test_vector_add_02(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 + UnitVectors.Ux.value
+        assert s1 == Space(2, 2, 3)
+
+    def test_vector_add_03(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Ux.value + s0
+        assert s1 == Space(2, 2, 3)
+
+    def test_vector_add_10(self):
+        s0 = Space(1, 2, 3)
+        s1 = Space(2, 3, 4)
+        s3 = s0 + s1
+        assert s3 == Space(3, 5, 7)
+
+    def test_vector_add_float_error(self):
+        with pytest.raises(TypeError):
+            Space(1, 2, 3) + Space.π
+
+    def test_vector_add_negative_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = -1 * Space(2, 3, 4)
+        s3 = s0 + s1
+        assert s3 == Space(-1, -1, -1)
+
+    def test_vector_unitary_minus_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = -Space(2, 3, 4)
+        s3 = s0 + s1
+        assert s3 == Space(-1, -1, -1)
+
+    def test_vector_sub_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 - UnitVectors.Uo.value
+        assert s1 == s0
+
+    def test_vector_sub_01(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Uy.value - s0
+        assert s1 == Space(-1, -1, -3)
 
 
 class TestUnitVectors:
