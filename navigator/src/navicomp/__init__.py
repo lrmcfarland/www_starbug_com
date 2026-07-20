@@ -222,15 +222,31 @@ class Space:
     def __add__(self, other) -> Space:
         if isinstance(other, Space):
             return Space(self.x + other.x, self.y + other.y, self.z + other.z)
-        return NotImplemented  # try commute
+        raise TypeError(
+            f"unsupported operand type(s) for +: 'Space' and '{type(other).__name__}'"
+        )
+
+    def __radd__(self, other) -> Space:
+        """Commute vector addition."""
+        return self.__add__(other)
 
     def __neg__(self) -> Space:
         return Space(x=-self.x, y=-self.y, z=-self.z)
 
+    def __rsub__(self, other) -> Space:
+        """Commute vector subtraction."""
+        if isinstance(other, Space):
+            return Space(other.x - self.x, other.y - self.y, other.z - self.z)
+        raise TypeError(
+            f"unsupported operand type(s) for -: '{type(other).__name__}' and 'Space'"
+        )
+
     def __sub__(self, other) -> Space:
         if isinstance(other, Space):
             return Space(self.x - other.x, self.y - other.y, self.z - other.z)
-        return NotImplemented
+        raise TypeError(
+            f"unsupported operand type(s) for -: 'Space' and '{type(other).__name__}'"
+        )
 
     @property
     def x(self) -> np.float64:

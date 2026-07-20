@@ -301,9 +301,19 @@ class TestOperators:
         s3 = s0 + s1
         assert s3 == Space(3, 5, 7)
 
-    def test_vector_add_float_error(self):
+    def test_vector_radd_10(self):
+        s0 = Space(1, 2, 3)
+        s1 = Space(2, 3, 4)
+        s3 = s1 + s0
+        assert s3 == Space(3, 5, 7)
+
+    def test_vector_add_float_error_00(self):
         with pytest.raises(TypeError):
             Space(1, 2, 3) + Space.π
+
+    def test_vector_add_float_error_01(self):
+        with pytest.raises(TypeError):
+            Space.π + Space(1, 2, 3)
 
     def test_vector_add_negative_00(self):
         s0 = Space(1, 2, 3)
@@ -317,6 +327,14 @@ class TestOperators:
         s3 = s0 + s1
         assert s3 == Space(-1, -1, -1)
 
+    def test_vector_sub_float_error_00(self):
+        with pytest.raises(TypeError):
+            Space(1, 2, 3) - Space.π
+
+    def test_vector_sub_float_error_01(self):
+        with pytest.raises(TypeError):
+            Space.π - Space(1, 2, 3)
+
     def test_vector_sub_00(self):
         s0 = Space(1, 2, 3)
         s1 = s0 - UnitVectors.Uo.value
@@ -326,6 +344,11 @@ class TestOperators:
         s0 = Space(1, 2, 3)
         s1 = UnitVectors.Uy.value - s0
         assert s1 == Space(-1, -1, -3)
+
+    def test_vector_rsub_01(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 - UnitVectors.Uy.value
+        assert s1 == Space(1, 1, 3)
 
 
 class TestUnitVectors:
