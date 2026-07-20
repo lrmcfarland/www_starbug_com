@@ -178,6 +178,111 @@ class TestOperators:
         space = Space()
         assert space == UnitVectors.Uo
 
+    def test_vector_unitary_minus_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = -Space(2, 3, 4)
+        s3 = s0 + s1
+        assert s3 == Space(-1, -1, -1)
+
+    def test_vector_add_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 + UnitVectors.Uo.value
+        assert s1 == s0
+
+    def test_vector_add_01(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Uo.value + s0
+        assert s1 == s0
+
+    def test_vector_add_02(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 + UnitVectors.Ux.value
+        assert s1 == Space(2, 2, 3)
+
+    def test_vector_add_03(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Ux.value + s0
+        assert s1 == Space(2, 2, 3)
+
+    def test_vector_add_10(self):
+        s0 = Space(1, 2, 3)
+        s1 = Space(2, 3, 4)
+        s3 = s0 + s1
+        assert s3 == Space(3, 5, 7)
+
+    def test_vector_radd_10(self):
+        s0 = Space(1, 2, 3)
+        s1 = Space(2, 3, 4)
+        s3 = s1 + s0
+        assert s3 == Space(3, 5, 7)
+
+    def test_vector_iadd_str_error_00(self):
+        with pytest.raises(TypeError):
+            s0 = Space(1, 2, 3)
+            s0 += "asdf"
+
+    def test_vector_iadd_00(self):
+        s0 = Space(1, 2, 3)
+        s0 += UnitVectors.Uz.value
+        assert s0 == Space(1, 2, 4)
+
+    def test_vector_iadd_01(self):
+        s0 = Space(1, 2, 3)
+        s0 += -3
+        assert s0 == Space(-2, -1)
+
+    def test_vector_add_float_error_00(self):
+        with pytest.raises(TypeError):
+            Space(1, 2, 3) + Space.π
+
+    def test_vector_add_float_error_01(self):
+        with pytest.raises(TypeError):
+            Space.π + Space(1, 2, 3)
+
+    def test_vector_add_negative_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = -1 * Space(2, 3, 4)
+        s3 = s0 + s1
+        assert s3 == Space(-1, -1, -1)
+
+    def test_vector_sub_float_error_00(self):
+        with pytest.raises(TypeError):
+            Space(1, 2, 3) - Space.π
+
+    def test_vector_sub_float_error_01(self):
+        with pytest.raises(TypeError):
+            Space.π - Space(1, 2, 3)
+
+    def test_vector_sub_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 - UnitVectors.Uo.value
+        assert s1 == s0
+
+    def test_vector_sub_01(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Uy.value - s0
+        assert s1 == Space(-1, -1, -3)
+
+    def test_vector_rsub_01(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 - UnitVectors.Uy.value
+        assert s1 == Space(1, 1, 3)
+
+    def test_vector_isub_str_error_00(self):
+        with pytest.raises(TypeError):
+            s0 = Space(1, 2, 3)
+            s0 -= "asdf"
+
+    def test_vector_isub_00(self):
+        s0 = Space(1, -4, 3)
+        s0 -= UnitVectors.Uy.value
+        assert s0 == Space(1, -5, 3)
+
+    def test_vector_isub_01(self):
+        s0 = Space(1, -4, 3)
+        s0 -= 4
+        assert s0 == Space(-3, -8, -1)
+
     def test_scalar_mul_00(self):
         space = 0.0 * UnitVectors.Ux.value
         assert space.x == 0.0
@@ -275,110 +380,6 @@ class TestOperators:
         space = 1.0 / Space(-1.0, 2.0, 3.5)
         assert space == Space(-1.0, 0.5, 0.2857142857142857)
 
-    def test_vector_add_00(self):
-        s0 = Space(1, 2, 3)
-        s1 = s0 + UnitVectors.Uo.value
-        assert s1 == s0
-
-    def test_vector_add_01(self):
-        s0 = Space(1, 2, 3)
-        s1 = UnitVectors.Uo.value + s0
-        assert s1 == s0
-
-    def test_vector_add_02(self):
-        s0 = Space(1, 2, 3)
-        s1 = s0 + UnitVectors.Ux.value
-        assert s1 == Space(2, 2, 3)
-
-    def test_vector_add_03(self):
-        s0 = Space(1, 2, 3)
-        s1 = UnitVectors.Ux.value + s0
-        assert s1 == Space(2, 2, 3)
-
-    def test_vector_add_10(self):
-        s0 = Space(1, 2, 3)
-        s1 = Space(2, 3, 4)
-        s3 = s0 + s1
-        assert s3 == Space(3, 5, 7)
-
-    def test_vector_radd_10(self):
-        s0 = Space(1, 2, 3)
-        s1 = Space(2, 3, 4)
-        s3 = s1 + s0
-        assert s3 == Space(3, 5, 7)
-
-    def test_vector_iadd_str_error_00(self):
-        with pytest.raises(TypeError):
-            s0 = Space(1, 2, 3)
-            s0 += "asdf"
-
-    def test_vector_iadd_00(self):
-        s0 = Space(1, 2, 3)
-        s0 += UnitVectors.Uz.value
-        assert s0 == Space(1, 2, 4)
-
-    def test_vector_iadd_01(self):
-        s0 = Space(1, 2, 3)
-        s0 += -3
-        assert s0 == Space(-2, -1)
-
-    def test_vector_add_float_error_00(self):
-        with pytest.raises(TypeError):
-            Space(1, 2, 3) + Space.π
-
-    def test_vector_add_float_error_01(self):
-        with pytest.raises(TypeError):
-            Space.π + Space(1, 2, 3)
-
-    def test_vector_add_negative_00(self):
-        s0 = Space(1, 2, 3)
-        s1 = -1 * Space(2, 3, 4)
-        s3 = s0 + s1
-        assert s3 == Space(-1, -1, -1)
-
-    def test_vector_unitary_minus_00(self):
-        s0 = Space(1, 2, 3)
-        s1 = -Space(2, 3, 4)
-        s3 = s0 + s1
-        assert s3 == Space(-1, -1, -1)
-
-    def test_vector_sub_float_error_00(self):
-        with pytest.raises(TypeError):
-            Space(1, 2, 3) - Space.π
-
-    def test_vector_sub_float_error_01(self):
-        with pytest.raises(TypeError):
-            Space.π - Space(1, 2, 3)
-
-    def test_vector_sub_00(self):
-        s0 = Space(1, 2, 3)
-        s1 = s0 - UnitVectors.Uo.value
-        assert s1 == s0
-
-    def test_vector_sub_01(self):
-        s0 = Space(1, 2, 3)
-        s1 = UnitVectors.Uy.value - s0
-        assert s1 == Space(-1, -1, -3)
-
-    def test_vector_rsub_01(self):
-        s0 = Space(1, 2, 3)
-        s1 = s0 - UnitVectors.Uy.value
-        assert s1 == Space(1, 1, 3)
-
-    def test_vector_isub_str_error_00(self):
-        with pytest.raises(TypeError):
-            s0 = Space(1, 2, 3)
-            s0 -= "asdf"
-
-    def test_vector_isub_00(self):
-        s0 = Space(1, -4, 3)
-        s0 -= UnitVectors.Uy.value
-        assert s0 == Space(1, -5, 3)
-
-    def test_vector_isub_00(self):
-        s0 = Space(1, -4, 3)
-        s0 -= 4
-        assert s0 == Space(-3, -8, -1)
 
 class TestUnitVectors:
     """Test unit vectors."""

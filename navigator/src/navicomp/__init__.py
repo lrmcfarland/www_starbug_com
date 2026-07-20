@@ -168,6 +168,68 @@ class Space:
     def __neg__(self) -> Space:
         return Space(x=-self.x, y=-self.y, z=-self.z)
 
+    # ---- add ----
+
+    def __add__(self, other) -> Space:
+        if isinstance(other, Space):
+            return Space(self.x + other.x, self.y + other.y, self.z + other.z)
+        raise TypeError(
+            f"unsupported operand type(s) for +: 'Space' and '{type(other).__name__}'"
+        )
+
+    def __radd__(self, other) -> Space:
+        """Commute vector addition."""
+        return self.__add__(other)
+
+    def __iadd__(self, other) -> Space:
+        if isinstance(other, Space):
+            self._space[0] += other.x
+            self._space[1] += other.y
+            self._space[2] += other.z
+            return self
+        if isinstance(other, (int, float, np.float64)):
+            self._space[0] += other
+            self._space[1] += other
+            self._space[2] += other
+            return self
+        raise TypeError(
+            f"unsupported operand type(s) for +: 'Space' and '{type(other).__name__}'"
+        )
+
+    # ----- subtract -----
+
+    def __sub__(self, other) -> Space:
+        if isinstance(other, Space):
+            return Space(self.x - other.x, self.y - other.y, self.z - other.z)
+        raise TypeError(
+            f"unsupported operand type(s) for -: 'Space' and '{type(other).__name__}'"
+        )
+
+    def __rsub__(self, other) -> Space:
+        """Commute vector subtraction."""
+        if isinstance(other, Space):
+            return Space(other.x - self.x, other.y - self.y, other.z - self.z)
+        raise TypeError(
+            f"unsupported operand type(s) for -: '{type(other).__name__}' and 'Space'"
+        )
+
+    def __isub__(self, other) -> Space:
+        if isinstance(other, Space):
+            self._space[0] -= other.x
+            self._space[1] -= other.y
+            self._space[2] -= other.z
+            return self
+        if isinstance(other, (int, float, np.float64)):
+            self._space[0] -= other
+            self._space[1] -= other
+            self._space[2] -= other
+            return self
+        raise TypeError(
+            f"unsupported operand type(s) for -: 'Space' and '{type(other).__name__}'"
+        )
+
+    # ----- multiply -----
+
     def __mul__(self, other: np.float64) -> Space:
         """Scalar multiplication."""
         if isinstance(other, (int, float, np.float64)):
@@ -189,6 +251,8 @@ class Space:
         raise TypeError(
             f"unsupported operand type(s) for *=: 'Space' and '{type(other).__name__}'"
         )
+
+    # ----- true divide -----
 
     def __truediv__(self, other) -> Space:
         """Scalar division self / other."""
@@ -222,61 +286,9 @@ class Space:
             f"unsupported operand type(s) for /=: 'Space' and '{type(other).__name__}'"
         )
 
-    def __add__(self, other) -> Space:
-        if isinstance(other, Space):
-            return Space(self.x + other.x, self.y + other.y, self.z + other.z)
-        raise TypeError(
-            f"unsupported operand type(s) for +: 'Space' and '{type(other).__name__}'"
-        )
-
-    def __radd__(self, other) -> Space:
-        """Commute vector addition."""
-        return self.__add__(other)
-
-    def __iadd__(self, other) -> Space:
-        if isinstance(other, Space):
-            self._space[0] += other.x
-            self._space[1] += other.y
-            self._space[2] += other.z
-            return self
-        if isinstance(other, (int, float, np.float64)):
-            self._space[0] += other
-            self._space[1] += other
-            self._space[2] += other
-            return self
-        raise TypeError(
-            f"unsupported operand type(s) for +: 'Space' and '{type(other).__name__}'"
-        )
-
-    def __sub__(self, other) -> Space:
-        if isinstance(other, Space):
-            return Space(self.x - other.x, self.y - other.y, self.z - other.z)
-        raise TypeError(
-            f"unsupported operand type(s) for -: 'Space' and '{type(other).__name__}'"
-        )
-
-    def __rsub__(self, other) -> Space:
-        """Commute vector subtraction."""
-        if isinstance(other, Space):
-            return Space(other.x - self.x, other.y - self.y, other.z - self.z)
-        raise TypeError(
-            f"unsupported operand type(s) for -: '{type(other).__name__}' and 'Space'"
-        )
-
-    def __isub__(self, other) -> Space:
-        if isinstance(other, Space):
-            self._space[0] -= other.x
-            self._space[1] -= other.y
-            self._space[2] -= other.z
-            return self
-        if isinstance(other, (int, float, np.float64)):
-            self._space[0] -= other
-            self._space[1] -= other
-            self._space[2] -= other
-            return self
-        raise TypeError(
-            f"unsupported operand type(s) for -: 'Space' and '{type(other).__name__}'"
-        )
+    # ----------------------
+    # ----- properties -----
+    # ----------------------
 
     @property
     def x(self) -> np.float64:
