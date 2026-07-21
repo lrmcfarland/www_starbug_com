@@ -34,11 +34,17 @@ class Space:
             (phi, greek). Defaults to 0.
         phi (np.float64, optional): Spherical physics azimuthal angle
             (alternative to φ). Defaults to 0.
-        h (np.float64, optional): Geographical height/altitude.
+        h (np.float64, optional): Geographical height/radius.
             Defaults to 1.
         az (np.float64, optional): Geographical azimuth.
             Defaults to 0.
         el (np.float64, optional): Geographical elevation.
+            Defaults to 0.
+        alt (np.float64, optional): Geographical altitude/radius.
+            Defaults to 1.
+        lat (np.float64, optional): Geographical latitude.
+            Defaults to 0.
+        lon (np.float64, optional): Geographical longitude.
             Defaults to 0.
 
     Raises
@@ -76,14 +82,21 @@ class Space:
         h: np.float64 = None,
         az: np.float64 = None,
         el: np.float64 = None,
+        alt: np.float64 = None,
+        lat: np.float64 = None,
+        lon: np.float64 = None,
     ):
         is_cartesian = x is not None or y is not None or z is not None
         is_spherical_physics_1 = ρ is not None or θ is not None or φ is not None
         is_spherical_physics_2 = r is not None or theta is not None or phi is not None
-        is_spherical_geo = h is not None or az is not None or el is not None
+        is_spherical_geo_1 = h is not None or az is not None or el is not None
+        is_spherical_geo_2 = alt is not None or lat is not None or lon is not None
 
         if is_cartesian and not (
-            is_spherical_physics_1 or is_spherical_physics_2 or is_spherical_geo
+            is_spherical_physics_1
+            or is_spherical_physics_2
+            or is_spherical_geo_1
+            or is_spherical_geo_2
         ):
             self._space = np.array(
                 [
@@ -93,7 +106,10 @@ class Space:
                 ]
             )
         elif is_spherical_physics_1 and not (
-            is_cartesian or is_spherical_physics_2 or is_spherical_geo
+            is_cartesian
+            or is_spherical_physics_2
+            or is_spherical_geo_1
+            or is_spherical_geo_2
         ):
             ρ0 = ρ if ρ is not None else 1
             θ0 = θ if θ is not None else 0
@@ -107,7 +123,10 @@ class Space:
                 ]
             )
         elif is_spherical_physics_2 and not (
-            is_cartesian or is_spherical_physics_1 or is_spherical_geo
+            is_cartesian
+            or is_spherical_physics_1
+            or is_spherical_geo_1
+            or is_spherical_geo_2
         ):
             ρ0 = r if r is not None else 1
             θ0 = theta if theta is not None else 0
@@ -120,8 +139,11 @@ class Space:
                     ρ0 * np.cos(θ0),
                 ]
             )
-        elif is_spherical_geo and not (
-            is_cartesian or is_spherical_physics_1 or is_spherical_physics_2
+        elif is_spherical_geo_1 and not (
+            is_cartesian
+            or is_spherical_physics_1
+            or is_spherical_physics_2
+            or is_spherical_geo_2
         ):
             h0 = h if h is not None else 1
             az0 = az if az is not None else 0
@@ -134,15 +156,35 @@ class Space:
                     h0 * np.sin(el0),
                 ]
             )
+        elif is_spherical_geo_2 and not (
+            is_cartesian
+            or is_spherical_physics_1
+            or is_spherical_physics_2
+            or is_spherical_geo_1
+        ):
+            alt0 = alt if alt is not None else 1
+            lon0 = lon if lon is not None else 0
+            lat0 = lat if lat is not None else 0
+
+            self._space = np.array(
+                [
+                    alt0 * np.cos(lat0) * np.cos(lon0),
+                    alt0 * np.cos(lat0) * np.sin(lon0),
+                    alt0 * np.sin(lat0),
+                ]
+            )
         elif is_spherical_physics_1 and is_spherical_physics_2:
             raise ValueError(
-                "Unsupported combination of spherical physics " "parameter sets."
+                "Unsupported combination of spherical physics parameter sets."
             )
+        elif is_spherical_geo_1 and is_spherical_geo_2:
+            raise ValueError("Unsupported combination of spherical geo parameter sets.")
         elif (
             is_cartesian
             or is_spherical_physics_1
             or is_spherical_physics_2
-            or is_spherical_geo
+            or is_spherical_geo_1
+            or is_spherical_geo_2
         ):
             raise ValueError("Unsupported combination of all parameter sets.")
         else:
@@ -343,7 +385,7 @@ class Space:
 
     @property
     def h(self) -> np.float64:
-        """Height or altitude.
+        """Height or altitude, a.k.a. radius.
 
         This has a rounding difference from r and ρ.
         """
@@ -357,7 +399,23 @@ class Space:
 
     @property
     def el(self) -> np.float64:
-        """Elevation."""
+        """Elevation above the horizon."""
+        hxy = np.hypot(self.x, self.y)
+        return np.arctan2(self.z, hxy)
+
+    @property
+    def alt(self) -> np.float64:
+        """Altitude."""
+        return self.ρ
+
+    @property
+    def lon(self) -> np.float64:
+        """Longitude, -180 to 180."""
+        return np.arctan2(self.y, self.x)
+
+    @property
+    def lat(self) -> np.float64:
+        """Latitude, -90 to 90."""
         hxy = np.hypot(self.x, self.y)
         return np.arctan2(self.z, hxy)
 
