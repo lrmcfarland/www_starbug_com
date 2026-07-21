@@ -29,6 +29,7 @@ running locally helpful for
     - [poetry](#poetry)
     - [Docker](#docker)
 - [Adding numpy scipy](#adding-numpy-scipy)
+- [Force Rebuild](#force-rebuild)
 
 
 To run on a development host, clone this repo.
@@ -171,3 +172,33 @@ docker build -t www_starbug_com-navigator .
 # Adding numpy scipy
 
 Update poetry lock for new pyproject.toml file.
+
+
+# Force Rebuild
+
+When adding new libraries the github CI/CD deploy can timeout.
+Login and rebuild manually to fix.
+
+Stop containers.
+
+```
+docker compose -f 'docker-compose.yml' down
+```
+
+Remove images
+
+```
+docker rmi www_starbug_com-holly-test www_starbug_com-holly www_starbug_com-navigator www_starbug_com-nginx
+```
+
+If getting killed with oom
+
+```
+docker builder prune -a
+```
+
+Restart
+
+```
+docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
+```
