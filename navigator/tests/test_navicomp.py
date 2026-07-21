@@ -5,7 +5,6 @@ from navicomp import Space, UnitVectors
 
 
 class TestCartesianConstructors:
-
     def test_default_space_constructor(self):
         """Test default space constructor."""
         space = Space()
@@ -47,7 +46,6 @@ class TestCartesianConstructors:
 
 
 class TestSphericalPhysicsConstructors:
-
     def test_physics_1_2_combo_exception_00(self):
         with pytest.raises(ValueError):
             Space(ρ=1, r=2)
@@ -92,7 +90,6 @@ class TestSphericalPhysicsConstructors:
 
 
 class TestSphericalGeoConstructors:
-
     def test_cartesian_geo_1_combo_exception_01(self):
         with pytest.raises(ValueError):
             Space(el=10, z=2)
@@ -129,13 +126,13 @@ class TestSphericalGeoConstructors:
             Space(lat=10, el=2)
 
     def test_spherical_geo_2_00(self):
-        space = Space(lat=Space.π, lon=Space.π/4)
+        space = Space(lat=Space.π, lon=Space.π / 4)
         assert space.z == 7.802224757367787e-10
         assert space.y == -4504977.302939494
         assert space.x == -4504977.302939494
 
     def test_spherical_geo_2_01(self):
-        space = Space(alt=10.0, lat=Space.π, lon=Space.π/4)
+        space = Space(alt=10.0, lat=Space.π, lon=Space.π / 4)
         assert space.z == pytest.approx(0, abs=1e-9)
         assert space.y == -4504984.374007306
         assert space.x == -4504984.374007306
@@ -144,7 +141,7 @@ class TestSphericalGeoConstructors:
         assert space.lon == -2.356194490192345
 
     def test_spherical_geo_2_02(self):
-        space = Space(alt=10.0, lat=Space.π/3.0, lon=Space.π)
+        space = Space(alt=10.0, lat=Space.π / 3.0, lon=Space.π)
         assert space.z == 5517456.507764696
         assert space.y == pytest.approx(0, abs=1e-9)
         assert space.x == -3185505.000000001
@@ -153,7 +150,7 @@ class TestSphericalGeoConstructors:
         assert space.lon == Space.π
 
     def test_spherical_geo_2_03(self):
-        space = Space(alt=10.0, lat=-Space.π/3.0, lon=2*Space.π)
+        space = Space(alt=10.0, lat=-Space.π / 3.0, lon=2 * Space.π)
         assert space.z == -5517456.507764696
         assert space.y == pytest.approx(0, abs=1e-9)
         assert space.x == 3185505.000000001
@@ -162,23 +159,23 @@ class TestSphericalGeoConstructors:
         assert space.lon == pytest.approx(0, abs=1e-9)
 
     def test_spherical_geo_2_normalize_angle_00(self):
-        space = Space(alt=10.0, lat=Space.π/4.0, lon=Space.π/4.0)
+        space = Space(alt=10.0, lat=Space.π / 4.0, lon=Space.π / 4.0)
 
         assert space.z == 4504984.374007306
         assert space.y == 3185504.9999999995
         assert space.x == 3185505.0
 
         assert space.ρ == Space.Re + 10.0
-        assert space.θ == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.φ == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.θ == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.φ == pytest.approx(Space.π / 4.0, abs=1e-14)
 
         assert space.h == 10.0
-        assert space.az == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.el == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.az == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.el == pytest.approx(Space.π / 4.0, abs=1e-14)
 
         assert space.alt == 10.0
-        assert space.lat == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.lon == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.lat == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.lon == pytest.approx(Space.π / 4.0, abs=1e-14)
 
     def test_spherical_geo_2_normalize_angle_01(self):
         """Adding 2*π to longitude doesn't change result.
@@ -186,44 +183,50 @@ class TestSphericalGeoConstructors:
         But calculated longitude is normalized back without it.
         """
         test_altitude = 10.0
-        space = Space(alt=test_altitude, lat=Space.π/4.0, lon=Space.π/4.0+2*Space.π)
+        space = Space(
+            alt=test_altitude, lat=Space.π / 4.0, lon=Space.π / 4.0 + 2 * Space.π
+        )
 
         assert space.z == 4504984.374007306
         assert space.y == 3185504.999999999
         assert space.x == 3185505.0000000005
 
         assert space.ρ == Space.Re + test_altitude
-        assert space.θ == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.φ == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.θ == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.φ == pytest.approx(Space.π / 4.0, abs=1e-14)
 
         assert space.h == test_altitude
-        assert space.az == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.el == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.az == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.el == pytest.approx(Space.π / 4.0, abs=1e-14)
 
         assert space.alt == test_altitude
-        assert space.lat == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.lon == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.lat == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.lon == pytest.approx(Space.π / 4.0, abs=1e-14)
 
     def test_spherical_geo_2_normalize_angle_02(self):
         """Subtracting 2*π from latitude doesn't change result."""
         test_altitude = 10.0
-        space = Space(alt=test_altitude, lat=Space.π/4.0 - 2*Space.π, lon=Space.π/4.0+2*Space.π)
+        space = Space(
+            alt=test_altitude,
+            lat=Space.π / 4.0 - 2 * Space.π,
+            lon=Space.π / 4.0 + 2 * Space.π,
+        )
 
         assert space.z == 4504984.374007307
         assert space.y == 3185504.9999999986
         assert space.x == 3185505.0
 
         assert space.ρ == space.Re + test_altitude
-        assert space.θ == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.φ == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.θ == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.φ == pytest.approx(Space.π / 4.0, abs=1e-14)
 
         assert space.h == test_altitude
-        assert space.az == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.el == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.az == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.el == pytest.approx(Space.π / 4.0, abs=1e-14)
 
         assert space.alt == test_altitude
-        assert space.lat == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.lon == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.lat == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.lon == pytest.approx(Space.π / 4.0, abs=1e-14)
 
     def test_spherical_geo_2_normalize_angle_03(self):
         """Adding π to latitude changes sign and rotation direction.
@@ -231,23 +234,23 @@ class TestSphericalGeoConstructors:
         π/4 + π == -3*π/4
         """
         test_altitude = 10.0
-        space = Space(alt=test_altitude, lat=Space.π/4.0, lon=Space.π/4.0+Space.π)
+        space = Space(alt=test_altitude, lat=Space.π / 4.0, lon=Space.π / 4.0 + Space.π)
 
         assert space.z == 4504984.374007306
         assert space.y == -3185504.9999999995
         assert space.x == -3185505.0000000005
 
         assert space.ρ == space.Re + test_altitude
-        assert space.θ == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.φ == pytest.approx(-3*Space.π/4.0, abs=1e-14)
+        assert space.θ == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.φ == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
 
         assert space.h == test_altitude
-        assert space.az == pytest.approx(-3*Space.π/4.0, abs=1e-14)
-        assert space.el == pytest.approx(Space.π/4.0, abs=1e-14)
+        assert space.az == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
+        assert space.el == pytest.approx(Space.π / 4.0, abs=1e-14)
 
         assert space.alt == test_altitude
-        assert space.lat == pytest.approx(Space.π/4.0, abs=1e-14)
-        assert space.lon == pytest.approx(-3*Space.π/4.0, abs=1e-14)
+        assert space.lat == pytest.approx(Space.π / 4.0, abs=1e-14)
+        assert space.lon == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
 
     def test_spherical_geo_2_normalize_angle_04(self):
         """Adding π to longitude changes sign and rotation direction.
@@ -255,27 +258,26 @@ class TestSphericalGeoConstructors:
         π/4 + π == -3*π/4
         """
         test_altitude = 10.0
-        space = Space(alt=test_altitude, lat=Space.π/4.0 + Space.π, lon=Space.π/4.0)
+        space = Space(alt=test_altitude, lat=Space.π / 4.0 + Space.π, lon=Space.π / 4.0)
 
         assert space.z == -4504984.374007306
         assert space.y == -3185505.0000000005
         assert space.x == -3185505.000000001
 
         assert space.ρ == pytest.approx(space.Re + test_altitude, abs=1e-9)
-        assert space.θ == pytest.approx(3*Space.π/4.0, abs=1e-14)
-        assert space.φ == pytest.approx(-3*Space.π/4.0, abs=1e-14)
+        assert space.θ == pytest.approx(3 * Space.π / 4.0, abs=1e-14)
+        assert space.φ == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
 
         assert space.h == pytest.approx(10.0, abs=1e-9)
-        assert space.az == pytest.approx(-3*Space.π/4.0, abs=1e-14)
-        assert space.el == pytest.approx(-Space.π/4.0, abs=1e-14)
+        assert space.az == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
+        assert space.el == pytest.approx(-Space.π / 4.0, abs=1e-14)
 
         assert space.alt == pytest.approx(10.0, abs=1e-9)
-        assert space.lat == pytest.approx(-Space.π/4.0, abs=1e-14)
-        assert space.lon == pytest.approx(-3*Space.π/4.0, abs=1e-14)
+        assert space.lat == pytest.approx(-Space.π / 4.0, abs=1e-14)
+        assert space.lon == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
 
 
 class TestDegrees2Radians:
-
     def test_deg2rad_00(self):
         assert Space.deg2rad(0) == 0
 
@@ -299,7 +301,6 @@ class TestDegrees2Radians:
 
 
 class TestRadians2Degrees:
-
     def test_rad2deg_00(self):
         assert Space.rad2deg(0) == 0
 
@@ -323,7 +324,6 @@ class TestRadians2Degrees:
 
 
 class TestOperators:
-
     def test_equality_00(self):
         space = Space(-1, 2, 3)
         assert space == Space(-1, 2, 3)
