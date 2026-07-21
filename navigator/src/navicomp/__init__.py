@@ -57,6 +57,7 @@ class Space:
     """
 
     π = np.pi
+    Re = 6.371e6  # mean radius of Earth in meters
 
     @classmethod
     def deg2rad(cls, an_angle: np.float64) -> np.float64:
@@ -145,7 +146,7 @@ class Space:
             or is_spherical_physics_2
             or is_spherical_geo_2
         ):
-            h0 = h if h is not None else 1
+            h0 = h + self.Re if h is not None else self.Re
             az0 = az if az is not None else 0
             el0 = el if el is not None else 0
 
@@ -162,7 +163,7 @@ class Space:
             or is_spherical_physics_2
             or is_spherical_geo_1
         ):
-            alt0 = alt if alt is not None else 1
+            alt0 = alt + self.Re if alt is not None else self.Re
             lon0 = lon if lon is not None else 0
             lat0 = lat if lat is not None else 0
 
@@ -390,7 +391,7 @@ class Space:
         This has a rounding difference from r and ρ.
         """
         hxy = np.hypot(self.x, self.y)
-        return np.hypot(hxy, self.z)
+        return np.hypot(hxy, self.z) - self.Re
 
     @property
     def az(self) -> np.float64:
@@ -406,7 +407,7 @@ class Space:
     @property
     def alt(self) -> np.float64:
         """Altitude."""
-        return self.ρ
+        return self.ρ - self.Re
 
     @property
     def lon(self) -> np.float64:
