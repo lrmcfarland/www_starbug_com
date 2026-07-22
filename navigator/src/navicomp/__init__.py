@@ -10,8 +10,9 @@ import numpy as np
 class Space:
     """Space coordinate.
 
-    Supports cartesian, Spherical Physics (with and without greek letters)
-    and Geographical (height, azimuth and elevation).
+    Supports Cartesian, Spherical Physics (with and without greek letters)
+    and Geographical (height, azimuth and elevation). However, mixing
+    coordinate types in the constructor is not supported.
 
     All angles are assumed to be in radians.
 
@@ -76,9 +77,9 @@ class Space:
         z: np.float64 = None,
         ρ: np.float64 = None,
         r: np.float64 = None,
-        θ: np.float64 = None,
+        θ: np.float64 = None,  # polar angle range [0, π]
         theta: np.float64 = None,
-        φ: np.float64 = None,
+        φ: np.float64 = None,  # azimuth range [0, 2π)
         phi: np.float64 = None,
         h: np.float64 = None,
         az: np.float64 = None,
@@ -116,6 +117,15 @@ class Space:
             θ0 = θ if θ is not None else 0
             φ0 = φ if φ is not None else 0
 
+            if ρ0 < 0:
+                raise ValueError("Range ρ out of range < 0")
+
+            if θ0 < 0 or θ0 > Space.π:
+                raise ValueError("Polar Angle θ out of range [0, π]")
+
+            if φ0 < 0 or φ0 >= 2 * Space.π:
+                raise ValueError("Azimuth φ out of range [0, 2π)")
+
             self._space = np.array(
                 [
                     ρ0 * np.sin(θ0) * np.cos(φ0),
@@ -132,6 +142,15 @@ class Space:
             ρ0 = r if r is not None else 1
             θ0 = theta if theta is not None else 0
             φ0 = phi if phi is not None else 0
+
+            if ρ0 < 0:
+                raise ValueError("Range ρ out of range < 0")
+
+            if θ0 < 0 or θ0 > Space.π:
+                raise ValueError("Polar Angle θ out of range [0, π]")
+
+            if φ0 < 0 or φ0 >= 2 * Space.π:
+                raise ValueError("Azimuth φ out of range [0, 2π)")
 
             self._space = np.array(
                 [
@@ -150,6 +169,15 @@ class Space:
             az0 = az if az is not None else 0
             el0 = el if el is not None else 0
 
+            if h0 < 0:
+                raise ValueError("Range ρ out of range < 0")
+
+            if az0 < 0 or az0 > 2 * Space.π:
+                raise ValueError("Polar Angle θ out of range [0, π]")
+
+            if el0 < 0 or el0 >= 2 * Space.π:
+                raise ValueError("Azimuth φ out of range [0, 2π)")
+
             self._space = np.array(
                 [
                     h0 * np.cos(el0) * np.cos(az0),
@@ -166,6 +194,15 @@ class Space:
             alt0 = alt + self.Re if alt is not None else self.Re
             lon0 = lon if lon is not None else 0
             lat0 = lat if lat is not None else 0
+
+            if alt0 < 0:  # TODO - Re?
+                raise ValueError("Range altitude out of range < 0")
+
+            if lon0 < 0 or lon0 > 2 * Space.π:
+                raise ValueError("Longitude out of range [-π, π]")
+
+            if lat0 < -Space.π / 2 or lat0 > Space.π / 2:
+                raise ValueError("Latitude out of range [0, 2π)")
 
             self._space = np.array(
                 [
@@ -368,7 +405,10 @@ class Space:
 
     @property
     def θ(self) -> np.float64:
-        return np.arctan2(np.sqrt(self.x**2 + self.y**2), self.z)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            theta = np.arccos(self.z / self.r)
+        theta = np.nan_to_num(theta, nan=0.0)  # Default origin theta to 0
+        return theta
 
     @property
     def theta(self) -> np.float64:

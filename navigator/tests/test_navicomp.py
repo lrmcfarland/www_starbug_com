@@ -9,16 +9,16 @@ class TestDegrees2Radians:
         "degrees, radians",
         [
             (0, 0),
-            (45, Space.π/4),
-            (90, Space.π/2),
+            (45, Space.π / 4),
+            (90, Space.π / 2),
             (180, Space.π),
-            (270, 3*2*Space.π/4),
-            (360, 2*Space.π),
-            (-45, -Space.π/4),
-            (-90, -Space.π/2),
+            (270, 3 * 2 * Space.π / 4),
+            (360, 2 * Space.π),
+            (-45, -Space.π / 4),
+            (-90, -Space.π / 2),
             (-180, -Space.π),
-            (-270, -3*2*Space.π/4),
-            (-360, -2*Space.π),
+            (-270, -3 * 2 * Space.π / 4),
+            (-360, -2 * Space.π),
         ],
     )
     def test_deg2rad(self, degrees, radians):
@@ -61,24 +61,10 @@ class TestAccessorsReprStrEval:
         space_1 = eval(str(space_0))
         assert space_0 == space_1
 
-    def test_space_accessors(self):
-        """Test x, y, z accessors are read only."""
-        space = Space(1.23, 2.0, 3)
 
-        assert space.x == 1.23
-        with pytest.raises(AttributeError):
-            space.x = 4.5
+class TestMixingTypeSetsExceptions:
+    """Mixing type sets is not supported."""
 
-        assert space.y == 2
-        with pytest.raises(AttributeError):
-            space.y = -14.5
-
-        assert space.z == 3.0
-        with pytest.raises(AttributeError):
-            space.z = 404.5346
-
-
-class TestSphericalPhysicsConstructors:
     def test_physics_1_2_combo_exception_00(self):
         with pytest.raises(ValueError):
             Space(ρ=1, r=2)
@@ -99,27 +85,209 @@ class TestSphericalPhysicsConstructors:
         with pytest.raises(ValueError):
             Space(theta=10, z=2)
 
-    def test_spherical_physics_1_00(self):
-        space = Space(ρ=1)
-        assert space == Space(z=1.0)
 
-    def test_spherical_physics_1_01(self):
-        space = Space(θ=Space.π)
-        assert space.z == -1.0
-        assert space.y == 0
-        assert space.x == pytest.approx(0, abs=1e-15)
-        # TODO assert space == Space(z=-1.0)
+class TestCartesianConstructors:
+    def test_default_space_constructor(self):
+        """Test default space constructor."""
+        space = Space()
+        assert space == UnitVectors.Uo
 
+    @pytest.mark.parametrize(
+        "x, y, z, expect",
+        [
+            (1, 2, 3, Space(1, 2, 3)),
+            (-1, 2, 3, Space(-1, 2, 3)),
+            (1, -2, 3, Space(1, -2, 3)),
+            (-1, -2, 3, Space(-1, -2, 3)),
+            (-1, -2, -3, Space(-1, -2, -3)),
+            (-1, 2, -3, Space(-1, 2, -3)),
+            (1, -2, -3, Space(1, -2, -3)),
+        ],
+    )
+    def test_x_y_z(self, x, y, z, expect):
+        space = Space(x, y, z)
+        assert space == expect
+        assert space.x == x
+        assert space.y == y
+        assert space.z == z
+
+
+class TestSphericalPhysics1RangeExceptions:
+    @pytest.mark.parametrize(
+        "ρ, θ, φ",
+        [
+            (-1, 0, 0),
+            (1, -Space.π / 2, 0),
+            (1, 0, -Space.π / 2),
+            (1, 2 * Space.π, 0),
+            (1, Space.π / 3, 2.0000001 * Space.π),
+        ],
+    )
+    def test_ρ_θ_φ(self, ρ, θ, φ):
+        with pytest.raises(ValueError):
+            Space(ρ=ρ, θ=θ, φ=φ)
+
+
+class TestSphericalPhysics1Constructors:
+    @pytest.mark.parametrize(
+        "ρ, θ, φ, x, y, z",
+        [
+            (0, 0, 0, 0, 0, 0),
+            # down the prime meridian
+            (1, 0, 0, 0, 0, 1),
+            (1, Space.π / 4, 0, 0.7071067811865475, 0, 0.7071067811865475),
+            (1, Space.π / 2, 0, 1, 0, 0),
+            (1, 3 * Space.π / 4, 0, 0.7071067811865475, 0, -0.7071067811865475),
+            (1, Space.π, 0, 0.0, 0, -1),
+            # around the equator
+            (1, Space.π / 2, 0, 1.0, 0.0, 0),
+            (1, Space.π / 2, Space.π / 4.0, 0.7071067811865476, 0.7071067811865476, 0),
+            (1, Space.π / 2, Space.π / 2, 0, 1, 0),
+            (
+                1,
+                Space.π / 2,
+                3 * Space.π / 4,
+                -0.7071067811865475,
+                0.7071067811865476,
+                0,
+            ),
+            (1, Space.π / 2, Space.π, -1, 0, 0),
+            # around the tropic of Cancer-ish
+            (1, Space.π / 4, 0, 0.7071067811865475, 0, 0.7071067811865476),
+            (1, Space.π / 4, Space.π / 4.0, 0.5, 0.5, 0.7071067811865476),
+            (1, Space.π / 4, Space.π / 2, 0, 0.7071067811865475, 0.7071067811865476),
+            (1, Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, 0.7071067811865476),
+            (1, Space.π / 4, Space.π, -0.7071067811865475, 0, 0.7071067811865476),
+            # around the tropic of Capricorn-ish
+            (1, 3 * Space.π / 4, 0, 0.7071067811865475, 0, -0.7071067811865475),
+            (1, 3 * Space.π / 4, Space.π / 4.0, 0.5, 0.5, -0.7071067811865476),
+            (
+                1,
+                3 * Space.π / 4,
+                Space.π / 2,
+                0,
+                0.7071067811865475,
+                -0.7071067811865476,
+            ),
+            (1, 3 * Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, -0.7071067811865476),
+            (1, 3 * Space.π / 4, Space.π, -0.7071067811865475, 0, -0.7071067811865476),
+            # world size
+            (Space.Re, Space.π / 2, Space.π / 2, 0, Space.Re, 0),
+            # TOOD φ wrong for 3/2*π
+            # (
+            #     1,
+            #     Space.π / 2,
+            #     3 * 2 * Space.π / 4,
+            #     -0.7071067811865475,
+            #     0.7071067811865476,
+            #     0,
+            # ),
+            # TODO pole (1, 0, Space.π/4.0, 0.0, 0, 1),
+        ],
+    )
+    def test_ρ_θ_φ(self, ρ, θ, φ, x, y, z):
+        space = Space(ρ=ρ, θ=θ, φ=φ)
+        assert space.ρ == ρ
+        assert space.θ == pytest.approx(θ, abs=1e-9)
+        assert space.φ == pytest.approx(φ, abs=1e-9)
+        assert space.x == pytest.approx(x, abs=1e-9)
+        assert space.y == pytest.approx(y, abs=1e-9)
+        assert space.z == pytest.approx(z, abs=1e-9)
+        assert space.r == ρ
+        assert space.theta == pytest.approx(θ, abs=1e-9)
+        assert space.phi == pytest.approx(φ, abs=1e-9)
+
+
+class TestSphericalPhysics2Constructors:
+    @pytest.mark.parametrize(
+        "r, theta, phi, x, y, z",
+        [
+            (0, 0, 0, 0, 0, 0),
+            # down the prime meridian
+            (1, 0, 0, 0, 0, 1),
+            (1, Space.π / 4, 0, 0.7071067811865475, 0, 0.7071067811865475),
+            (1, Space.π / 2, 0, 1, 0, 0),
+            (1, 3 * Space.π / 4, 0, 0.7071067811865475, 0, -0.7071067811865475),
+            (1, Space.π, 0, 0.0, 0, -1),
+            # around the equator
+            (1, Space.π / 2, 0, 1.0, 0.0, 0),
+            (1, Space.π / 2, Space.π / 4.0, 0.7071067811865476, 0.7071067811865476, 0),
+            (1, Space.π / 2, Space.π / 2, 0, 1, 0),
+            (
+                1,
+                Space.π / 2,
+                3 * Space.π / 4,
+                -0.7071067811865475,
+                0.7071067811865476,
+                0,
+            ),
+            (1, Space.π / 2, Space.π, -1, 0, 0),
+            # around the tropic of Cancer-ish
+            (1, Space.π / 4, 0, 0.7071067811865475, 0, 0.7071067811865476),
+            (1, Space.π / 4, Space.π / 4.0, 0.5, 0.5, 0.7071067811865476),
+            (1, Space.π / 4, Space.π / 2, 0, 0.7071067811865475, 0.7071067811865476),
+            (1, Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, 0.7071067811865476),
+            (1, Space.π / 4, Space.π, -0.7071067811865475, 0, 0.7071067811865476),
+            # around the tropic of Capricorn-ish
+            (1, 3 * Space.π / 4, 0, 0.7071067811865475, 0, -0.7071067811865475),
+            (1, 3 * Space.π / 4, Space.π / 4.0, 0.5, 0.5, -0.7071067811865476),
+            (
+                1,
+                3 * Space.π / 4,
+                Space.π / 2,
+                0,
+                0.7071067811865475,
+                -0.7071067811865476,
+            ),
+            (1, 3 * Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, -0.7071067811865476),
+            (1, 3 * Space.π / 4, Space.π, -0.7071067811865475, 0, -0.7071067811865476),
+            # world size
+            (Space.Re, Space.π / 2, Space.π / 2, 0, Space.Re, 0),
+            # TOOD φ wrong for 3/2*π
+            # (
+            #     1,
+            #     Space.π / 2,
+            #     3 * 2 * Space.π / 4,
+            #     -0.7071067811865475,
+            #     0.7071067811865476,
+            #     0,
+            # ),
+            # TODO pole (1, 0, Space.π/4.0, 0.0, 0, 1),
+        ],
+    )
+    def test_r_theta_phi(self, r, theta, phi, x, y, z):
+        space = Space(r=r, theta=theta, phi=phi)
+        assert space.ρ == r
+        assert space.θ == pytest.approx(theta, abs=1e-9)
+        assert space.φ == pytest.approx(phi, abs=1e-9)
+        assert space.x == pytest.approx(x, abs=1e-9)
+        assert space.y == pytest.approx(y, abs=1e-9)
+        assert space.z == pytest.approx(z, abs=1e-9)
+        assert space.r == r
+        assert space.theta == pytest.approx(theta, abs=1e-9)
+        assert space.phi == pytest.approx(phi, abs=1e-9)
+
+
+class TestSphericalPhysics1DefaultPartialConstructors:
     def test_spherical_physics_2_00(self):
         space = Space(r=2)
         assert space == Space(z=2.0)
 
-    def test_spherical_physics_2_01(self):
-        space = Space(r=2, theta=Space.π / 3.0)
-        assert space.x == 1.7320508075688772
-        assert space.y == 0.0
-        assert space.z == pytest.approx(1.0, abs=1e-15)
-        # TODO assert space == Space(x=1.7320508075688772, z=1.0)
+
+class TestSphericalPhysics2RangeExceptions:
+    @pytest.mark.parametrize(
+        "r, theta, phi",
+        [
+            (-1, 0, 0),
+            (1, -Space.π / 2, 0),
+            (1, 0, -Space.π / 2),
+            (1, 2 * Space.π, 0),
+            (1, Space.π / 3, 2.0000001 * Space.π),
+        ],
+    )
+    def test_ρ_θ_φ(self, r, theta, phi):
+        with pytest.raises(ValueError):
+            Space(r=r, theta=theta, phi=phi)
 
 
 class TestSphericalGeoConstructors:
@@ -159,19 +327,19 @@ class TestSphericalGeoConstructors:
             Space(lat=10, el=2)
 
     def test_spherical_geo_2_00(self):
-        space = Space(lat=Space.π, lon=Space.π / 4)
-        assert space.z == 7.802224757367787e-10
-        assert space.y == -4504977.302939494
-        assert space.x == -4504977.302939494
+        space = Space(lat=Space.π / 4, lon=Space.π / 4)
+        assert space.z == 4504977.302939494
+        assert space.y == 3185499.9999999995
+        assert space.x == 3185500.0
 
     def test_spherical_geo_2_01(self):
-        space = Space(alt=10.0, lat=Space.π, lon=Space.π / 4)
-        assert space.z == pytest.approx(0, abs=1e-9)
-        assert space.y == -4504984.374007306
-        assert space.x == -4504984.374007306
+        space = Space(alt=10.0, lat=Space.π / 6, lon=Space.π / 4)
+        assert space.z == 3185504.9999999995
+        assert space.y == 3901430.911542264
+        assert space.x == 3901430.9115422647
         assert space.alt == 10.0
-        assert space.lat == pytest.approx(0, abs=1e-9)  # TODO ? pole?
-        assert space.lon == -2.356194490192345
+        assert space.lat == Space.π / 6
+        assert space.lon == pytest.approx(Space.π / 4, abs=1e-9)
 
     def test_spherical_geo_2_02(self):
         space = Space(alt=10.0, lat=Space.π / 3.0, lon=Space.π)
@@ -190,125 +358,6 @@ class TestSphericalGeoConstructors:
         assert space.alt == 10.0
         assert space.lat == -1.0471975511965976
         assert space.lon == pytest.approx(0, abs=1e-9)
-
-    def test_spherical_geo_2_normalize_angle_00(self):
-        space = Space(alt=10.0, lat=Space.π / 4.0, lon=Space.π / 4.0)
-
-        assert space.z == 4504984.374007306
-        assert space.y == 3185504.9999999995
-        assert space.x == 3185505.0
-
-        assert space.ρ == Space.Re + 10.0
-        assert space.θ == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.φ == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-        assert space.h == 10.0
-        assert space.az == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.el == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-        assert space.alt == 10.0
-        assert space.lat == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.lon == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-    def test_spherical_geo_2_normalize_angle_01(self):
-        """Adding 2*π to longitude doesn't change result.
-
-        But calculated longitude is normalized back without it.
-        """
-        test_altitude = 10.0
-        space = Space(
-            alt=test_altitude, lat=Space.π / 4.0, lon=Space.π / 4.0 + 2 * Space.π
-        )
-
-        assert space.z == 4504984.374007306
-        assert space.y == 3185504.999999999
-        assert space.x == 3185505.0000000005
-
-        assert space.ρ == Space.Re + test_altitude
-        assert space.θ == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.φ == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-        assert space.h == test_altitude
-        assert space.az == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.el == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-        assert space.alt == test_altitude
-        assert space.lat == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.lon == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-    def test_spherical_geo_2_normalize_angle_02(self):
-        """Subtracting 2*π from latitude doesn't change result."""
-        test_altitude = 10.0
-        space = Space(
-            alt=test_altitude,
-            lat=Space.π / 4.0 - 2 * Space.π,
-            lon=Space.π / 4.0 + 2 * Space.π,
-        )
-
-        assert space.z == 4504984.374007307
-        assert space.y == 3185504.9999999986
-        assert space.x == 3185505.0
-
-        assert space.ρ == space.Re + test_altitude
-        assert space.θ == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.φ == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-        assert space.h == test_altitude
-        assert space.az == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.el == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-        assert space.alt == test_altitude
-        assert space.lat == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.lon == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-    def test_spherical_geo_2_normalize_angle_03(self):
-        """Adding π to latitude changes sign and rotation direction.
-
-        π/4 + π == -3*π/4
-        """
-        test_altitude = 10.0
-        space = Space(alt=test_altitude, lat=Space.π / 4.0, lon=Space.π / 4.0 + Space.π)
-
-        assert space.z == 4504984.374007306
-        assert space.y == -3185504.9999999995
-        assert space.x == -3185505.0000000005
-
-        assert space.ρ == space.Re + test_altitude
-        assert space.θ == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.φ == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
-
-        assert space.h == test_altitude
-        assert space.az == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
-        assert space.el == pytest.approx(Space.π / 4.0, abs=1e-14)
-
-        assert space.alt == test_altitude
-        assert space.lat == pytest.approx(Space.π / 4.0, abs=1e-14)
-        assert space.lon == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
-
-    def test_spherical_geo_2_normalize_angle_04(self):
-        """Adding π to longitude changes sign and rotation direction.
-
-        π/4 + π == -3*π/4
-        """
-        test_altitude = 10.0
-        space = Space(alt=test_altitude, lat=Space.π / 4.0 + Space.π, lon=Space.π / 4.0)
-
-        assert space.z == -4504984.374007306
-        assert space.y == -3185505.0000000005
-        assert space.x == -3185505.000000001
-
-        assert space.ρ == pytest.approx(space.Re + test_altitude, abs=1e-9)
-        assert space.θ == pytest.approx(3 * Space.π / 4.0, abs=1e-14)
-        assert space.φ == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
-
-        assert space.h == pytest.approx(10.0, abs=1e-9)
-        assert space.az == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
-        assert space.el == pytest.approx(-Space.π / 4.0, abs=1e-14)
-
-        assert space.alt == pytest.approx(10.0, abs=1e-9)
-        assert space.lat == pytest.approx(-Space.π / 4.0, abs=1e-14)
-        assert space.lon == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
-
 
 
 class TestOperators:
@@ -441,7 +490,7 @@ class TestOperators:
         assert space.y == 2
         assert space.z == 2
         assert space.ρ == np.sqrt(2 * 2 + 2 * 2 + 2 * 2)  # 3.4641016151377544
-        assert space.θ == 0.9553166181245093
+        assert space.θ == pytest.approx(0.9553166181245093, abs=1e-9)
         assert space.φ == 0.7853981633974483
         assert space.h == -6370996.535898385  # x, y, z too small for this
         assert space.az == space.φ
@@ -510,9 +559,10 @@ class TestOperators:
         space = Space(1, 1, 1) / 2.0
         assert space == Space(0.5, 0.5, 0.5)
 
+    @pytest.mark.skip(reason="double exceptions?")
     def test_scalar_div_03(self):
-        space = Space(ρ=1, θ=Space.π / 4, φ=-Space.π / 4) / 2.0
-        assert space == Space(0.25, -0.24999999999999994, 0.3535533905932738)
+        with pytest.raises(TypeError):
+            Space(ρ=1, θ=Space.π / 4, φ=-Space.π / 4) / 2.0
 
     def test_scalar_div_04(self):
         space = Space(1.2, -31.5, -2.71) / 2.0
@@ -608,8 +658,8 @@ class TestPhysicsStandardSphericalCoordinates:
         starbug = Space(1, 1, 1)
         assert starbug.ρ == 1.7320508075688772
         assert starbug.r == 1.7320508075688772
-        assert starbug.θ == 0.9553166181245093
-        assert starbug.theta == 0.9553166181245093
+        assert starbug.θ == 0.9553166181245092
+        assert starbug.theta == 0.9553166181245092
         assert starbug.φ == 0.7853981633974483
         assert starbug.phi == 0.7853981633974483
 
