@@ -4,11 +4,44 @@ import numpy as np
 from navicomp import Space, UnitVectors
 
 
-class TestCartesianConstructors:
-    def test_default_space_constructor(self):
-        """Test default space constructor."""
-        space = Space()
-        assert space == UnitVectors.Uo
+class TestDegrees2Radians:
+    @pytest.mark.parametrize(
+        "degrees, radians",
+        [
+            (0, 0),
+            (45, Space.π/4),
+            (90, Space.π/2),
+            (180, Space.π),
+            (270, 3*2*Space.π/4),
+            (360, 2*Space.π),
+            (-45, -Space.π/4),
+            (-90, -Space.π/2),
+            (-180, -Space.π),
+            (-270, -3*2*Space.π/4),
+            (-360, -2*Space.π),
+        ],
+    )
+    def test_deg2rad(self, degrees, radians):
+        assert Space.deg2rad(degrees) == radians
+        assert Space.rad2deg(radians) == degrees
+
+
+class TestAccessorsReprStrEval:
+    def test_cartesian_accessors(self):
+        """Test x, y, z accessors are read only."""
+        space = Space(1.23, 2.0, 3)
+
+        assert space.x == 1.23
+        with pytest.raises(AttributeError):
+            space.x = 4.5
+
+        assert space.y == 2
+        with pytest.raises(AttributeError):
+            space.y = -14.5
+
+        assert space.z == 3.0
+        with pytest.raises(AttributeError):
+            space.z = 404.5346
 
     def test_repr_01(self):
         space = Space(2, -3, 5)
@@ -276,51 +309,6 @@ class TestSphericalGeoConstructors:
         assert space.lat == pytest.approx(-Space.π / 4.0, abs=1e-14)
         assert space.lon == pytest.approx(-3 * Space.π / 4.0, abs=1e-14)
 
-
-class TestDegrees2Radians:
-    def test_deg2rad_00(self):
-        assert Space.deg2rad(0) == 0
-
-    def test_deg2rad_01(self):
-        assert Space.deg2rad(180) == Space.π
-
-    def test_deg2rad_02(self):
-        assert Space.deg2rad(90) == Space.π / 2.0
-
-    def test_deg2rad_03(self):
-        assert Space.deg2rad(-90) == -Space.π / 2.0
-
-    def test_deg2rad_04(self):
-        assert Space.deg2rad(360) == 2 * Space.π
-
-    def test_deg2rad_05(self):
-        assert Space.deg2rad(270) == 1.5 * Space.π
-
-    def test_deg2rad_06(self):
-        assert Space.deg2rad(45) == Space.π / 4
-
-
-class TestRadians2Degrees:
-    def test_rad2deg_00(self):
-        assert Space.rad2deg(0) == 0
-
-    def test_rad2deg_01(self):
-        assert Space.rad2deg(Space.π) == 180.0
-
-    def test_rad2deg_02(self):
-        assert Space.rad2deg(Space.π / 2) == 90.0
-
-    def test_rad2deg_03(self):
-        assert Space.rad2deg(-Space.π / 2) == -90.0
-
-    def test_rad2deg_04(self):
-        assert Space.rad2deg(2.0 * Space.π) == 360.0
-
-    def test_rad2deg_05(self):
-        assert Space.rad2deg(3 / 2 * Space.π) == 270.0
-
-    def test_rad2deg_06(self):
-        assert Space.rad2deg(-Space.π / 4.0) == -45.0
 
 
 class TestOperators:
