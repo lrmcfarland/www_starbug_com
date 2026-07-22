@@ -86,6 +86,73 @@ class TestMixingTypeSetsExceptions:
             Space(theta=10, z=2)
 
 
+class TestDefaultPartialConstructors:
+    def test_default_space_constructor(self):
+        """Test default space constructor."""
+        space = Space()
+        assert space == UnitVectors.Uo
+        assert space.x == 0
+        assert space.y == 0
+        assert space.z == 0
+        assert space.ρ == 0
+        assert space.θ == 0
+        assert space.φ == 0
+
+    def test_x(self):
+        space = Space(x=1)
+        assert space.x == 1
+        assert space.y == 0
+        assert space.z == 0
+        assert space.ρ == 1
+        assert space.θ == Space.π / 2
+        assert space.φ == 0
+
+    def test_y(self):
+        space = Space(y=1)
+        assert space.x == 0
+        assert space.y == 1
+        assert space.z == 0
+        assert space.ρ == 1
+        assert space.θ == Space.π / 2
+        assert space.φ == Space.π / 2
+
+    def test_z(self):
+        space = Space(z=1)
+        assert space.x == 0
+        assert space.y == 0
+        assert space.z == 1
+        assert space.ρ == 1
+        assert space.θ == 0
+        assert space.φ == 0
+
+    def test_ρ(self):
+        space = Space(ρ=1)
+        assert space.x == 0
+        assert space.y == 0
+        assert space.z == 1
+        assert space.ρ == 1
+        assert space.θ == 0
+        assert space.φ == 0
+
+    def test_θ(self):
+        space = Space(θ=Space.π / 2)
+        assert space.x == 1
+        assert space.y == 0
+        assert space.z == pytest.approx(0, abs=1e-16)
+        assert space.ρ == 1
+        assert space.θ == Space.π / 2
+        assert space.φ == 0
+
+    def test_φ(self):
+        space = Space(φ=Space.π / 2)
+        assert space.x == 0
+        assert space.y == 0
+        assert space.z == 1
+        assert space.ρ == 1
+        assert space.θ == 0
+        assert space.φ == 0
+
+
 class TestCartesianConstructors:
     def test_default_space_constructor(self):
         """Test default space constructor."""
@@ -266,12 +333,6 @@ class TestSphericalPhysics2Constructors:
         assert space.r == r
         assert space.theta == pytest.approx(theta, abs=1e-9)
         assert space.phi == pytest.approx(phi, abs=1e-9)
-
-
-class TestSphericalPhysics1DefaultPartialConstructors:
-    def test_spherical_physics_2_00(self):
-        space = Space(r=2)
-        assert space == Space(z=2.0)
 
 
 class TestSphericalPhysics2RangeExceptions:
