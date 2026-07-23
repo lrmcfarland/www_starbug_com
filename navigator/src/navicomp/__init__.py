@@ -416,7 +416,11 @@ class Space:
 
     @property
     def φ(self) -> np.float64:
-        return np.arctan2(self.y, self.x)
+        phi = np.arctan2(self.y, self.x)
+        # Normalize to [0, 2π)
+        if phi < 0:
+            phi += 2 * Space.π
+        return phi
 
     @property
     def phi(self) -> np.float64:
