@@ -744,7 +744,7 @@ class TestSphericalGeo2Constructors:
         assert space.z == pytest.approx(z, abs=1)
 
 
-class TestOperators:
+class TestEqualityOperators:
     def test_equality_00(self):
         space = Space(-1, 2, 3)
         assert space == Space(-1, 2, 3)
@@ -763,52 +763,13 @@ class TestOperators:
         s3 = s0 + s1
         assert s3 == Space(-1, -1, -1)
 
-    def test_vector_add_00(self):
-        s0 = Space(1, 2, 3)
-        s1 = s0 + UnitVectors.Uo.value
-        assert s1 == s0
 
-    def test_vector_add_01(self):
-        s0 = Space(1, 2, 3)
-        s1 = UnitVectors.Uo.value + s0
-        assert s1 == s0
-
-    def test_vector_add_02(self):
-        s0 = Space(1, 2, 3)
-        s1 = s0 + UnitVectors.Ux.value
-        assert s1 == Space(2, 2, 3)
-
-    def test_vector_add_03(self):
-        s0 = Space(1, 2, 3)
-        s1 = UnitVectors.Ux.value + s0
-        assert s1 == Space(2, 2, 3)
-
-    def test_vector_add_10(self):
-        s0 = Space(1, 2, 3)
-        s1 = Space(2, 3, 4)
-        s3 = s0 + s1
-        assert s3 == Space(3, 5, 7)
-
-    def test_vector_radd_10(self):
-        s0 = Space(1, 2, 3)
-        s1 = Space(2, 3, 4)
-        s3 = s1 + s0
-        assert s3 == Space(3, 5, 7)
+class TestAddExceptions:
 
     def test_vector_iadd_str_error_00(self):
         with pytest.raises(TypeError):
             s0 = Space(1, 2, 3)
             s0 += "asdf"
-
-    def test_vector_iadd_00(self):
-        s0 = Space(1, 2, 3)
-        s0 += UnitVectors.Uz.value
-        assert s0 == Space(1, 2, 4)
-
-    def test_vector_iadd_01(self):
-        s0 = Space(1, 2, 3)
-        s0 += -3
-        assert s0 == Space(-2, -1)
 
     def test_vector_add_float_error_00(self):
         with pytest.raises(TypeError):
@@ -818,49 +779,94 @@ class TestOperators:
         with pytest.raises(TypeError):
             Space.π + Space(1, 2, 3)
 
-    def test_vector_add_negative_00(self):
-        s0 = Space(1, 2, 3)
-        s1 = -1 * Space(2, 3, 4)
-        s3 = s0 + s1
-        assert s3 == Space(-1, -1, -1)
 
-    def test_vector_sub_float_error_00(self):
-        with pytest.raises(TypeError):
-            Space(1, 2, 3) - Space.π
+class TestAddOperators:
 
-    def test_vector_sub_float_error_01(self):
-        with pytest.raises(TypeError):
-            Space.π - Space(1, 2, 3)
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (0, 0, 0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, 0, 0, Space(3)),
+            (2, 0, 0, 1, 0, 0, Space(3)),
+            (1, 1, 1, -1, -1, -1, Space()),
+            (1, 2, 3, 3, 2, 1, Space(4, 4, 4)),
+        ],
+    )
+    def test_add(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        s3 = s1 + s2
+        assert s3 == expect
 
-    def test_vector_sub_00(self):
-        s0 = Space(1, 2, 3)
-        s1 = s0 - UnitVectors.Uo.value
-        assert s1 == s0
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (0, 0, 0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, 0, 0, Space(3)),
+            (2, 0, 0, 1, 0, 0, Space(3)),
+            (1, 1, 1, -1, -1, -1, Space()),
+            (1, 2, 3, 3, 2, 1, Space(4, 4, 4)),
+        ],
+    )
+    def test_iadd(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        s2 += s1
+        assert s2 == expect
 
-    def test_vector_sub_01(self):
-        s0 = Space(1, 2, 3)
-        s1 = UnitVectors.Uy.value - s0
-        assert s1 == Space(-1, -1, -3)
 
-    def test_vector_rsub_01(self):
-        s0 = Space(1, 2, 3)
-        s1 = s0 - UnitVectors.Uy.value
-        assert s1 == Space(1, 1, 3)
+class TestSubtractExceptions:
 
-    def test_vector_isub_str_error_00(self):
+    def test_vector_iadd_str_error_00(self):
         with pytest.raises(TypeError):
             s0 = Space(1, 2, 3)
             s0 -= "asdf"
 
-    def test_vector_isub_00(self):
-        s0 = Space(1, -4, 3)
-        s0 -= UnitVectors.Uy.value
-        assert s0 == Space(1, -5, 3)
+    def test_vector_add_float_error_00(self):
+        with pytest.raises(TypeError):
+            Space(1, 2, 3) - Space.π
 
-    def test_vector_isub_01(self):
-        s0 = Space(1, -4, 3)
-        s0 -= 4
-        assert s0 == Space(-3, -8, -1)
+    def test_vector_add_float_error_01(self):
+        with pytest.raises(TypeError):
+            Space.π - Space(1, 2, 3)
+
+
+class TestSubtractOperators:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (0, 0, 0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, 0, 0, Space(-1)),
+            (2, 0, 0, 1, 0, 0, Space(1)),
+            (1, 1, 1, -1, -1, -1, Space(2, 2, 2)),
+            (1, 2, 3, 3, 2, 1, Space(-2, 0, 2)),
+        ],
+    )
+    def test_add(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        s3 = s1 - s2
+        assert s3 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (0, 0, 0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, 0, 0, Space(1)),
+            (2, 0, 0, 1, 0, 0, Space(-1)),
+            (1, 1, 1, -1, -1, -1, Space(-2, -2, -2)),
+            (1, 2, 3, 3, 2, 1, Space(2, 0, -2)),
+        ],
+    )
+    def test_iadd(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        s2 -= s1
+        assert s2 == expect
+
+
+class TestMultiplyOperators:
 
     def test_scalar_mul_00(self):
         space = 0.0 * UnitVectors.Ux.value
@@ -901,6 +907,9 @@ class TestOperators:
         assert space.x == 3
         assert space.y == -6
         assert space.z == 9
+
+
+class TestDivideOperators:
 
     def test_scalar_itruediv_exception_00(self):
         """Test scalar inplace div exception."""
