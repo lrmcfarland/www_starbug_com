@@ -341,20 +341,38 @@ class TestSphericalPhysics2RangeExceptions:
         [
             (-1, 0, 0),
             (1, -Space.π / 2, 0),
-            (1, 0, -Space.π / 2),
+            (1, 0, -1.000001 * Space.π / 2),
             (1, 2 * Space.π, 0),
             (1, Space.π / 3, 2.0000001 * Space.π),
         ],
     )
-    def test_ρ_θ_φ(self, r, theta, phi):
+    def test_r_theta_phi(self, r, theta, phi):
         with pytest.raises(ValueError):
             Space(r=r, theta=theta, phi=phi)
 
 
-class TestSphericalGeoConstructors:
-    def test_cartesian_geo_1_combo_exception_01(self):
+class TestSphericalGeo1RangeExceptions:
+    @pytest.mark.parametrize(
+        "h, az, el",
+        [
+            (-1.0000001 * Space.Re, 0, 0),
+            (1, -0.0000001, 0),
+            (1, -2.000001*Space.π, 0),
+            (1, 0, -1.00001 * Space.π / 2),
+            (1, 0, 1.00001 * Space.π / 2),
+        ],
+    )
+    def test_h_az_el(self, h, az, el):
         with pytest.raises(ValueError):
-            Space(el=10, z=2)
+            Space(h=h, az=az, el=el)
+
+
+
+
+
+
+
+class TestSphericalGeoConstructors:
 
     def test_spherical_geo_1_00(self):
         space = Space(az=Space.π)

@@ -173,10 +173,10 @@ class Space:
                 raise ValueError("Range ρ out of range < 0")
 
             if az0 < 0 or az0 > 2 * Space.π:
-                raise ValueError("Polar Angle θ out of range [0, π]")
+                raise ValueError("Polar Angle θ out of range [0, 2π]")
 
-            if el0 < 0 or el0 >= 2 * Space.π:
-                raise ValueError("Azimuth φ out of range [0, 2π)")
+            if el0 < -Space.π / 2 or el0 > Space.π / 2:
+                raise ValueError("Azimuth φ out of range [-π/2, π/2)")
 
             self._space = np.array(
                 [
