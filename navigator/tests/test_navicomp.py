@@ -228,9 +228,11 @@ class TestSphericalPhysics1Constructors:
             (1, Space.π / 4, 0, sqrt2over2, 0, sqrt2over2),
             (1, Space.π / 4, Space.π / 4.0, 0.5, 0.5, sqrt2over2),
             (1, Space.π / 4, Space.π / 2, 0, sqrt2over2, sqrt2over2),
-            (1, Space.π / 4, Space.π, -sqrt2over2, 0, sqrt2over2),
             (1, Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, sqrt2over2),
             (1, Space.π / 4, Space.π, -sqrt2over2, 0, sqrt2over2),
+            (1, Space.π / 2, 5 * Space.π / 4, -sqrt2over2, -sqrt2over2, 0),
+            (1, Space.π / 2, 3 * Space.π / 2, 0, -1, 0),
+            (1, Space.π / 2, 2 * Space.π, 1, 0, 0),
             # around the tropic of Capricorn-ish
             (1, 3 * Space.π / 4, 0, sqrt2over2, 0, -sqrt2over2),
             (1, 3 * Space.π / 4, Space.π / 4.0, 0.5, 0.5, -sqrt2over2),
@@ -245,18 +247,11 @@ class TestSphericalPhysics1Constructors:
             (1, 3 * Space.π / 4, Space.π, -sqrt2over2, 0, -sqrt2over2),
             (1, 3 * Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, -sqrt2over2),
             (1, 3 * Space.π / 4, Space.π, -sqrt2over2, 0, -sqrt2over2),
+            (1, 3 * Space.π / 4, 5 * Space.π / 4, -0.5, -0.5, -sqrt2over2),
+            (1, 3 * Space.π / 4, 3 * Space.π / 2, 0, -sqrt2over2, -sqrt2over2),
+            (1, 3 * Space.π / 4, 2 * Space.π, sqrt2over2, 0, -sqrt2over2),
             # world size
             (Space.Re, Space.π / 2, Space.π / 2, 0, Space.Re, 0),
-            # TOOD φ wrong for 3/2*π
-            # (
-            #     1,
-            #     Space.π / 2,
-            #     3 * 2 * Space.π / 4,
-            #     -sqrt2over2,
-            #     sqrt2over2,
-            #     0,
-            # ),
-            # TODO pole (1, 0, Space.π/4.0, 0.0, 0, 1),
         ],
     )
     def test_ρ_θ_φ(self, ρ, θ, φ, x, y, z):
@@ -288,7 +283,6 @@ class TestSphericalPhysics2Constructors:
             (1, Space.π / 2, 0, 1.0, 0.0, 0),
             (1, Space.π / 2, Space.π / 4.0, sqrt2over2, sqrt2over2, 0),
             (1, Space.π / 2, Space.π / 2, 0, 1, 0),
-            (1, Space.π / 2, Space.π, -1, 0, 0),
             (
                 1,
                 Space.π / 2,
@@ -307,6 +301,9 @@ class TestSphericalPhysics2Constructors:
             (1, Space.π / 4, Space.π / 2, 0, sqrt2over2, sqrt2over2),
             (1, Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, sqrt2over2),
             (1, Space.π / 4, Space.π, -sqrt2over2, 0, sqrt2over2),
+            (1, Space.π / 2, 5 * Space.π / 4, -sqrt2over2, -sqrt2over2, 0),
+            (1, Space.π / 2, 3 * Space.π / 2, 0, -1, 0),
+            (1, Space.π / 2, 2 * Space.π, 1, 0, 0),
             # around the tropic of Capricorn-ish
             (1, 3 * Space.π / 4, 0, sqrt2over2, 0, -sqrt2over2),
             (1, 3 * Space.π / 4, Space.π / 4.0, 0.5, 0.5, -sqrt2over2),
@@ -320,18 +317,13 @@ class TestSphericalPhysics2Constructors:
             ),
             (1, 3 * Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, -sqrt2over2),
             (1, 3 * Space.π / 4, Space.π, -sqrt2over2, 0, -sqrt2over2),
+            (1, 3 * Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, -sqrt2over2),
+            (1, 3 * Space.π / 4, Space.π, -sqrt2over2, 0, -sqrt2over2),
+            (1, 3 * Space.π / 4, 5 * Space.π / 4, -0.5, -0.5, -sqrt2over2),
+            (1, 3 * Space.π / 4, 3 * Space.π / 2, 0, -sqrt2over2, -sqrt2over2),
+            (1, 3 * Space.π / 4, 2 * Space.π, sqrt2over2, 0, -sqrt2over2),
             # world size
             (Space.Re, Space.π / 2, Space.π / 2, 0, Space.Re, 0),
-            # TOOD φ wrong for 3/2*π
-            # (
-            #     1,
-            #     Space.π / 2,
-            #     3 * 2 * Space.π / 4,
-            #     -root2over2,
-            #     root2over2,
-            #     0,
-            # ),
-            # TODO pole (1, 0, Space.π/4.0, 0.0, 0, 1),
         ],
     )
     def test_r_theta_phi(self, r, theta, phi, x, y, z):
