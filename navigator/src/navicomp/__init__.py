@@ -113,24 +113,24 @@ class Space:
             or is_spherical_geo_1
             or is_spherical_geo_2
         ):
-            ρ0 = ρ if ρ is not None else 1
-            θ0 = θ if θ is not None else 0
-            φ0 = φ if φ is not None else 0
+            _ρ = ρ if ρ is not None else 1
+            _θ = θ if θ is not None else 0
+            _φ = φ if φ is not None else 0
 
-            if ρ0 < 0:
+            if _ρ < 0:
                 raise ValueError("Range ρ out of range < 0")
 
-            if θ0 < 0 or θ0 > Space.π:
+            if _θ < 0 or _θ > Space.π:
                 raise ValueError("Polar Angle θ out of range [0, π]")
 
-            if φ0 < 0 or φ0 >= 2 * Space.π:
+            if _φ < 0 or _φ > 2 * Space.π:
                 raise ValueError("Azimuth φ out of range [0, 2π)")
 
             self._space = np.array(
                 [
-                    ρ0 * np.sin(θ0) * np.cos(φ0),
-                    ρ0 * np.sin(θ0) * np.sin(φ0),
-                    ρ0 * np.cos(θ0),
+                    _ρ * np.sin(_θ) * np.cos(_φ),
+                    _ρ * np.sin(_θ) * np.sin(_φ),
+                    _ρ * np.cos(_θ),
                 ]
             )
         elif is_spherical_physics_2 and not (
@@ -139,24 +139,24 @@ class Space:
             or is_spherical_geo_1
             or is_spherical_geo_2
         ):
-            ρ0 = r if r is not None else 1
-            θ0 = theta if theta is not None else 0
-            φ0 = phi if phi is not None else 0
+            _ρ = r if r is not None else 1
+            _θ = theta if theta is not None else 0
+            _φ = phi if phi is not None else 0
 
-            if ρ0 < 0:
+            if _ρ < 0:
                 raise ValueError("Range ρ out of range < 0")
 
-            if θ0 < 0 or θ0 > Space.π:
+            if _θ < 0 or _θ > Space.π:
                 raise ValueError("Polar Angle θ out of range [0, π]")
 
-            if φ0 < 0 or φ0 >= 2 * Space.π:
+            if _φ < 0 or _φ >= 2 * Space.π:
                 raise ValueError("Azimuth φ out of range [0, 2π)")
 
             self._space = np.array(
                 [
-                    ρ0 * np.sin(θ0) * np.cos(φ0),
-                    ρ0 * np.sin(θ0) * np.sin(φ0),
-                    ρ0 * np.cos(θ0),
+                    _ρ * np.sin(_θ) * np.cos(_φ),
+                    _ρ * np.sin(_θ) * np.sin(_φ),
+                    _ρ * np.cos(_θ),
                 ]
             )
         elif is_spherical_geo_1 and not (
@@ -165,24 +165,24 @@ class Space:
             or is_spherical_physics_2
             or is_spherical_geo_2
         ):
-            h0 = h + self.Re if h is not None else self.Re
-            az0 = az if az is not None else 0
-            el0 = el if el is not None else 0
+            _h = h + self.Re if h is not None else self.Re
+            _az = az if az is not None else 0
+            _el = el if el is not None else 0
 
-            if h0 < 0:
-                raise ValueError("Range ρ out of range < 0")
+            if _h < 0:
+                raise ValueError("Range h out of range < 0")
 
-            if az0 < 0 or az0 > 2 * Space.π:
-                raise ValueError("Polar Angle θ out of range [0, 2π]")
+            if _az < 0 or _az > 2 * Space.π:
+                raise ValueError("Azimuth out of range [0, 2π]")
 
-            if el0 < -Space.π / 2 or el0 > Space.π / 2:
-                raise ValueError("Azimuth φ out of range [-π/2, π/2)")
+            if _el < -Space.π / 2 or _el > Space.π / 2:
+                raise ValueError("Elevation out of range [-π/2, π/2)")
 
             self._space = np.array(
                 [
-                    h0 * np.cos(el0) * np.cos(az0),
-                    h0 * np.cos(el0) * np.sin(az0),
-                    h0 * np.sin(el0),
+                    _h * np.cos(_el) * np.cos(_az),
+                    _h * np.cos(_el) * np.sin(_az),
+                    _h * np.sin(_el),
                 ]
             )
         elif is_spherical_geo_2 and not (
@@ -191,24 +191,24 @@ class Space:
             or is_spherical_physics_2
             or is_spherical_geo_1
         ):
-            alt0 = alt + self.Re if alt is not None else self.Re
-            lon0 = lon if lon is not None else 0
-            lat0 = lat if lat is not None else 0
+            _alt = alt + self.Re if alt is not None else self.Re
+            _lon = lon if lon is not None else 0
+            _lat = lat if lat is not None else 0
 
-            if alt0 < 0:  # TODO - Re?
+            if _alt < 0:  # TODO - Re?
                 raise ValueError("Range altitude out of range < 0")
 
-            if lon0 < 0 or lon0 > 2 * Space.π:
+            if _lon < 0 or _lon > 2 * Space.π:
                 raise ValueError("Longitude out of range [-π, π]")
 
-            if lat0 < -Space.π / 2 or lat0 > Space.π / 2:
+            if _lat < -Space.π / 2 or _lat > Space.π / 2:
                 raise ValueError("Latitude out of range [0, 2π)")
 
             self._space = np.array(
                 [
-                    alt0 * np.cos(lat0) * np.cos(lon0),
-                    alt0 * np.cos(lat0) * np.sin(lon0),
-                    alt0 * np.sin(lat0),
+                    _alt * np.cos(_lat) * np.cos(_lon),
+                    _alt * np.cos(_lat) * np.sin(_lon),
+                    _alt * np.sin(_lat),
                 ]
             )
         elif is_spherical_physics_1 and is_spherical_physics_2:
