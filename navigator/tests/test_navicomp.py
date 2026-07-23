@@ -28,6 +28,81 @@ class TestDegrees2Radians:
         assert Space.rad2deg(radians) == degrees
 
 
+class TestUnitVectors:
+    """Test unit vectors."""
+
+    def test_Uo(self):
+        """Test unit vector x."""
+        assert UnitVectors.Uo.value.x == 0
+        assert UnitVectors.Uo.value.y == 0
+        assert UnitVectors.Uo.value.z == 0
+
+        with pytest.raises(AttributeError):
+            UnitVectors.Uo = UnitVectors.Ux
+
+    def test_Ux(self):
+        """Test unit vector x."""
+        assert UnitVectors.Ux.value.x == 1
+        assert UnitVectors.Ux.value.y == 0
+        assert UnitVectors.Ux.value.z == 0
+
+        with pytest.raises(AttributeError):
+            UnitVectors.Ux = Space(0, 0, 0)
+
+    def test_Uy(self):
+        """Test unit vector y."""
+        assert UnitVectors.Uy.value.x == 0
+        assert UnitVectors.Uy.value.y == 1
+        assert UnitVectors.Uy.value.z == 0
+
+        with pytest.raises(AttributeError):
+            UnitVectors.Uy = UnitVectors.Ux
+
+    def test_Uz(self):
+        """Test unit vector z."""
+        assert UnitVectors.Uz.value.x == 0
+        assert UnitVectors.Uz.value.y == 0
+        assert UnitVectors.Uz.value.z == 1
+
+        with pytest.raises(AttributeError):
+            UnitVectors.Uz = UnitVectors.Ux
+
+    def test_add_Uo(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 + UnitVectors.Uo.value
+        assert s1 == s0
+
+    def test_add_Ux_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 + UnitVectors.Ux.value
+        assert s1 == Space(2, 2, 3)
+
+    def test_add_Ux_01(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Ux.value + s0
+        assert s1 == Space(2, 2, 3)
+
+    def test_sub_Uo(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 - UnitVectors.Uo.value
+        assert s1 == s0
+
+    def test_sub_Ux(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Ux.value - s0
+        assert s1 == Space(0, -2, -3)
+
+    def test_sub_Uy(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Uy.value - s0
+        assert s1 == Space(-1, -1, -3)
+
+    def test_sub_Uz(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 - UnitVectors.Uz.value
+        assert s1 == Space(1, 2, 2)
+
+
 class TestAccessorsReprStrEval:
     def test_cartesian_accessors(self):
         """Test x, y, z accessors are read only."""
