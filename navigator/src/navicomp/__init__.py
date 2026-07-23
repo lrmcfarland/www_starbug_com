@@ -440,7 +440,11 @@ class Space:
     @property
     def az(self) -> np.float64:
         """Azimuth."""
-        return np.arctan2(self.y, self.x)
+        az = np.arctan2(self.y, self.x)
+        # Normalize to [0, 2π)
+        if az < 0:
+            az += 2 * Space.π
+        return az
 
     @property
     def el(self) -> np.float64:
