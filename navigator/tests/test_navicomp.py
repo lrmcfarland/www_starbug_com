@@ -230,9 +230,9 @@ class TestSphericalPhysics1Constructors:
             (1, Space.π / 4, Space.π / 2, 0, sqrt2over2, sqrt2over2),
             (1, Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, sqrt2over2),
             (1, Space.π / 4, Space.π, -sqrt2over2, 0, sqrt2over2),
-            (1, Space.π / 2, 5 * Space.π / 4, -sqrt2over2, -sqrt2over2, 0),
-            (1, Space.π / 2, 3 * Space.π / 2, 0, -1, 0),
-            (1, Space.π / 2, 2 * Space.π, 1, 0, 0),
+            (1, Space.π / 4, 5 * Space.π / 4, -0.5, -0.5, sqrt2over2),
+            (1, Space.π / 4, 3 * Space.π / 2, 0, -sqrt2over2, sqrt2over2),
+            (1, Space.π / 4, 2 * Space.π, sqrt2over2, 0, sqrt2over2),
             # around the tropic of Capricorn-ish
             (1, 3 * Space.π / 4, 0, sqrt2over2, 0, -sqrt2over2),
             (1, 3 * Space.π / 4, Space.π / 4.0, 0.5, 0.5, -sqrt2over2),
@@ -265,6 +265,22 @@ class TestSphericalPhysics1Constructors:
         assert space.r == ρ
         assert space.theta == pytest.approx(θ, abs=1e-9)
         assert space.phi == pytest.approx(φ, abs=1e-9)
+
+
+class TestSphericalPhysics2RangeExceptions:
+    @pytest.mark.parametrize(
+        "r, theta, phi",
+        [
+            (-1, 0, 0),
+            (1, -Space.π / 2, 0),
+            (1, 0, -1.000001 * Space.π / 2),
+            (1, 2 * Space.π, 0),
+            (1, Space.π / 3, 2.0000001 * Space.π),
+        ],
+    )
+    def test_r_theta_phi(self, r, theta, phi):
+        with pytest.raises(ValueError):
+            Space(r=r, theta=theta, phi=phi)
 
 
 class TestSphericalPhysics2Constructors:
@@ -301,9 +317,9 @@ class TestSphericalPhysics2Constructors:
             (1, Space.π / 4, Space.π / 2, 0, sqrt2over2, sqrt2over2),
             (1, Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, sqrt2over2),
             (1, Space.π / 4, Space.π, -sqrt2over2, 0, sqrt2over2),
-            (1, Space.π / 2, 5 * Space.π / 4, -sqrt2over2, -sqrt2over2, 0),
-            (1, Space.π / 2, 3 * Space.π / 2, 0, -1, 0),
-            (1, Space.π / 2, 2 * Space.π, 1, 0, 0),
+            (1, Space.π / 4, 5 * Space.π / 4, -0.5, -0.5, sqrt2over2),
+            (1, Space.π / 4, 3 * Space.π / 2, 0, -sqrt2over2, sqrt2over2),
+            (1, Space.π / 4, 2 * Space.π, sqrt2over2, 0, sqrt2over2),
             # around the tropic of Capricorn-ish
             (1, 3 * Space.π / 4, 0, sqrt2over2, 0, -sqrt2over2),
             (1, 3 * Space.π / 4, Space.π / 4.0, 0.5, 0.5, -sqrt2over2),
@@ -339,22 +355,6 @@ class TestSphericalPhysics2Constructors:
         assert space.phi == pytest.approx(phi, abs=1e-9)
 
 
-class TestSphericalPhysics2RangeExceptions:
-    @pytest.mark.parametrize(
-        "r, theta, phi",
-        [
-            (-1, 0, 0),
-            (1, -Space.π / 2, 0),
-            (1, 0, -1.000001 * Space.π / 2),
-            (1, 2 * Space.π, 0),
-            (1, Space.π / 3, 2.0000001 * Space.π),
-        ],
-    )
-    def test_r_theta_phi(self, r, theta, phi):
-        with pytest.raises(ValueError):
-            Space(r=r, theta=theta, phi=phi)
-
-
 class TestSphericalGeo1RangeExceptions:
     @pytest.mark.parametrize(
         "h, az, el",
@@ -371,76 +371,145 @@ class TestSphericalGeo1RangeExceptions:
             Space(h=h, az=az, el=el)
 
 
-
-
-
-
-
-class TestSphericalGeoConstructors:
-
-    def test_spherical_geo_1_00(self):
-        space = Space(az=Space.π)
-        assert space.z == 0.0
-        assert space.y == pytest.approx(0, abs=1e-9)
-        assert space.x == -space.Re
-        assert space.h == 0.0
-        assert space.az == Space.π
-        assert space.el == 0
-
-    def test_spherical_geo_1_01(self):
-        space = Space(az=0, el=Space.π / 4)
-        assert space.z == 4504977.302939494
-        assert space.y == pytest.approx(0, abs=1e-15)
-        assert space.x == 4504977.302939494
-        assert space.h == 0.0
-        assert space.az == 0
-        assert space.el == Space.π / 4
-
-    def test_spherical_geo_1_02(self):
-        space = Space(az=Space.π, el=Space.π / 4)
-        assert space.z == 4504977.302939494
-        assert space.y == pytest.approx(0, abs=1e-9)
-        assert space.x == -4504977.302939494
-        assert space.h == 0.0
-        assert space.az == Space.π
-        assert space.el == Space.π / 4
-
-    def test_geo_1_2_combo_exception_01(self):
-        with pytest.raises(ValueError):
-            Space(lat=10, el=2)
-
-    def test_spherical_geo_2_00(self):
-        space = Space(lat=Space.π / 4, lon=Space.π / 4)
-        assert space.z == 4504977.302939494
-        assert space.y == 3185499.9999999995
-        assert space.x == 3185500.0
-
-    def test_spherical_geo_2_01(self):
-        space = Space(alt=10.0, lat=Space.π / 6, lon=Space.π / 4)
-        assert space.z == 3185504.9999999995
-        assert space.y == 3901430.911542264
-        assert space.x == 3901430.9115422647
-        assert space.alt == 10.0
-        assert space.lat == Space.π / 6
-        assert space.lon == pytest.approx(Space.π / 4, abs=1e-9)
-
-    def test_spherical_geo_2_02(self):
-        space = Space(alt=10.0, lat=Space.π / 3.0, lon=Space.π)
-        assert space.z == 5517456.507764696
-        assert space.y == pytest.approx(0, abs=1e-9)
-        assert space.x == -3185505.000000001
-        assert space.alt == 10.0
-        assert space.lat == 1.0471975511965976
-        assert space.lon == Space.π
-
-    def test_spherical_geo_2_03(self):
-        space = Space(alt=10.0, lat=-Space.π / 3.0, lon=2 * Space.π)
-        assert space.z == -5517456.507764696
-        assert space.y == pytest.approx(0, abs=1e-9)
-        assert space.x == 3185505.000000001
-        assert space.alt == 10.0
-        assert space.lat == -1.0471975511965976
-        assert space.lon == pytest.approx(0, abs=1e-9)
+class TestSphericalGeo1Constructors:
+    @pytest.mark.parametrize(
+        "h, el, az, x, y, z",
+        [
+            (0, 0, 0, Space.Re, 0, 0),
+            # down the prime meridian
+            (1, Space.π / 2, 0, 0, 0, Space.Re + 1),
+            (0, Space.π / 4, 0, sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (1, 0, 0, Space.Re + 1, 0, 0),
+            (0, -Space.π / 4, 0, sqrt2over2 * Space.Re, 0, -sqrt2over2 * Space.Re),
+            (0, -Space.π / 2, 0, 0, 0, -Space.Re),
+            # around the equator
+            (0, 0, 0, Space.Re, 0, 0),
+            (0, 0, Space.π / 4.0, sqrt2over2 * Space.Re, sqrt2over2 * Space.Re, 0),
+            (0, 0, Space.π / 2, 0, Space.Re, 0),
+            (
+                0,
+                0,
+                3 * Space.π / 4,
+                -sqrt2over2 * Space.Re,
+                sqrt2over2 * Space.Re,
+                0,
+            ),
+            (0, 0, Space.π, -Space.Re, 0, 0),
+            (0, 0, 5 * Space.π / 4, -sqrt2over2 * Space.Re, -sqrt2over2 * Space.Re, 0),
+            (0, 0, 3 * Space.π / 2, 0, -Space.Re, 0),
+            (0, 0, 2 * Space.π, Space.Re, 0, 0),
+            # around the tropic of Cancer-ish
+            (0, Space.π / 4, 0, sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (
+                0,
+                Space.π / 4,
+                Space.π / 4.0,
+                0.5 * Space.Re,
+                0.5 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                Space.π / 2,
+                0,
+                sqrt2over2 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                3 * Space.π / 4,
+                -0.5 * Space.Re,
+                0.5 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (0, Space.π / 4, Space.π, -sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (
+                0,
+                Space.π / 4,
+                5 * Space.π / 4,
+                -0.5 * Space.Re,
+                -0.5 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                3 * Space.π / 2,
+                0,
+                -sqrt2over2 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                2 * Space.π,
+                sqrt2over2 * Space.Re,
+                0,
+                sqrt2over2 * Space.Re,
+            ),
+            # around the tropic of Capricorn-ish
+            (0, -Space.π / 4, 0, sqrt2over2 * Space.Re, 0, -sqrt2over2 * Space.Re),
+            (
+                0,
+                -Space.π / 4,
+                Space.π / 4.0,
+                0.5 * Space.Re,
+                0.5 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                Space.π / 2,
+                0,
+                sqrt2over2 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                3 * Space.π / 4,
+                -0.5 * Space.Re,
+                0.5 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (0, Space.π / 4, Space.π, -sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (
+                0,
+                -Space.π / 4,
+                5 * Space.π / 4,
+                -0.5 * Space.Re,
+                -0.5 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                3 * Space.π / 2,
+                0,
+                -sqrt2over2 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                2 * Space.π,
+                sqrt2over2 * Space.Re,
+                0,
+                -sqrt2over2 * Space.Re,
+            ),
+        ],
+    )
+    def test_h_az_el(self, h, az, el, x, y, z):
+        space = Space(h=h, el=el, az=az)
+        assert space.h == pytest.approx(h, abs=1e-9)
+        assert space.az == pytest.approx(az, abs=1e-9)
+        assert space.el == pytest.approx(el, abs=1e-9)
+        assert space.x == pytest.approx(x, abs=1)
+        assert space.y == pytest.approx(y, abs=1)
+        assert space.z == pytest.approx(z, abs=1)
 
 
 class TestOperators:
@@ -752,8 +821,8 @@ class TestPhysicsStandardSphericalCoordinates:
         assert starbug.r == 1.7320508075688772
         assert starbug.θ == 2.186276035465284
         assert starbug.theta == 2.186276035465284
-        assert starbug.φ == -2.356194490192345
-        assert starbug.phi == -2.356194490192345
+        assert starbug.φ == pytest.approx(2 * Space.π - 2.356194490192345, abs=1e-9)
+        assert starbug.phi == pytest.approx(2 * Space.π - 2.356194490192345, abs=1e-9)
 
 
 class TestSphericalStableAtPoles:
@@ -794,7 +863,7 @@ class TestSphericalStableAtPoles:
         starbug = Space(0, -16.0, 0.0)
         assert starbug.ρ == 16.0
         assert starbug.θ == np.pi / 2.0
-        assert starbug.φ == -Space.π / 2
+        assert starbug.φ == pytest.approx(2 * Space.π - Space.π / 2, abs=1e-9)
 
 
 class TestGeographyStandardSphericalCoordinates:
