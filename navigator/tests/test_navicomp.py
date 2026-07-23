@@ -102,6 +102,12 @@ class TestUnitVectors:
         s1 = s0 - UnitVectors.Uz.value
         assert s1 == Space(1, 2, 2)
 
+    def test_scalar_mul_Uz(self):
+        space = Space.π * UnitVectors.Uz.value
+        assert space.x == 0.0
+        assert space.y == 0.0
+        assert space.z == space.π
+
 
 class TestAccessorsReprStrEval:
     def test_cartesian_accessors(self):
@@ -866,130 +872,140 @@ class TestSubtractOperators:
         assert s2 == expect
 
 
-class TestMultiplyOperators:
-
-    def test_scalar_mul_00(self):
-        space = 0.0 * UnitVectors.Ux.value
-        assert space.x == 0.0
-        assert space.y == 0.0
-        assert space.z == 0
-
-    def test_scalar_mul_01(self):
-        space = Space(1, 1, 1) * 2
-        assert space.x == 2
-        assert space.y == 2
-        assert space.z == 2
-        assert space.ρ == np.sqrt(2 * 2 + 2 * 2 + 2 * 2)  # 3.4641016151377544
-        assert space.θ == pytest.approx(0.9553166181245093, abs=1e-9)
-        assert space.φ == 0.7853981633974483
-        assert space.h == -6370996.535898385  # x, y, z too small for this
-        assert space.az == space.φ
-        assert space.el == 0.6154797086703873
-
-    def test_scalar_mul_02(self):
-        space = Space.π * UnitVectors.Uz.value
-        assert space.x == 0.0
-        assert space.y == 0.0
-        assert space.z == space.π
+class TestMultiplyExceptions:
 
     def test_scalar_imul_exception_00(self):
         """Test scalar inplace multiply exception.
 
-        Not dot or cross product.
+        Dot and cross products are explicit elsewhere.
         """
         with pytest.raises(TypeError):
             s0 = Space(1, -2, 3)
             s0 *= Space(2)
 
-    def test_scalar_imul_00(self):
-        space = Space(1, -2, 3)
-        space *= 3
-        assert space.x == 3
-        assert space.y == -6
-        assert space.z == 9
+
+class TestMultiplyOperators:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, Space(2)),
+            (1, 0, 0, -2, Space(-2)),
+        ],
+    )
+    def test_multiply_float(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = s1 * a
+        s3 = a * s1
+        assert s2 == expect
+        assert s3 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, Space(2)),
+            (1, 0, 0, -2, Space(-2)),
+        ],
+    )
+    def test_imultiply_float(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s1 *= a
+        assert s1 == expect
 
 
-class TestDivideOperators:
+class TestDivideExceptions:
 
-    def test_scalar_itruediv_exception_00(self):
-        """Test scalar inplace div exception."""
+    def test_truediv_by_zero_int(self):
+        with pytest.raises(ZeroDivisionError):
+            Space(1, 1, 1) / 0
+
+    def test_truediv_by_zero_float(self):
+        with pytest.raises(ZeroDivisionError):
+            Space(1, 1, 1) / 0.0
+
+    def test_rtruediv_by_zero_space(self):
+        with pytest.raises(ZeroDivisionError):
+            1.0 / Space(0, 0, 0)
+
+    def test_itruediv_by_zero_int(self):
+        """Test scalar inplace div by zero exception."""
         with pytest.raises(ZeroDivisionError):
             s0 = Space(-1, -2, 3)
             s0 /= 0
 
-    def test_scalar_itruediv_exception_01(self):
-        """Test scalar inplace multiply exception.
-
-        Not dot or cross product.
-        """
-        with pytest.raises(TypeError):
-            s0 = Space(1, -2, 3)
-            s0 /= Space(2, 4, 6)
-
-    def test_scalar_itruediv_00(self):
-        s0 = Space(2, 4, 6)
-        s0 /= 2
-        assert s0 == Space(1, 2, 3)
-
-    def test_scalar_itruediv_01(self):
-        s0 = Space(2, 4, 6)
-        s0 /= 2
-        assert s0 == Space(1, 2, 3)
-
-    def test_scalar_div_00(self):
-        with pytest.raises(ZeroDivisionError):
-            Space(1, 1, 1) / 0.0
-
-    def test_scalar_div_000(self):
-        with pytest.raises(ZeroDivisionError):
-            1.0 / Space(0, 0, 0)
-
-    def test_scalar_div_01(self):
-        space = Space(1, 1, 1) / 1.0
-        assert space == Space(1.0, 1.0, 1.0)
-
-    def test_scalar_div_02(self):
-        space = Space(1, 1, 1) / 2.0
-        assert space == Space(0.5, 0.5, 0.5)
-
-    @pytest.mark.skip(reason="double exceptions?")
-    def test_scalar_div_03(self):
-        with pytest.raises(TypeError):
-            Space(ρ=1, θ=Space.π / 4, φ=-Space.π / 4) / 2.0
-
-    def test_scalar_div_04(self):
-        space = Space(1.2, -31.5, -2.71) / 2.0
-        assert space == Space(0.6, -15.75, -1.355)
-
-    def test_scalar_div_05(self):
-        space = 1.0 / Space(0.5, 0.5, 0.5)
-        assert space == Space(2, 2, 2)
-
-    def test_scalar_div_06(self):
-        space = 1.0 / Space(-1.0, 2.0, 3.5)
-        assert space == Space(-1.0, 0.5, 0.2857142857142857)
-
-    def test_scalar_ifloordiv_00(self):
+    def test_ifloordiv_by_zero_float(self):
         with pytest.raises(ZeroDivisionError):
             s1 = Space(1, 1, 1)
             s1 //= 0.0
 
-    def test_scalar_ifloordiv_000(self):
+    def test_itruediv_by_space(self):
+        """Test scalar inplace divide by Space exception."""
+        with pytest.raises(TypeError):
+            s0 = Space(1, -2, 3)
+            s0 /= Space(2, 4, 6)
+
+    def test_itruediv_by_string(self):
+        """Test scalar inplace divide by Space exception."""
+        with pytest.raises(TypeError):
+            Space(1, -2, 3) / "0"
+
+    def test_ifloordiv_by_space(self):
         with pytest.raises(TypeError):
             s1 = Space(1, 1, 1)
             s1 //= Space(2, 3, 4)
 
-    def test_scalar_ifloordiv_01(self):
-        s1 = Space(1, 1, 1)
-        s1 //= 3
-        assert s1 == Space(0, 0, 0)
 
-    def test_scalar_ifloordiv_02(self):
-        s1 = Space(10, 10, 10)
-        s1 //= 3
-        assert s1 == Space(3, 3, 3)
+class TestDivideOperators:
 
-    def test_scalar_ifloordiv_03(self):
-        s1 = Space(100, -99, 10)
-        s1 //= 7
-        assert s1 == Space(14, -15, 1)
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (4, 0, 0, 2, Space(2)),
+            (-4, 0, 0, -2, Space(2)),
+            (8, -16, 32, 4, Space(2, -4, 8)),
+        ],
+    )
+    def test_truediv(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = s1 / a
+        assert s2 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (4, 1, 1, 2, Space(0.5, 2.0, 2.0)),
+            (-4, 1, 1, -2, Space(0.5, -2.0, -2.0)),
+            (8, -16, 32, 4, Space(0.5, -0.25, 0.125)),
+        ],
+    )
+    def test_rtruediv(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = a / s1
+        assert s2 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (4, 0, 0, 2, Space(2)),
+            (-4, 0, 0, -2, Space(2)),
+            (8, -16, 32, 4, Space(2, -4, 8)),
+        ],
+    )
+    def test_itruediv(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s1 /= a
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (-13, 7, 19, 2, Space(-7, 3, 9)),
+            (-4, -3, -7, -3, Space(1, 1, 2)),
+        ],
+    )
+    def test_ifloordiv(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s1 //= a
+        assert s1 == expect
