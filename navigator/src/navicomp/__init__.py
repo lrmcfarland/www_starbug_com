@@ -195,7 +195,7 @@ class Space:
             _lon = lon if lon is not None else 0
             _lat = lat if lat is not None else 0
 
-            if _alt < 0:  # TODO - Re?
+            if _alt < 0:
                 raise ValueError("Range altitude out of range < 0")
 
             if _lon < 0 or _lon > 2 * Space.π:
@@ -460,7 +460,11 @@ class Space:
     @property
     def lon(self) -> np.float64:
         """Longitude, -180 to 180."""
-        return np.arctan2(self.y, self.x)
+        lon = np.arctan2(self.y, self.x)
+        # Normalize to [0, 2π)
+        if lon < 0:
+            lon += 2 * Space.π
+        return lon
 
     @property
     def lat(self) -> np.float64:
