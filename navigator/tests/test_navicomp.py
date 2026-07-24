@@ -108,6 +108,28 @@ class TestUnitVectors:
         assert space.y == 0.0
         assert space.z == space.π
 
+    @pytest.mark.parametrize(
+        "a, b, expect",
+        [
+            (UnitVectors.Ux, UnitVectors.Uy, 0),
+            (UnitVectors.Uy, UnitVectors.Uz, 0),
+            (UnitVectors.Uz, UnitVectors.Ux, 0),
+        ],
+    )
+    def test_a_dot_b(self, a, b, expect):
+        assert a.value.dot(b.value) == expect
+
+    @pytest.mark.parametrize(
+        "a, b, expect",
+        [
+            (UnitVectors.Ux, UnitVectors.Uy, UnitVectors.Uz),
+            (UnitVectors.Uy, UnitVectors.Uz, UnitVectors.Ux),
+            (UnitVectors.Uz, UnitVectors.Ux, UnitVectors.Uy),
+        ],
+    )
+    def test_a_cross_b(self, a, b, expect):
+        assert a.value.cross(b.value) == expect.value
+
 
 class TestAccessorsReprStrEval:
     def test_cartesian_accessors(self):
@@ -1009,3 +1031,33 @@ class TestDivideOperators:
         s1 = Space(x=x, y=y, z=z)
         s1 //= a
         assert s1 == expect
+
+
+class TestScalarProduct:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (1, 2, 3, 4, 5, 6, 32),
+            (-1, 0, 3, 4, 5, 6, 14),
+        ],
+    )
+    def test_dot_product(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        assert s1.dot(s2) == expect
+
+
+class TestVectorProduct:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (1, 2, 3, 4, 5, 6, Space(-3, 6, -3)),
+            (4, 5, 6, 1, 2, 3, Space(3, -6, 3)),
+        ],
+    )
+    def test_dot_product(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        assert s1.cross(s2) == expect

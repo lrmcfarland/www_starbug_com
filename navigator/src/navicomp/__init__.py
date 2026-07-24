@@ -472,6 +472,22 @@ class Space:
         hxy = np.hypot(self.x, self.y)
         return np.arctan2(self.z, hxy)
 
+    # -------------------
+    # ----- methods -----
+    # -------------------
+
+    def dot(self, other: Space) -> np.float64:
+        """Scalar product."""
+        return self.x * other.x + self.y * other.y + self.z * other.z
+
+    def cross(self, other: Space) -> Space:
+        """Vector product."""
+        return Space(
+            x=self.y * other.z - self.z * other.y,
+            y=self.z * other.x - self.x * other.z,
+            z=self.x * other.y - self.y * other.x,
+        )
+
 
 class UnitVectors(Enum):
     """Unit vectors."""
