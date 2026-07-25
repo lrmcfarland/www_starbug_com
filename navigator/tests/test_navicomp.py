@@ -10,12 +10,12 @@ class TestDegrees2Radians:
     @pytest.mark.parametrize(
         "degrees, radians",
         [
-            (0, 0),
-            (45, Space.π / 4),
-            (90, Space.π / 2),
-            (180, Space.π),
-            (270, 3 * 2 * Space.π / 4),
             (360, 2 * Space.π),
+            (270, 3 * 2 * Space.π / 4),
+            (180, Space.π),
+            (90, Space.π / 2),
+            (45, Space.π / 4),
+            (0, 0),
             (-45, -Space.π / 4),
             (-90, -Space.π / 2),
             (-180, -Space.π),
@@ -103,10 +103,10 @@ class TestUnitVectors:
         assert s1 == Space(1, 2, 2)
 
     def test_scalar_mul_Uz(self):
-        space = Space.π * UnitVectors.Uz.value
-        assert space.x == 0.0
-        assert space.y == 0.0
-        assert space.z == space.π
+        s0 = Space.π * UnitVectors.Uz.value
+        assert s0.x == 0.0
+        assert s0.y == 0.0
+        assert s0.z == Space.π
 
     @pytest.mark.parametrize(
         "a, b, expect",
@@ -134,37 +134,37 @@ class TestUnitVectors:
 class TestAccessorsReprStrEval:
     def test_cartesian_accessors(self):
         """Test x, y, z accessors are read only."""
-        space = Space(1.23, 2.0, 3)
+        s0 = Space(1.23, 2.0, 3)
 
-        assert space.x == 1.23
+        assert s0.x == 1.23
         with pytest.raises(AttributeError):
-            space.x = 4.5
+            s0.x = 4.5
 
-        assert space.y == 2
+        assert s0.y == 2
         with pytest.raises(AttributeError):
-            space.y = -14.5
+            s0.y = -14.5
 
-        assert space.z == 3.0
+        assert s0.z == 3.0
         with pytest.raises(AttributeError):
-            space.z = 404.5346
+            s0.z = 404.5346
 
     def test_repr_01(self):
-        space = Space(2, -3, 5)
-        assert repr(space) == "Space(2, -3, 5)"
+        s0 = Space(2, -3, 5)
+        assert repr(s0) == "Space(2, -3, 5)"
 
     def test_eval_repr_01(self):
-        space_0 = Space(2, -3, 5)
-        space_1 = eval(repr(space_0))
-        assert space_0 == space_1
+        s0 = Space(2, -3, 5)
+        s1 = eval(repr(s0))
+        assert s0 == s1
 
     def test_str_01(self):
-        space = Space(1, 2, 3)
-        assert str(space) == "Space(x=1, y=2, z=3)"
+        s0 = Space(1, 2, 3)
+        assert str(s0) == "Space(x=1, y=2, z=3)"
 
     def test_eval_str_01(self):
-        space_0 = Space(2, -3, 5)
-        space_1 = eval(str(space_0))
-        assert space_0 == space_1
+        s0 = Space(2, -3, 5)
+        s1 = eval(str(s0))
+        assert s0 == s1
 
 
 class TestMixingTypeSetsExceptions:
@@ -194,75 +194,75 @@ class TestMixingTypeSetsExceptions:
 class TestDefaultPartialConstructors:
     def test_default_space_constructor(self):
         """Test default space constructor."""
-        space = Space()
-        assert space == UnitVectors.Uo
-        assert space.x == 0
-        assert space.y == 0
-        assert space.z == 0
-        assert space.ρ == 0
-        assert space.θ == 0
-        assert space.φ == 0
+        s0 = Space()
+        assert s0 == UnitVectors.Uo
+        assert s0.x == 0
+        assert s0.y == 0
+        assert s0.z == 0
+        assert s0.ρ == 0
+        assert s0.θ == 0
+        assert s0.φ == 0
 
     def test_x(self):
-        space = Space(x=1)
-        assert space.x == 1
-        assert space.y == 0
-        assert space.z == 0
-        assert space.ρ == 1
-        assert space.θ == Space.π / 2
-        assert space.φ == 0
+        s0 = Space(x=1)
+        assert s0.x == 1
+        assert s0.y == 0
+        assert s0.z == 0
+        assert s0.ρ == 1
+        assert s0.θ == Space.π / 2
+        assert s0.φ == 0
 
     def test_y(self):
-        space = Space(y=1)
-        assert space.x == 0
-        assert space.y == 1
-        assert space.z == 0
-        assert space.ρ == 1
-        assert space.θ == Space.π / 2
-        assert space.φ == Space.π / 2
+        s0 = Space(y=1)
+        assert s0.x == 0
+        assert s0.y == 1
+        assert s0.z == 0
+        assert s0.ρ == 1
+        assert s0.θ == Space.π / 2
+        assert s0.φ == Space.π / 2
 
     def test_z(self):
-        space = Space(z=1)
-        assert space.x == 0
-        assert space.y == 0
-        assert space.z == 1
-        assert space.ρ == 1
-        assert space.θ == 0
-        assert space.φ == 0
+        s0 = Space(z=1)
+        assert s0.x == 0
+        assert s0.y == 0
+        assert s0.z == 1
+        assert s0.ρ == 1
+        assert s0.θ == 0
+        assert s0.φ == 0
 
     def test_ρ(self):
-        space = Space(ρ=1)
-        assert space.x == 0
-        assert space.y == 0
-        assert space.z == 1
-        assert space.ρ == 1
-        assert space.θ == 0
-        assert space.φ == 0
+        s0 = Space(ρ=1)
+        assert s0.x == 0
+        assert s0.y == 0
+        assert s0.z == 1
+        assert s0.ρ == 1
+        assert s0.θ == 0
+        assert s0.φ == 0
 
     def test_θ(self):
-        space = Space(θ=Space.π / 2)
-        assert space.x == 1
-        assert space.y == 0
-        assert space.z == pytest.approx(0, abs=1e-16)
-        assert space.ρ == 1
-        assert space.θ == Space.π / 2
-        assert space.φ == 0
+        s0 = Space(θ=Space.π / 2)
+        assert s0.x == 1
+        assert s0.y == 0
+        assert s0.z == pytest.approx(0, abs=1e-16)
+        assert s0.ρ == 1
+        assert s0.θ == Space.π / 2
+        assert s0.φ == 0
 
     def test_φ(self):
-        space = Space(φ=Space.π / 2)
-        assert space.x == 0
-        assert space.y == 0
-        assert space.z == 1
-        assert space.ρ == 1
-        assert space.θ == 0
-        assert space.φ == 0
+        s0 = Space(φ=Space.π / 2)
+        assert s0.x == 0
+        assert s0.y == 0
+        assert s0.z == 1
+        assert s0.ρ == 1
+        assert s0.θ == 0
+        assert s0.φ == 0
 
 
 class TestCartesianConstructors:
     def test_default_space_constructor(self):
         """Test default space constructor."""
-        space = Space()
-        assert space == UnitVectors.Uo
+        s0 = Space()
+        assert s0 == UnitVectors.Uo
 
     @pytest.mark.parametrize(
         "x, y, z, expect",
@@ -277,11 +277,11 @@ class TestCartesianConstructors:
         ],
     )
     def test_x_y_z(self, x, y, z, expect):
-        space = Space(x, y, z)
-        assert space == expect
-        assert space.x == x
-        assert space.y == y
-        assert space.z == z
+        s0 = Space(x, y, z)
+        assert s0 == expect
+        assert s0.x == x
+        assert s0.y == y
+        assert s0.z == z
 
 
 class TestSphericalPhysics1RangeExceptions:
@@ -358,16 +358,16 @@ class TestSphericalPhysics1Constructors:
         ],
     )
     def test_ρ_θ_φ(self, ρ, θ, φ, x, y, z):
-        space = Space(ρ=ρ, θ=θ, φ=φ)
-        assert space.ρ == ρ
-        assert space.θ == pytest.approx(θ, abs=1e-9)
-        assert space.φ == pytest.approx(φ, abs=1e-9)
-        assert space.x == pytest.approx(x, abs=1e-9)
-        assert space.y == pytest.approx(y, abs=1e-9)
-        assert space.z == pytest.approx(z, abs=1e-9)
-        assert space.r == ρ
-        assert space.theta == pytest.approx(θ, abs=1e-9)
-        assert space.phi == pytest.approx(φ, abs=1e-9)
+        s0 = Space(ρ=ρ, θ=θ, φ=φ)
+        assert s0.ρ == ρ
+        assert s0.θ == pytest.approx(θ, abs=1e-9)
+        assert s0.φ == pytest.approx(φ, abs=1e-9)
+        assert s0.x == pytest.approx(x, abs=1e-9)
+        assert s0.y == pytest.approx(y, abs=1e-9)
+        assert s0.z == pytest.approx(z, abs=1e-9)
+        assert s0.r == ρ
+        assert s0.theta == pytest.approx(θ, abs=1e-9)
+        assert s0.phi == pytest.approx(φ, abs=1e-9)
 
 
 class TestSphericalPhysics2RangeExceptions:
@@ -446,16 +446,16 @@ class TestSphericalPhysics2Constructors:
         ],
     )
     def test_r_theta_phi(self, r, theta, phi, x, y, z):
-        space = Space(r=r, theta=theta, phi=phi)
-        assert space.ρ == r
-        assert space.θ == pytest.approx(theta, abs=1e-9)
-        assert space.φ == pytest.approx(phi, abs=1e-9)
-        assert space.x == pytest.approx(x, abs=1e-9)
-        assert space.y == pytest.approx(y, abs=1e-9)
-        assert space.z == pytest.approx(z, abs=1e-9)
-        assert space.r == r
-        assert space.theta == pytest.approx(theta, abs=1e-9)
-        assert space.phi == pytest.approx(phi, abs=1e-9)
+        s0 = Space(r=r, theta=theta, phi=phi)
+        assert s0.ρ == r
+        assert s0.θ == pytest.approx(theta, abs=1e-9)
+        assert s0.φ == pytest.approx(phi, abs=1e-9)
+        assert s0.x == pytest.approx(x, abs=1e-9)
+        assert s0.y == pytest.approx(y, abs=1e-9)
+        assert s0.z == pytest.approx(z, abs=1e-9)
+        assert s0.r == r
+        assert s0.theta == pytest.approx(theta, abs=1e-9)
+        assert s0.phi == pytest.approx(phi, abs=1e-9)
 
 
 class TestSphericalGeo1RangeExceptions:
@@ -606,13 +606,13 @@ class TestSphericalGeo1Constructors:
         ],
     )
     def test_h_az_el(self, h, az, el, x, y, z):
-        space = Space(h=h, el=el, az=az)
-        assert space.h == pytest.approx(h, abs=1e-9)
-        assert space.az == pytest.approx(az, abs=1e-9)
-        assert space.el == pytest.approx(el, abs=1e-9)
-        assert space.x == pytest.approx(x, abs=1)
-        assert space.y == pytest.approx(y, abs=1)
-        assert space.z == pytest.approx(z, abs=1)
+        s0 = Space(h=h, el=el, az=az)
+        assert s0.h == pytest.approx(h, abs=1e-9)
+        assert s0.az == pytest.approx(az, abs=1e-9)
+        assert s0.el == pytest.approx(el, abs=1e-9)
+        assert s0.x == pytest.approx(x, abs=1)
+        assert s0.y == pytest.approx(y, abs=1)
+        assert s0.z == pytest.approx(z, abs=1)
 
 
 class TestSphericalGeo2RangeExceptions:
@@ -763,27 +763,27 @@ class TestSphericalGeo2Constructors:
         ],
     )
     def test_alt_lat_lon(self, alt, lat, lon, x, y, z):
-        space = Space(alt=alt, lat=lat, lon=lon)
-        assert space.alt == pytest.approx(alt, abs=1e-9)
-        assert space.lat == pytest.approx(lat, abs=1e-9)
-        assert space.lon == pytest.approx(lon, abs=1e-9)
-        assert space.x == pytest.approx(x, abs=1)
-        assert space.y == pytest.approx(y, abs=1)
-        assert space.z == pytest.approx(z, abs=1)
+        s0 = Space(alt=alt, lat=lat, lon=lon)
+        assert s0.alt == pytest.approx(alt, abs=1e-9)
+        assert s0.lat == pytest.approx(lat, abs=1e-9)
+        assert s0.lon == pytest.approx(lon, abs=1e-9)
+        assert s0.x == pytest.approx(x, abs=1)
+        assert s0.y == pytest.approx(y, abs=1)
+        assert s0.z == pytest.approx(z, abs=1)
 
 
 class TestEqualityOperators:
     def test_equality_00(self):
-        space = Space(-1, 2, 3)
-        assert space == Space(-1, 2, 3)
+        s0 = Space(-1, 2, 3)
+        assert s0 == Space(-1, 2, 3)
 
     def test_equality_01(self):
-        space = Space(-1, 2, 3)
-        assert space != Space(1, 2, 3)
+        s0 = Space(-1, 2, 3)
+        assert s0 != Space(1, 2, 3)
 
     def test_equality_Uo(self):
-        space = Space()
-        assert space == UnitVectors.Uo
+        s0 = Space()
+        assert s0 == UnitVectors.Uo
 
     def test_vector_unitary_minus_00(self):
         s0 = Space(1, 2, 3)

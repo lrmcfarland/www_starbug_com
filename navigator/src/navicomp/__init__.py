@@ -383,6 +383,10 @@ class Space:
     # ----------------------
 
     @property
+    def space(self) -> np.array:
+        return self._space
+
+    @property
     def x(self) -> np.float64:
         return self._space[0]
 
