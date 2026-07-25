@@ -1061,3 +1061,305 @@ class TestVectorProduct:
         s1 = Space(x=x, y=y, z=z)
         s2 = Space(x=a, y=b, z=c)
         assert s1.cross(s2) == expect
+
+
+class TestUnitVectorRotations:
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (UnitVectors.Ux.value, Space(0, 0, -2 * Space.π), UnitVectors.Ux),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, -7 * Space.π / 4),
+                Space(sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, -3 * Space.π / 2), UnitVectors.Uy.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, -5 * Space.π / 4),
+                Space(-sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, -Space.π), -UnitVectors.Ux.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, -3 * Space.π / 4),
+                Space(-sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, -Space.π / 2), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, -Space.π / 4),
+                Space(sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, 0), UnitVectors.Ux),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, Space.π / 4),
+                Space(sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, Space.π / 2), UnitVectors.Uy),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, 3 * Space.π / 4),
+                Space(-sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, Space.π), -UnitVectors.Ux.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, 5 * Space.π / 4),
+                Space(-sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, 3 * Space.π / 2), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, 7 * Space.π / 4),
+                Space(sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, 2 * Space.π), UnitVectors.Ux),
+        ],
+    )
+    def test_rotate_x_about_z(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (UnitVectors.Uz.value, Space(-2 * Space.π, 0, 0), UnitVectors.Uz),
+            (
+                UnitVectors.Uz.value,
+                Space(-7 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, sqrt2over2),
+            ),
+            (
+                UnitVectors.Uz.value,
+                Space(-3 * Space.π / 2, 0, 0),
+                -UnitVectors.Uy.value,
+            ),
+            (
+                UnitVectors.Uz.value,
+                Space(-5 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(-Space.π, 0, 0), -UnitVectors.Uz.value),
+            (
+                UnitVectors.Uz.value,
+                Space(-3 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(-Space.π / 2, 0, 0), UnitVectors.Uy),
+            (
+                UnitVectors.Uz.value,
+                Space(-Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(0, 0, 0), UnitVectors.Uz),
+            (
+                UnitVectors.Uz.value,
+                Space(Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(Space.π / 2, 0, 0), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uz.value,
+                Space(3 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(Space.π, 0, 0), -UnitVectors.Uz.value),
+            (
+                UnitVectors.Uz.value,
+                Space(5 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(3 * Space.π / 2, 0, 0), UnitVectors.Uy.value),
+            (
+                UnitVectors.Uz.value,
+                Space(7 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(2 * Space.π, 0, 0), UnitVectors.Uz),
+        ],
+    )
+    def test_rotate_z_about_x(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (UnitVectors.Uy.value, Space(0, 0, -2 * Space.π), UnitVectors.Uy),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -7 * Space.π / 4),
+                Space(-sqrt2over2, sqrt2over2, 0),
+            ),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -3 * Space.π / 2),
+                -UnitVectors.Ux.value,
+            ),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -5 * Space.π / 4),
+                Space(-sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, -Space.π), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -3 * Space.π / 4),
+                Space(sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, -Space.π / 2), UnitVectors.Ux.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -Space.π / 4),
+                Space(sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 0), UnitVectors.Uy),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, Space.π / 4),
+                Space(-sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, Space.π / 2), -UnitVectors.Ux.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, 3 * Space.π / 4),
+                Space(-sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, Space.π), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, 5 * Space.π / 4),
+                Space(sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 3 * Space.π / 2), UnitVectors.Ux.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, 7 * Space.π / 4),
+                Space(sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 2 * Space.π), UnitVectors.Uy),
+        ],
+    )
+    def test_rotate_y_about_z(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (UnitVectors.Uy.value, Space(-2 * Space.π, 0, 0), UnitVectors.Uy),
+            (
+                UnitVectors.Uy.value,
+                Space(-7 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, sqrt2over2),
+            ),
+            (
+                UnitVectors.Uy.value,
+                Space(-3 * Space.π / 2, 0, 0),
+                UnitVectors.Uz,
+            ),
+            (
+                UnitVectors.Uy.value,
+                Space(-5 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(-Space.π, 0, 0), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uy.value,
+                Space(-3 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(-Space.π / 2, 0, 0), -UnitVectors.Uz.value),
+            (
+                UnitVectors.Uy.value,
+                Space(-Space.π / 4, 0, 0),
+                Space(
+                    0,
+                    sqrt2over2,
+                    -sqrt2over2,
+                ),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 0), UnitVectors.Uy),
+            (
+                UnitVectors.Uy.value,
+                Space(Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(Space.π / 2, 0, 0), UnitVectors.Uz),
+            (
+                UnitVectors.Uy.value,
+                Space(3 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(Space.π, 0, 0), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uy.value,
+                Space(5 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(3 * Space.π / 2, 0, 0), -UnitVectors.Uz.value),
+            (
+                UnitVectors.Uy.value,
+                Space(7 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 2 * Space.π), UnitVectors.Uy),
+        ],
+    )
+    def test_rotate_y_about_x(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+
+class TestOtherVectorRotations:
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (Space(1, 1, 1), Space(Space.π / 2, 0, 0), Space(1, -1, 1)),
+            (Space(1, 1, 1), Space(0, Space.π / 2, 0), Space(1, 1, -1)),
+            (Space(1, 1, 1), Space(0, 0, Space.π / 2), Space(-1, 1, 1)),
+            (Space(1, 1, 1), Space(-Space.π / 2, 0, 0), Space(1, 1, -1)),
+            (Space(1, 1, 1), Space(0, -Space.π / 2, 0), Space(-1, 1, 1)),
+            (Space(1, 1, 1), Space(0, 0, -Space.π / 2), Space(1, -1, 1)),
+        ],
+    )
+    def test_rotate_diagonal_x_y_z(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (
+                Space(1, 1, 1),
+                Space(Space.π / 2, -Space.π / 2, 0),
+                Space(-1.168339925651214, -1.168339925651214, 0.5195802500659871),
+            ),
+            (
+                Space(1, 1, 1),
+                Space(Space.π, -Space.π, 0),
+                Space(0.41532667533962164, 0.41532667533962164, -1.62941937680349),
+            ),
+            (
+                Space(1, 1, 1),
+                Space(Space.π / 2, Space.π / 2, -Space.π),
+                Space(-1.555587722456349, 0.0337352014458876, -0.7609262605052307),
+            ),
+        ],
+    )
+    def test_rotate_perpendicular_axis(self, vector, axis, expect):
+        # experimental
+        # slope1 = vector.z/np.sqrt(vector.x**2 + vector.y**2)
+        # print(f"slope 1 {slope1}")
+        # slope2 = axis.z/np.sqrt(axis.x**2 + axis.y**2)
+        # print(f"slope 2 {slope2}")
+        assert vector.dot(axis) == 0  # perpendicular
+        s3 = vector.rotate(axis)
+        assert s3 == expect
+        assert s3.dot(axis) == pytest.approx(0, abs=1e-15)  # still perpendicular
+        # slope3 = s3.z/np.sqrt(s3.x**2 + s3.y**2)
+        # print(f"slope 3 {slope3}")

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import Enum
-
+from scipy.spatial.transform import Rotation as R
 import numpy as np
 
 
@@ -243,7 +243,7 @@ class Space:
             other = other.value
         if not isinstance(other, Space):
             return NotImplemented
-        return self.x == other.x and self.y == other.y and self.z == other.z
+        return np.allclose(self.space, other.space)
 
     def __neg__(self) -> Space:
         return Space(x=-self.x, y=-self.y, z=-self.z)
@@ -491,6 +491,14 @@ class Space:
             y=self.z * other.x - self.x * other.z,
             z=self.x * other.y - self.y * other.x,
         )
+
+    def rotate(self, rotation_vector: Space) -> Space:
+        """Rotate self about axis.
+
+        Return a new Space object with the rotation.
+        """
+        rotation = R.from_rotvec(rotation_vector.space)
+        return Space(*rotation.apply(self.space))
 
 
 class UnitVectors(Enum):
