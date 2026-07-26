@@ -28,7 +28,7 @@ services:
       start_period: 10s
   navigator:
     build: ./navigator
-    command: gunicorn --bind 0.0.0.0:5000 www_starbug_com:app
+    command: gunicorn --bind 0.0.0.0:5000 www:app
     expose:
       - 5000
     networks:

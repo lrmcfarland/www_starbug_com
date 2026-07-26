@@ -1,0 +1,1365 @@
+import pytest
+import numpy as np
+
+from navicomp import Space, UnitVectors
+
+sqrt2over2 = np.sqrt(2) / 2
+
+
+class TestDegrees2Radians:
+    @pytest.mark.parametrize(
+        "degrees, radians",
+        [
+            (360, 2 * Space.π),
+            (270, 3 * 2 * Space.π / 4),
+            (180, Space.π),
+            (90, Space.π / 2),
+            (45, Space.π / 4),
+            (0, 0),
+            (-45, -Space.π / 4),
+            (-90, -Space.π / 2),
+            (-180, -Space.π),
+            (-270, -3 * 2 * Space.π / 4),
+            (-360, -2 * Space.π),
+        ],
+    )
+    def test_deg2rad(self, degrees, radians):
+        assert Space.deg2rad(degrees) == radians
+        assert Space.rad2deg(radians) == degrees
+
+
+class TestUnitVectors:
+    """Test unit vectors."""
+
+    def test_Uo(self):
+        """Test unit vector x."""
+        assert UnitVectors.Uo.value.x == 0
+        assert UnitVectors.Uo.value.y == 0
+        assert UnitVectors.Uo.value.z == 0
+
+        with pytest.raises(AttributeError):
+            UnitVectors.Uo = UnitVectors.Ux
+
+    def test_Ux(self):
+        """Test unit vector x."""
+        assert UnitVectors.Ux.value.x == 1
+        assert UnitVectors.Ux.value.y == 0
+        assert UnitVectors.Ux.value.z == 0
+
+        with pytest.raises(AttributeError):
+            UnitVectors.Ux = Space(0, 0, 0)
+
+    def test_Uy(self):
+        """Test unit vector y."""
+        assert UnitVectors.Uy.value.x == 0
+        assert UnitVectors.Uy.value.y == 1
+        assert UnitVectors.Uy.value.z == 0
+
+        with pytest.raises(AttributeError):
+            UnitVectors.Uy = UnitVectors.Ux
+
+    def test_Uz(self):
+        """Test unit vector z."""
+        assert UnitVectors.Uz.value.x == 0
+        assert UnitVectors.Uz.value.y == 0
+        assert UnitVectors.Uz.value.z == 1
+
+        with pytest.raises(AttributeError):
+            UnitVectors.Uz = UnitVectors.Ux
+
+    def test_add_Uo(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 + UnitVectors.Uo.value
+        assert s1 == s0
+
+    def test_add_Ux_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 + UnitVectors.Ux.value
+        assert s1 == Space(2, 2, 3)
+
+    def test_add_Ux_01(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Ux.value + s0
+        assert s1 == Space(2, 2, 3)
+
+    def test_sub_Uo(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 - UnitVectors.Uo.value
+        assert s1 == s0
+
+    def test_sub_Ux(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Ux.value - s0
+        assert s1 == Space(0, -2, -3)
+
+    def test_sub_Uy(self):
+        s0 = Space(1, 2, 3)
+        s1 = UnitVectors.Uy.value - s0
+        assert s1 == Space(-1, -1, -3)
+
+    def test_sub_Uz(self):
+        s0 = Space(1, 2, 3)
+        s1 = s0 - UnitVectors.Uz.value
+        assert s1 == Space(1, 2, 2)
+
+    def test_scalar_mul_Uz(self):
+        s0 = Space.π * UnitVectors.Uz.value
+        assert s0.x == 0.0
+        assert s0.y == 0.0
+        assert s0.z == Space.π
+
+    @pytest.mark.parametrize(
+        "a, b, expect",
+        [
+            (UnitVectors.Ux, UnitVectors.Uy, 0),
+            (UnitVectors.Uy, UnitVectors.Uz, 0),
+            (UnitVectors.Uz, UnitVectors.Ux, 0),
+        ],
+    )
+    def test_a_dot_b(self, a, b, expect):
+        assert a.value.dot(b.value) == expect
+
+    @pytest.mark.parametrize(
+        "a, b, expect",
+        [
+            (UnitVectors.Ux, UnitVectors.Uy, UnitVectors.Uz),
+            (UnitVectors.Uy, UnitVectors.Uz, UnitVectors.Ux),
+            (UnitVectors.Uz, UnitVectors.Ux, UnitVectors.Uy),
+        ],
+    )
+    def test_a_cross_b(self, a, b, expect):
+        assert a.value.cross(b.value) == expect.value
+
+
+class TestAccessorsReprStrEval:
+    def test_cartesian_accessors(self):
+        """Test x, y, z accessors are read only."""
+        s0 = Space(1.23, 2.0, 3)
+
+        assert s0.x == 1.23
+        with pytest.raises(AttributeError):
+            s0.x = 4.5
+
+        assert s0.y == 2
+        with pytest.raises(AttributeError):
+            s0.y = -14.5
+
+        assert s0.z == 3.0
+        with pytest.raises(AttributeError):
+            s0.z = 404.5346
+
+    def test_repr_01(self):
+        s0 = Space(2, -3, 5)
+        assert repr(s0) == "Space(2, -3, 5)"
+
+    def test_eval_repr_01(self):
+        s0 = Space(2, -3, 5)
+        s1 = eval(repr(s0))
+        assert s0 == s1
+
+    def test_str_01(self):
+        s0 = Space(1, 2, 3)
+        assert str(s0) == "Space(x=1, y=2, z=3)"
+
+    def test_eval_str_01(self):
+        s0 = Space(2, -3, 5)
+        s1 = eval(str(s0))
+        assert s0 == s1
+
+
+class TestMixingTypeSetsExceptions:
+    """Mixing type sets is not supported."""
+
+    def test_physics_1_2_combo_exception_00(self):
+        with pytest.raises(ValueError):
+            Space(ρ=1, r=2)
+
+    def test_physics_1_2_combo_exception_01(self):
+        with pytest.raises(ValueError):
+            Space(θ=0, r=2)
+
+    def test_physics_geo_combo_exception_01(self):
+        with pytest.raises(ValueError):
+            Space(h=10, r=2)
+
+    def test_cartesian_geo_combo_exception_01(self):
+        with pytest.raises(ValueError):
+            Space(h=10, x=2)
+
+    def test_cartesian_physics_combo_exception_01(self):
+        with pytest.raises(ValueError):
+            Space(theta=10, z=2)
+
+
+class TestDefaultPartialConstructors:
+    def test_default_space_constructor(self):
+        """Test default space constructor."""
+        s0 = Space()
+        assert s0 == UnitVectors.Uo
+        assert s0.x == 0
+        assert s0.y == 0
+        assert s0.z == 0
+        assert s0.ρ == 0
+        assert s0.θ == 0
+        assert s0.φ == 0
+
+    def test_x(self):
+        s0 = Space(x=1)
+        assert s0.x == 1
+        assert s0.y == 0
+        assert s0.z == 0
+        assert s0.ρ == 1
+        assert s0.θ == Space.π / 2
+        assert s0.φ == 0
+
+    def test_y(self):
+        s0 = Space(y=1)
+        assert s0.x == 0
+        assert s0.y == 1
+        assert s0.z == 0
+        assert s0.ρ == 1
+        assert s0.θ == Space.π / 2
+        assert s0.φ == Space.π / 2
+
+    def test_z(self):
+        s0 = Space(z=1)
+        assert s0.x == 0
+        assert s0.y == 0
+        assert s0.z == 1
+        assert s0.ρ == 1
+        assert s0.θ == 0
+        assert s0.φ == 0
+
+    def test_ρ(self):
+        s0 = Space(ρ=1)
+        assert s0.x == 0
+        assert s0.y == 0
+        assert s0.z == 1
+        assert s0.ρ == 1
+        assert s0.θ == 0
+        assert s0.φ == 0
+
+    def test_θ(self):
+        s0 = Space(θ=Space.π / 2)
+        assert s0.x == 1
+        assert s0.y == 0
+        assert s0.z == pytest.approx(0)
+        assert s0.ρ == 1
+        assert s0.θ == Space.π / 2
+        assert s0.φ == 0
+
+    def test_φ(self):
+        s0 = Space(φ=Space.π / 2)
+        assert s0.x == 0
+        assert s0.y == 0
+        assert s0.z == 1
+        assert s0.ρ == 1
+        assert s0.θ == 0
+        assert s0.φ == 0
+
+
+class TestCartesianConstructors:
+    def test_default_space_constructor(self):
+        """Test default space constructor."""
+        s0 = Space()
+        assert s0 == UnitVectors.Uo
+
+    @pytest.mark.parametrize(
+        "x, y, z, expect",
+        [
+            (1, 2, 3, Space(1, 2, 3)),
+            (-1, 2, 3, Space(-1, 2, 3)),
+            (1, -2, 3, Space(1, -2, 3)),
+            (-1, -2, 3, Space(-1, -2, 3)),
+            (-1, -2, -3, Space(-1, -2, -3)),
+            (-1, 2, -3, Space(-1, 2, -3)),
+            (1, -2, -3, Space(1, -2, -3)),
+        ],
+    )
+    def test_x_y_z(self, x, y, z, expect):
+        s0 = Space(x, y, z)
+        assert s0 == expect
+        assert s0.x == x
+        assert s0.y == y
+        assert s0.z == z
+
+
+class TestSphericalPhysics1RangeExceptions:
+    @pytest.mark.parametrize(
+        "ρ, θ, φ",
+        [
+            (-1, 0, 0),
+            (1, -Space.π / 2, 0),
+            (1, 0, -Space.π / 2),
+            (1, 2 * Space.π, 0),
+            (1, Space.π / 3, 2.0000001 * Space.π),
+        ],
+    )
+    def test_ρ_θ_φ(self, ρ, θ, φ):
+        with pytest.raises(ValueError):
+            Space(ρ=ρ, θ=θ, φ=φ)
+
+
+class TestSphericalPhysics1Constructors:
+    @pytest.mark.parametrize(
+        "ρ, θ, φ, x, y, z",
+        [
+            (0, 0, 0, 0, 0, 0),
+            # down the prime meridian
+            (1, 0, 0, 0, 0, 1),
+            (1, Space.π / 4, 0, sqrt2over2, 0, sqrt2over2),
+            (1, Space.π / 2, 0, 1, 0, 0),
+            (1, 3 * Space.π / 4, 0, sqrt2over2, 0, -sqrt2over2),
+            (1, Space.π, 0, 0.0, 0, -1),
+            # around the equator
+            (1, Space.π / 2, 0, 1.0, 0.0, 0),
+            (1, Space.π / 2, Space.π / 4.0, sqrt2over2, sqrt2over2, 0),
+            (1, Space.π / 2, Space.π / 2, 0, 1, 0),
+            (
+                1,
+                Space.π / 2,
+                3 * Space.π / 4,
+                -sqrt2over2,
+                sqrt2over2,
+                0,
+            ),
+            (1, Space.π / 2, Space.π, -1, 0, 0),
+            (1, Space.π / 2, 5 * Space.π / 4, -sqrt2over2, -sqrt2over2, 0),
+            (1, Space.π / 2, 3 * Space.π / 2, 0, -1, 0),
+            (1, Space.π / 2, 2 * Space.π, 1, 0, 0),
+            # around the tropic of Cancer-ish
+            (1, Space.π / 4, 0, sqrt2over2, 0, sqrt2over2),
+            (1, Space.π / 4, Space.π / 4.0, 0.5, 0.5, sqrt2over2),
+            (1, Space.π / 4, Space.π / 2, 0, sqrt2over2, sqrt2over2),
+            (1, Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, sqrt2over2),
+            (1, Space.π / 4, Space.π, -sqrt2over2, 0, sqrt2over2),
+            (1, Space.π / 4, 5 * Space.π / 4, -0.5, -0.5, sqrt2over2),
+            (1, Space.π / 4, 3 * Space.π / 2, 0, -sqrt2over2, sqrt2over2),
+            (1, Space.π / 4, 2 * Space.π, sqrt2over2, 0, sqrt2over2),
+            # around the tropic of Capricorn-ish
+            (1, 3 * Space.π / 4, 0, sqrt2over2, 0, -sqrt2over2),
+            (1, 3 * Space.π / 4, Space.π / 4.0, 0.5, 0.5, -sqrt2over2),
+            (
+                1,
+                3 * Space.π / 4,
+                Space.π / 2,
+                0,
+                sqrt2over2,
+                -sqrt2over2,
+            ),
+            (1, 3 * Space.π / 4, Space.π, -sqrt2over2, 0, -sqrt2over2),
+            (1, 3 * Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, -sqrt2over2),
+            (1, 3 * Space.π / 4, Space.π, -sqrt2over2, 0, -sqrt2over2),
+            (1, 3 * Space.π / 4, 5 * Space.π / 4, -0.5, -0.5, -sqrt2over2),
+            (1, 3 * Space.π / 4, 3 * Space.π / 2, 0, -sqrt2over2, -sqrt2over2),
+            (1, 3 * Space.π / 4, 2 * Space.π, sqrt2over2, 0, -sqrt2over2),
+            # world size
+            (Space.Re, Space.π / 2, Space.π / 2, 0, Space.Re, 0),
+        ],
+    )
+    def test_ρ_θ_φ(self, ρ, θ, φ, x, y, z):
+        s0 = Space(ρ=ρ, θ=θ, φ=φ)
+        assert s0.ρ == ρ
+        assert s0.θ == pytest.approx(θ)
+        assert s0.φ == pytest.approx(φ)
+        assert s0.x == pytest.approx(x, abs=1e-9)
+        assert s0.y == pytest.approx(y)
+        assert s0.z == pytest.approx(z, abs=1e-9)
+        assert s0.r == ρ
+        assert s0.theta == pytest.approx(θ)
+        assert s0.phi == pytest.approx(φ)
+
+
+class TestSphericalPhysics2RangeExceptions:
+    @pytest.mark.parametrize(
+        "r, theta, phi",
+        [
+            (-1, 0, 0),
+            (1, -Space.π / 2, 0),
+            (1, 0, -1.000001 * Space.π / 2),
+            (1, 2 * Space.π, 0),
+            (1, Space.π / 3, 2.0000001 * Space.π),
+        ],
+    )
+    def test_r_theta_phi(self, r, theta, phi):
+        with pytest.raises(ValueError):
+            Space(r=r, theta=theta, phi=phi)
+
+
+class TestSphericalPhysics2Constructors:
+    @pytest.mark.parametrize(
+        "r, theta, phi, x, y, z",
+        [
+            (0, 0, 0, 0, 0, 0),
+            # down the prime meridian
+            (1, 0, 0, 0, 0, 1),
+            (1, Space.π / 4, 0, sqrt2over2, 0, sqrt2over2),
+            (1, Space.π / 2, 0, 1, 0, 0),
+            (1, Space.π, 0, 0, 0, -1),
+            (1, 3 * Space.π / 4, 0, sqrt2over2, 0, -sqrt2over2),
+            (1, Space.π, 0, 0.0, 0, -1),
+            # around the equator
+            (1, Space.π / 2, 0, 1.0, 0.0, 0),
+            (1, Space.π / 2, Space.π / 4.0, sqrt2over2, sqrt2over2, 0),
+            (1, Space.π / 2, Space.π / 2, 0, 1, 0),
+            (
+                1,
+                Space.π / 2,
+                3 * Space.π / 4,
+                -sqrt2over2,
+                sqrt2over2,
+                0,
+            ),
+            (1, Space.π / 2, Space.π, -1, 0, 0),
+            (1, Space.π / 2, 5 * Space.π / 4, -sqrt2over2, -sqrt2over2, 0),
+            (1, Space.π / 2, 3 * Space.π / 2, 0, -1, 0),
+            (1, Space.π / 2, 2 * Space.π, 1, 0, 0),
+            # around the tropic of Cancer-ish
+            (1, Space.π / 4, 0, sqrt2over2, 0, sqrt2over2),
+            (1, Space.π / 4, Space.π / 4.0, 0.5, 0.5, sqrt2over2),
+            (1, Space.π / 4, Space.π / 2, 0, sqrt2over2, sqrt2over2),
+            (1, Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, sqrt2over2),
+            (1, Space.π / 4, Space.π, -sqrt2over2, 0, sqrt2over2),
+            (1, Space.π / 4, 5 * Space.π / 4, -0.5, -0.5, sqrt2over2),
+            (1, Space.π / 4, 3 * Space.π / 2, 0, -sqrt2over2, sqrt2over2),
+            (1, Space.π / 4, 2 * Space.π, sqrt2over2, 0, sqrt2over2),
+            # around the tropic of Capricorn-ish
+            (1, 3 * Space.π / 4, 0, sqrt2over2, 0, -sqrt2over2),
+            (1, 3 * Space.π / 4, Space.π / 4.0, 0.5, 0.5, -sqrt2over2),
+            (
+                1,
+                3 * Space.π / 4,
+                Space.π / 2,
+                0,
+                sqrt2over2,
+                -sqrt2over2,
+            ),
+            (1, 3 * Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, -sqrt2over2),
+            (1, 3 * Space.π / 4, Space.π, -sqrt2over2, 0, -sqrt2over2),
+            (1, 3 * Space.π / 4, 3 * Space.π / 4, -0.5, 0.5, -sqrt2over2),
+            (1, 3 * Space.π / 4, Space.π, -sqrt2over2, 0, -sqrt2over2),
+            (1, 3 * Space.π / 4, 5 * Space.π / 4, -0.5, -0.5, -sqrt2over2),
+            (1, 3 * Space.π / 4, 3 * Space.π / 2, 0, -sqrt2over2, -sqrt2over2),
+            (1, 3 * Space.π / 4, 2 * Space.π, sqrt2over2, 0, -sqrt2over2),
+            # world size
+            (Space.Re, Space.π / 2, Space.π / 2, 0, Space.Re, 0),
+        ],
+    )
+    def test_r_theta_phi(self, r, theta, phi, x, y, z):
+        s0 = Space(r=r, theta=theta, phi=phi)
+        assert s0.ρ == r
+        assert s0.θ == pytest.approx(theta)
+        assert s0.φ == pytest.approx(phi)
+        assert s0.x == pytest.approx(x, abs=1e-9)
+        assert s0.y == pytest.approx(y)
+        assert s0.z == pytest.approx(z, abs=1e-9)
+        assert s0.r == r
+        assert s0.theta == pytest.approx(theta)
+        assert s0.phi == pytest.approx(phi)
+
+
+class TestSphericalGeo1RangeExceptions:
+    @pytest.mark.parametrize(
+        "h, az, el",
+        [
+            (-1.0000001 * Space.Re, 0, 0),
+            (1, -0.0000001, 0),
+            (1, -2.000001 * Space.π, 0),
+            (1, 0, -1.00001 * Space.π / 2),
+            (1, 0, 1.00001 * Space.π / 2),
+        ],
+    )
+    def test_h_az_el(self, h, az, el):
+        with pytest.raises(ValueError):
+            Space(h=h, az=az, el=el)
+
+
+class TestSphericalGeo1Constructors:
+    @pytest.mark.parametrize(
+        "h, el, az, x, y, z",
+        [
+            (0, 0, 0, Space.Re, 0, 0),
+            # down the prime meridian
+            (1, Space.π / 2, 0, 0, 0, Space.Re + 1),
+            (0, Space.π / 4, 0, sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (1, 0, 0, Space.Re + 1, 0, 0),
+            (0, -Space.π / 4, 0, sqrt2over2 * Space.Re, 0, -sqrt2over2 * Space.Re),
+            (0, -Space.π / 2, 0, 0, 0, -Space.Re),
+            # around the equator
+            (0, 0, 0, Space.Re, 0, 0),
+            (0, 0, Space.π / 4.0, sqrt2over2 * Space.Re, sqrt2over2 * Space.Re, 0),
+            (0, 0, Space.π / 2, 0, Space.Re, 0),
+            (
+                0,
+                0,
+                3 * Space.π / 4,
+                -sqrt2over2 * Space.Re,
+                sqrt2over2 * Space.Re,
+                0,
+            ),
+            (0, 0, Space.π, -Space.Re, 0, 0),
+            (0, 0, 5 * Space.π / 4, -sqrt2over2 * Space.Re, -sqrt2over2 * Space.Re, 0),
+            (0, 0, 3 * Space.π / 2, 0, -Space.Re, 0),
+            (0, 0, 2 * Space.π, Space.Re, 0, 0),
+            # around the tropic of Cancer-ish
+            (0, Space.π / 4, 0, sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (
+                0,
+                Space.π / 4,
+                Space.π / 4.0,
+                0.5 * Space.Re,
+                0.5 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                Space.π / 2,
+                0,
+                sqrt2over2 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                3 * Space.π / 4,
+                -0.5 * Space.Re,
+                0.5 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (0, Space.π / 4, Space.π, -sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (
+                0,
+                Space.π / 4,
+                5 * Space.π / 4,
+                -0.5 * Space.Re,
+                -0.5 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                3 * Space.π / 2,
+                0,
+                -sqrt2over2 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                2 * Space.π,
+                sqrt2over2 * Space.Re,
+                0,
+                sqrt2over2 * Space.Re,
+            ),
+            # around the tropic of Capricorn-ish
+            (0, -Space.π / 4, 0, sqrt2over2 * Space.Re, 0, -sqrt2over2 * Space.Re),
+            (
+                0,
+                -Space.π / 4,
+                Space.π / 4.0,
+                0.5 * Space.Re,
+                0.5 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                Space.π / 2,
+                0,
+                sqrt2over2 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                3 * Space.π / 4,
+                -0.5 * Space.Re,
+                0.5 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (0, Space.π / 4, Space.π, -sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (
+                0,
+                -Space.π / 4,
+                5 * Space.π / 4,
+                -0.5 * Space.Re,
+                -0.5 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                3 * Space.π / 2,
+                0,
+                -sqrt2over2 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                2 * Space.π,
+                sqrt2over2 * Space.Re,
+                0,
+                -sqrt2over2 * Space.Re,
+            ),
+        ],
+    )
+    def test_h_az_el(self, h, az, el, x, y, z):
+        s0 = Space(h=h, el=el, az=az)
+        assert s0.h == pytest.approx(h, abs=1e-9)
+        assert s0.az == pytest.approx(az)
+        assert s0.el == pytest.approx(el)
+        assert s0.x == pytest.approx(x, abs=1)
+        assert s0.y == pytest.approx(y, abs=1)
+        assert s0.z == pytest.approx(z, abs=1)
+
+
+class TestSphericalGeo2RangeExceptions:
+    @pytest.mark.parametrize(
+        "alt, lat, lon",
+        [
+            (-1.0000001 * Space.Re, 0, 0),
+            (0, -1.0000001 * Space.π / 2, 0),
+            (0, 1.0000001 * Space.π / 2, 0),
+            (0, 0, -0.000000001),
+            (0, 0, 2.000000001 * Space.π),
+        ],
+    )
+    def test_alt_lat_lon(self, alt, lat, lon):
+        with pytest.raises(ValueError):
+            Space(alt=alt, lat=lat, lon=lon)
+
+
+class TestSphericalGeo2Constructors:
+    @pytest.mark.parametrize(
+        "alt, lat, lon, x, y, z",
+        [
+            (0, 0, 0, Space.Re, 0, 0),
+            # down the prime meridian
+            (1, Space.π / 2, 0, 0, 0, Space.Re + 1),
+            (0, Space.π / 4, 0, sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (1, 0, 0, Space.Re + 1, 0, 0),
+            (0, -Space.π / 4, 0, sqrt2over2 * Space.Re, 0, -sqrt2over2 * Space.Re),
+            (0, -Space.π / 2, 0, 0, 0, -Space.Re),
+            # around the equator
+            (0, 0, 0, Space.Re, 0, 0),
+            (0, 0, Space.π / 4.0, sqrt2over2 * Space.Re, sqrt2over2 * Space.Re, 0),
+            (0, 0, Space.π / 2, 0, Space.Re, 0),
+            (
+                0,
+                0,
+                3 * Space.π / 4,
+                -sqrt2over2 * Space.Re,
+                sqrt2over2 * Space.Re,
+                0,
+            ),
+            (0, 0, Space.π, -Space.Re, 0, 0),
+            (0, 0, 5 * Space.π / 4, -sqrt2over2 * Space.Re, -sqrt2over2 * Space.Re, 0),
+            (0, 0, 3 * Space.π / 2, 0, -Space.Re, 0),
+            (0, 0, 2 * Space.π, Space.Re, 0, 0),
+            # around the tropic of Cancer-ish
+            (0, Space.π / 4, 0, sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (
+                0,
+                Space.π / 4,
+                Space.π / 4.0,
+                0.5 * Space.Re,
+                0.5 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                Space.π / 2,
+                0,
+                sqrt2over2 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                3 * Space.π / 4,
+                -0.5 * Space.Re,
+                0.5 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (0, Space.π / 4, Space.π, -sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (
+                0,
+                Space.π / 4,
+                5 * Space.π / 4,
+                -0.5 * Space.Re,
+                -0.5 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                3 * Space.π / 2,
+                0,
+                -sqrt2over2 * Space.Re,
+                sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                Space.π / 4,
+                2 * Space.π,
+                sqrt2over2 * Space.Re,
+                0,
+                sqrt2over2 * Space.Re,
+            ),
+            # around the tropic of Capricorn-ish
+            (0, -Space.π / 4, 0, sqrt2over2 * Space.Re, 0, -sqrt2over2 * Space.Re),
+            (
+                0,
+                -Space.π / 4,
+                Space.π / 4.0,
+                0.5 * Space.Re,
+                0.5 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                Space.π / 2,
+                0,
+                sqrt2over2 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                3 * Space.π / 4,
+                -0.5 * Space.Re,
+                0.5 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (0, Space.π / 4, Space.π, -sqrt2over2 * Space.Re, 0, sqrt2over2 * Space.Re),
+            (
+                0,
+                -Space.π / 4,
+                5 * Space.π / 4,
+                -0.5 * Space.Re,
+                -0.5 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                3 * Space.π / 2,
+                0,
+                -sqrt2over2 * Space.Re,
+                -sqrt2over2 * Space.Re,
+            ),
+            (
+                0,
+                -Space.π / 4,
+                2 * Space.π,
+                sqrt2over2 * Space.Re,
+                0,
+                -sqrt2over2 * Space.Re,
+            ),
+        ],
+    )
+    def test_alt_lat_lon(self, alt, lat, lon, x, y, z):
+        s0 = Space(alt=alt, lat=lat, lon=lon)
+        assert s0.alt == pytest.approx(alt, abs=1e-9)
+        assert s0.lat == pytest.approx(lat)
+        assert s0.lon == pytest.approx(lon)
+        assert s0.x == pytest.approx(x, abs=1)
+        assert s0.y == pytest.approx(y, abs=1)
+        assert s0.z == pytest.approx(z, abs=1)
+
+
+class TestEqualityOperators:
+    def test_equality_00(self):
+        s0 = Space(-1, 2, 3)
+        assert s0 == Space(-1, 2, 3)
+
+    def test_equality_01(self):
+        s0 = Space(-1, 2, 3)
+        assert s0 != Space(1, 2, 3)
+
+    def test_equality_Uo(self):
+        s0 = Space()
+        assert s0 == UnitVectors.Uo
+
+    def test_vector_unitary_minus_00(self):
+        s0 = Space(1, 2, 3)
+        s1 = -Space(2, 3, 4)
+        s3 = s0 + s1
+        assert s3 == Space(-1, -1, -1)
+
+
+class TestAddExceptions:
+
+    def test_vector_iadd_str_error_00(self):
+        with pytest.raises(TypeError):
+            s0 = Space(1, 2, 3)
+            s0 += "asdf"
+
+    def test_vector_add_float_error_00(self):
+        with pytest.raises(TypeError):
+            Space(1, 2, 3) + Space.π
+
+    def test_vector_add_float_error_01(self):
+        with pytest.raises(TypeError):
+            Space.π + Space(1, 2, 3)
+
+
+class TestAddOperators:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (0, 0, 0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, 0, 0, Space(3)),
+            (2, 0, 0, 1, 0, 0, Space(3)),
+            (1, 1, 1, -1, -1, -1, Space()),
+            (1, 2, 3, 3, 2, 1, Space(4, 4, 4)),
+        ],
+    )
+    def test_add(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        s3 = s1 + s2
+        assert s3 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (0, 0, 0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, 0, 0, Space(3)),
+            (2, 0, 0, 1, 0, 0, Space(3)),
+            (1, 1, 1, -1, -1, -1, Space()),
+            (1, 2, 3, 3, 2, 1, Space(4, 4, 4)),
+        ],
+    )
+    def test_iadd(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        s2 += s1
+        assert s2 == expect
+
+
+class TestSubtractExceptions:
+
+    def test_vector_iadd_str_error_00(self):
+        with pytest.raises(TypeError):
+            s0 = Space(1, 2, 3)
+            s0 -= "asdf"
+
+    def test_vector_add_float_error_00(self):
+        with pytest.raises(TypeError):
+            Space(1, 2, 3) - Space.π
+
+    def test_vector_add_float_error_01(self):
+        with pytest.raises(TypeError):
+            Space.π - Space(1, 2, 3)
+
+
+class TestSubtractOperators:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (0, 0, 0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, 0, 0, Space(-1)),
+            (2, 0, 0, 1, 0, 0, Space(1)),
+            (1, 1, 1, -1, -1, -1, Space(2, 2, 2)),
+            (1, 2, 3, 3, 2, 1, Space(-2, 0, 2)),
+        ],
+    )
+    def test_add(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        s3 = s1 - s2
+        assert s3 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (0, 0, 0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, 0, 0, Space(1)),
+            (2, 0, 0, 1, 0, 0, Space(-1)),
+            (1, 1, 1, -1, -1, -1, Space(-2, -2, -2)),
+            (1, 2, 3, 3, 2, 1, Space(2, 0, -2)),
+        ],
+    )
+    def test_iadd(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        s2 -= s1
+        assert s2 == expect
+
+
+class TestMultiplyExceptions:
+
+    def test_scalar_imul_exception_00(self):
+        """Test scalar inplace multiply exception.
+
+        Dot and cross products are explicit elsewhere.
+        """
+        with pytest.raises(TypeError):
+            s0 = Space(1, -2, 3)
+            s0 *= Space(2)
+
+
+class TestMultiplyOperators:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, Space(2)),
+            (1, 0, 0, -2, Space(-2)),
+        ],
+    )
+    def test_multiply_float(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = s1 * a
+        s3 = a * s1
+        assert s2 == expect
+        assert s3 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (0, 0, 0, 0, Space()),
+            (1, 0, 0, 2, Space(2)),
+            (1, 0, 0, -2, Space(-2)),
+        ],
+    )
+    def test_imultiply_float(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s1 *= a
+        assert s1 == expect
+
+
+class TestDivideExceptions:
+
+    def test_truediv_by_zero_int(self):
+        with pytest.raises(ZeroDivisionError):
+            Space(1, 1, 1) / 0
+
+    def test_truediv_by_zero_float(self):
+        with pytest.raises(ZeroDivisionError):
+            Space(1, 1, 1) / 0.0
+
+    def test_rtruediv_by_zero_space(self):
+        with pytest.raises(ZeroDivisionError):
+            1.0 / Space(0, 0, 0)
+
+    def test_itruediv_by_zero_int(self):
+        """Test scalar inplace div by zero exception."""
+        with pytest.raises(ZeroDivisionError):
+            s0 = Space(-1, -2, 3)
+            s0 /= 0
+
+    def test_ifloordiv_by_zero_float(self):
+        with pytest.raises(ZeroDivisionError):
+            s1 = Space(1, 1, 1)
+            s1 //= 0.0
+
+    def test_itruediv_by_space(self):
+        """Test scalar inplace divide by Space exception."""
+        with pytest.raises(TypeError):
+            s0 = Space(1, -2, 3)
+            s0 /= Space(2, 4, 6)
+
+    def test_itruediv_by_string(self):
+        """Test scalar inplace divide by Space exception."""
+        with pytest.raises(TypeError):
+            Space(1, -2, 3) / "0"
+
+    def test_ifloordiv_by_space(self):
+        with pytest.raises(TypeError):
+            s1 = Space(1, 1, 1)
+            s1 //= Space(2, 3, 4)
+
+
+class TestDivideOperators:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (4, 0, 0, 2, Space(2)),
+            (-4, 0, 0, -2, Space(2)),
+            (8, -16, 32, 4, Space(2, -4, 8)),
+        ],
+    )
+    def test_truediv(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = s1 / a
+        assert s2 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (4, 1, 1, 2, Space(0.5, 2.0, 2.0)),
+            (-4, 1, 1, -2, Space(0.5, -2.0, -2.0)),
+            (8, -16, 32, 4, Space(0.5, -0.25, 0.125)),
+        ],
+    )
+    def test_rtruediv(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = a / s1
+        assert s2 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (4, 0, 0, 2, Space(2)),
+            (-4, 0, 0, -2, Space(2)),
+            (8, -16, 32, 4, Space(2, -4, 8)),
+        ],
+    )
+    def test_itruediv(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s1 /= a
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, expect",
+        [
+            (-13, 7, 19, 2, Space(-7, 3, 9)),
+            (-4, -3, -7, -3, Space(1, 1, 2)),
+        ],
+    )
+    def test_ifloordiv(self, x, y, z, a, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s1 //= a
+        assert s1 == expect
+
+
+class TestScalarProduct:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (1, 2, 3, 4, 5, 6, 32),
+            (-1, 0, 3, 4, 5, 6, 14),
+        ],
+    )
+    def test_dot_product(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        assert s1.dot(s2) == expect
+
+
+class TestVectorProduct:
+
+    @pytest.mark.parametrize(
+        "x, y, z, a, b, c, expect",
+        [
+            (1, 2, 3, 4, 5, 6, Space(-3, 6, -3)),
+            (4, 5, 6, 1, 2, 3, Space(3, -6, 3)),
+        ],
+    )
+    def test_dot_product(self, x, y, z, a, b, c, expect):
+        s1 = Space(x=x, y=y, z=z)
+        s2 = Space(x=a, y=b, z=c)
+        assert s1.cross(s2) == expect
+
+
+class TestUnitVectorRotations:
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (UnitVectors.Ux.value, Space(0, 0, -2 * Space.π), UnitVectors.Ux),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, -7 * Space.π / 4),
+                Space(sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, -3 * Space.π / 2), UnitVectors.Uy.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, -5 * Space.π / 4),
+                Space(-sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, -Space.π), -UnitVectors.Ux.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, -3 * Space.π / 4),
+                Space(-sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, -Space.π / 2), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, -Space.π / 4),
+                Space(sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, 0), UnitVectors.Ux),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, Space.π / 4),
+                Space(sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, Space.π / 2), UnitVectors.Uy),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, 3 * Space.π / 4),
+                Space(-sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, Space.π), -UnitVectors.Ux.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, 5 * Space.π / 4),
+                Space(-sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, 3 * Space.π / 2), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Ux.value,
+                Space(0, 0, 7 * Space.π / 4),
+                Space(sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Ux.value, Space(0, 0, 2 * Space.π), UnitVectors.Ux),
+        ],
+    )
+    def test_rotate_x_about_z(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (UnitVectors.Uz.value, Space(-2 * Space.π, 0, 0), UnitVectors.Uz),
+            (
+                UnitVectors.Uz.value,
+                Space(-7 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, sqrt2over2),
+            ),
+            (
+                UnitVectors.Uz.value,
+                Space(-3 * Space.π / 2, 0, 0),
+                -UnitVectors.Uy.value,
+            ),
+            (
+                UnitVectors.Uz.value,
+                Space(-5 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(-Space.π, 0, 0), -UnitVectors.Uz.value),
+            (
+                UnitVectors.Uz.value,
+                Space(-3 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(-Space.π / 2, 0, 0), UnitVectors.Uy),
+            (
+                UnitVectors.Uz.value,
+                Space(-Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(0, 0, 0), UnitVectors.Uz),
+            (
+                UnitVectors.Uz.value,
+                Space(Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(Space.π / 2, 0, 0), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uz.value,
+                Space(3 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(Space.π, 0, 0), -UnitVectors.Uz.value),
+            (
+                UnitVectors.Uz.value,
+                Space(5 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(3 * Space.π / 2, 0, 0), UnitVectors.Uy.value),
+            (
+                UnitVectors.Uz.value,
+                Space(7 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uz.value, Space(2 * Space.π, 0, 0), UnitVectors.Uz),
+        ],
+    )
+    def test_rotate_z_about_x(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (UnitVectors.Uy.value, Space(0, 0, -2 * Space.π), UnitVectors.Uy),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -7 * Space.π / 4),
+                Space(-sqrt2over2, sqrt2over2, 0),
+            ),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -3 * Space.π / 2),
+                -UnitVectors.Ux.value,
+            ),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -5 * Space.π / 4),
+                Space(-sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, -Space.π), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -3 * Space.π / 4),
+                Space(sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, -Space.π / 2), UnitVectors.Ux.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, -Space.π / 4),
+                Space(sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 0), UnitVectors.Uy),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, Space.π / 4),
+                Space(-sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, Space.π / 2), -UnitVectors.Ux.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, 3 * Space.π / 4),
+                Space(-sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, Space.π), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, 5 * Space.π / 4),
+                Space(sqrt2over2, -sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 3 * Space.π / 2), UnitVectors.Ux.value),
+            (
+                UnitVectors.Uy.value,
+                Space(0, 0, 7 * Space.π / 4),
+                Space(sqrt2over2, sqrt2over2, 0),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 2 * Space.π), UnitVectors.Uy),
+        ],
+    )
+    def test_rotate_y_about_z(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (UnitVectors.Uy.value, Space(-2 * Space.π, 0, 0), UnitVectors.Uy),
+            (
+                UnitVectors.Uy.value,
+                Space(-7 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, sqrt2over2),
+            ),
+            (
+                UnitVectors.Uy.value,
+                Space(-3 * Space.π / 2, 0, 0),
+                UnitVectors.Uz,
+            ),
+            (
+                UnitVectors.Uy.value,
+                Space(-5 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(-Space.π, 0, 0), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uy.value,
+                Space(-3 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(-Space.π / 2, 0, 0), -UnitVectors.Uz.value),
+            (
+                UnitVectors.Uy.value,
+                Space(-Space.π / 4, 0, 0),
+                Space(
+                    0,
+                    sqrt2over2,
+                    -sqrt2over2,
+                ),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 0), UnitVectors.Uy),
+            (
+                UnitVectors.Uy.value,
+                Space(Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(Space.π / 2, 0, 0), UnitVectors.Uz),
+            (
+                UnitVectors.Uy.value,
+                Space(3 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(Space.π, 0, 0), -UnitVectors.Uy.value),
+            (
+                UnitVectors.Uy.value,
+                Space(5 * Space.π / 4, 0, 0),
+                Space(0, -sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(3 * Space.π / 2, 0, 0), -UnitVectors.Uz.value),
+            (
+                UnitVectors.Uy.value,
+                Space(7 * Space.π / 4, 0, 0),
+                Space(0, sqrt2over2, -sqrt2over2),
+            ),
+            (UnitVectors.Uy.value, Space(0, 0, 2 * Space.π), UnitVectors.Uy),
+        ],
+    )
+    def test_rotate_y_about_x(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+
+class TestOtherVectorRotations:
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (Space(1, 1, 1), Space(Space.π / 2, 0, 0), Space(1, -1, 1)),
+            (Space(1, 1, 1), Space(0, Space.π / 2, 0), Space(1, 1, -1)),
+            (Space(1, 1, 1), Space(0, 0, Space.π / 2), Space(-1, 1, 1)),
+            (Space(1, 1, 1), Space(-Space.π / 2, 0, 0), Space(1, 1, -1)),
+            (Space(1, 1, 1), Space(0, -Space.π / 2, 0), Space(-1, 1, 1)),
+            (Space(1, 1, 1), Space(0, 0, -Space.π / 2), Space(1, -1, 1)),
+        ],
+    )
+    def test_rotate_diagonal_x_y_z(self, vector, axis, expect):
+        s1 = vector.rotate(axis)
+        assert s1 == expect
+
+    @pytest.mark.parametrize(
+        "vector, axis, expect",
+        [
+            (
+                Space(1, 1, 1),
+                Space(Space.π / 2, -Space.π / 2, 0),
+                Space(-1.168339925651214, -1.168339925651214, 0.5195802500659871),
+            ),
+            (
+                Space(1, 1, 1),
+                Space(Space.π, -Space.π, 0),
+                Space(0.41532667533962164, 0.41532667533962164, -1.62941937680349),
+            ),
+            (
+                Space(1, 1, 1),
+                Space(Space.π / 2, Space.π / 2, -Space.π),
+                Space(-1.555587722456349, 0.0337352014458876, -0.7609262605052307),
+            ),
+        ],
+    )
+    def test_rotate_perpendicular_axis(self, vector, axis, expect):
+        # experimental
+        # slope1 = vector.z/np.sqrt(vector.x**2 + vector.y**2)
+        # print(f"slope 1 {slope1}")
+        # slope2 = axis.z/np.sqrt(axis.x**2 + axis.y**2)
+        # print(f"slope 2 {slope2}")
+        assert vector.dot(axis) == 0  # perpendicular
+        s3 = vector.rotate(axis)
+        assert s3 == expect
+        assert s3.dot(axis) == pytest.approx(0)  # still perpendicular
+        # slope3 = s3.z/np.sqrt(s3.x**2 + s3.y**2)
+        # print(f"slope 3 {slope3}")
