@@ -243,7 +243,7 @@ class TestDefaultPartialConstructors:
         s0 = Space(θ=Space.π / 2)
         assert s0.x == 1
         assert s0.y == 0
-        assert s0.z == pytest.approx(0, abs=1e-16)
+        assert s0.z == pytest.approx(0)
         assert s0.ρ == 1
         assert s0.θ == Space.π / 2
         assert s0.φ == 0
@@ -360,14 +360,14 @@ class TestSphericalPhysics1Constructors:
     def test_ρ_θ_φ(self, ρ, θ, φ, x, y, z):
         s0 = Space(ρ=ρ, θ=θ, φ=φ)
         assert s0.ρ == ρ
-        assert s0.θ == pytest.approx(θ, abs=1e-9)
-        assert s0.φ == pytest.approx(φ, abs=1e-9)
+        assert s0.θ == pytest.approx(θ)
+        assert s0.φ == pytest.approx(φ)
         assert s0.x == pytest.approx(x, abs=1e-9)
-        assert s0.y == pytest.approx(y, abs=1e-9)
+        assert s0.y == pytest.approx(y)
         assert s0.z == pytest.approx(z, abs=1e-9)
         assert s0.r == ρ
-        assert s0.theta == pytest.approx(θ, abs=1e-9)
-        assert s0.phi == pytest.approx(φ, abs=1e-9)
+        assert s0.theta == pytest.approx(θ)
+        assert s0.phi == pytest.approx(φ)
 
 
 class TestSphericalPhysics2RangeExceptions:
@@ -448,14 +448,14 @@ class TestSphericalPhysics2Constructors:
     def test_r_theta_phi(self, r, theta, phi, x, y, z):
         s0 = Space(r=r, theta=theta, phi=phi)
         assert s0.ρ == r
-        assert s0.θ == pytest.approx(theta, abs=1e-9)
-        assert s0.φ == pytest.approx(phi, abs=1e-9)
+        assert s0.θ == pytest.approx(theta)
+        assert s0.φ == pytest.approx(phi)
         assert s0.x == pytest.approx(x, abs=1e-9)
-        assert s0.y == pytest.approx(y, abs=1e-9)
+        assert s0.y == pytest.approx(y)
         assert s0.z == pytest.approx(z, abs=1e-9)
         assert s0.r == r
-        assert s0.theta == pytest.approx(theta, abs=1e-9)
-        assert s0.phi == pytest.approx(phi, abs=1e-9)
+        assert s0.theta == pytest.approx(theta)
+        assert s0.phi == pytest.approx(phi)
 
 
 class TestSphericalGeo1RangeExceptions:
@@ -608,8 +608,8 @@ class TestSphericalGeo1Constructors:
     def test_h_az_el(self, h, az, el, x, y, z):
         s0 = Space(h=h, el=el, az=az)
         assert s0.h == pytest.approx(h, abs=1e-9)
-        assert s0.az == pytest.approx(az, abs=1e-9)
-        assert s0.el == pytest.approx(el, abs=1e-9)
+        assert s0.az == pytest.approx(az)
+        assert s0.el == pytest.approx(el)
         assert s0.x == pytest.approx(x, abs=1)
         assert s0.y == pytest.approx(y, abs=1)
         assert s0.z == pytest.approx(z, abs=1)
@@ -765,8 +765,8 @@ class TestSphericalGeo2Constructors:
     def test_alt_lat_lon(self, alt, lat, lon, x, y, z):
         s0 = Space(alt=alt, lat=lat, lon=lon)
         assert s0.alt == pytest.approx(alt, abs=1e-9)
-        assert s0.lat == pytest.approx(lat, abs=1e-9)
-        assert s0.lon == pytest.approx(lon, abs=1e-9)
+        assert s0.lat == pytest.approx(lat)
+        assert s0.lon == pytest.approx(lon)
         assert s0.x == pytest.approx(x, abs=1)
         assert s0.y == pytest.approx(y, abs=1)
         assert s0.z == pytest.approx(z, abs=1)
@@ -1360,6 +1360,6 @@ class TestOtherVectorRotations:
         assert vector.dot(axis) == 0  # perpendicular
         s3 = vector.rotate(axis)
         assert s3 == expect
-        assert s3.dot(axis) == pytest.approx(0, abs=1e-15)  # still perpendicular
+        assert s3.dot(axis) == pytest.approx(0)  # still perpendicular
         # slope3 = s3.z/np.sqrt(s3.x**2 + s3.y**2)
         # print(f"slope 3 {slope3}")
