@@ -39,8 +39,9 @@ It is configured using
     - [Docker user](#docker-user)
     - [Start on boot](#start-on-boot)
     - [logs](#logs)
-  - [docker-compose](#docker-compose)
 - [Deploy](#deploy)
+  - [Initial Install](#initial-install)
+    - [docker-compose](#docker-compose)
   - [GitHub CI/CD](#github-cicd)
   - [GitHub Secrets](#github-secrets)
 - [Actions](#actions)
@@ -55,7 +56,12 @@ This example creates an AWS EC2 instance to host this web site.
 
 ## Instance Type
 
-Ubuntu, t3.micro type.
+Ubuntu Server v26.04 LTS (HVM) SSD volume type, t3.small with 2GB RAM
+
+t3.micro type is getting docker out of memory errors when deploying updates CI/CD.
+It has 1GB RAM which is now too small for www.starbug.com with react, numpy and scipy.
+TODO use pre-build images.
+
 
 
 ### KeyPair
@@ -113,7 +119,7 @@ GitHub secrets.
 
 ## Volumes
 
-Add two 8 GB extra volume to for `/opt` and `/var`
+Add two 8 GB volumes to for `/opt` and `/var` for a total of three volumes.
 The extra volumes will need to be mounted.
 [Make an Amazon EBS volume available for use](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-using-volumes.html)
 
@@ -132,45 +138,72 @@ Once it is running login to finish configuration.
 Initialize and mount the extra disks for `/opt` and `/var`.
 
 ```
-ubuntu@ip-172-31-1-227:~$ sudo lsblk -f
-NAME         FSTYPE   FSVER LABEL           UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
-loop0        squashfs 4.0                                                              0   100% /snap/amazon-ssm-agent/13009
-loop1        squashfs 4.0                                                              0   100% /snap/core22/2411
-loop2        squashfs 4.0                                                              0   100% /snap/snapd/26382
-nvme0n1
-├─nvme0n1p1  ext4     1.0   cloudimg-rootfs 6b954d12-072a-4efb-a00e-a5bbe1bc36d7    4.6G    31% /
-├─nvme0n1p13 ext4     1.0   BOOT            746ae872-0923-4f92-9622-191c0ffec556    826M    10% /boot
-├─nvme0n1p14
-└─nvme0n1p15 vfat     FAT32 UEFI            955C-CD3C                              98.1M     6% /boot/efi
-nvme2n1
-nvme1n1
+ubuntu@ip-172-31-22-170:~$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       6.7G  2.1G  4.6G  31% /
+tmpfs           980M     0  980M   0% /dev/shm
+tmpfs           392M  900K  391M   1% /run
+tmpfs           980M     0  980M   0% /tmp
+none            1.0M     0  1.0M   0% /run/credentials/systemd-journald.service
+none            1.0M     0  1.0M   0% /run/credentials/systemd-resolved.service
+/dev/xvda13     989M   96M  827M  11% /boot
+/dev/xvda15     105M  6.3M   99M   7% /boot/efi
+none            1.0M     0  1.0M   0% /run/credentials/systemd-networkd.service
+none            1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyS0.service
+none            1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
+tmpfs           196M  8.0K  196M   1% /run/user/1000
 ```
 
-`/dev/nvme0n1` is formatted with several partitions mounted.
+```
+ubuntu@ip-172-31-22-170:~$ sudo lsblk -f
+NAME     FSTYPE   FSVER LABEL           UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
+loop0    squashfs 4.0                                                              0   100% /snap/amazon-ssm-agent/13009
+loop1    squashfs 4.0                                                              0   100% /snap/core22/2411
+loop2    squashfs 4.0                                                              0   100% /snap/snapd/26865
+xvda
+├─xvda1  ext4     1.0   cloudimg-rootfs 553eb6f0-df3b-48cf-b8d3-48b8d7fe5b76    4.6G    31% /
+├─xvda13 ext4     1.0   BOOT            005a5132-2768-402e-b8f5-1e31db26b1b6    826M    10% /boot
+├─xvda14
+└─xvda15 vfat     FAT32 UEFI            032C-9E93                              98.1M     6% /boot/efi
+xvdb
+xvdc
+```
+
+`/dev/xvda` is formatted with several partitions mounted.
 
 ```
-sudo file -s /dev/nvme0n1
+sudo file -s /dev/xvda
 ```
 
 For example:
 ```
-ubuntu@ip-172-31-9-157:~$ sudo file -s /dev/nvme0n1
-/dev/nvme0n1: DOS/MBR boot sector, extended partition table (last)
+ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda
+/dev/xvda: DOS/MBR boot sector, extended partition table (last)
 
-ubuntu@ip-172-31-9-157:~$ sudo file -s /dev/nvme0n1p13
-/dev/nvme0n1p13: Linux rev 1.0 ext4 filesystem data, UUID=746ae872-0923-4f92-9622-191c0ffec556, volume name "BOOT" (needs journal recovery) (extents) (64bit) (large files) (huge files)
+ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda1
+/dev/xvda1: Linux rev 1.0 ext4 filesystem data, UUID=553eb6f0-df3b-48cf-b8d3-48b8d7fe5b76, volume name "cloudimg-rootfs" (needs journal recovery) (extents) (64bit) (large files) (huge files)
 
-ubuntu@ip-172-31-9-157:~$ sudo file -s /dev/nvme0n1p15
-/dev/nvme0n1p15: DOS/MBR boot sector, code offset 0x58+2, OEM-ID "mkfs.fat", Media descriptor 0xf8, sectors/track 63, heads 128, hidden sectors 2107392, sectors 217035 (volumes > 32 MB), FAT (32 bit), sectors/FAT 1670, reserved 0x1, serial number 0x955ccd3c, label: "UEFI       "
+ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda13
+/dev/xvda13: Linux rev 1.0 ext4 filesystem data, UUID=005a5132-2768-402e-b8f5-1e31db26b1b6, volume name "BOOT" (needs journal recovery) (extents) (64bit) (large files) (huge files)
+
+ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda14
+/dev/xvda14: data
+
+ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda15
+/dev/xvda15: DOS/MBR boot sector, code offset 0x58+2, OEM-ID "mkfs.fat", Media descriptor 0xf8, sectors/track 63, heads 128, hidden sectors 2107392, sectors 217035 (volumes > 32 MB), FAT (32 bit), sectors/FAT 1670, reserved 0x1, serial number 0x32c9e93, label: "UEFI       "
+
+ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvdb
+/dev/xvdb: data
+
+ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvdc
+/dev/xvdc: data
+
 ```
 
-`/dev/nvme1n1` and `/dev/nvme2n1` not.
+`/dev/xvda` is formatted with several partitions mounted
+but `/dev/xvdb` and `/dev/xvdc`  are not.
+
 “If the output shows simply data, as in the following example output, there is no file system on the device”
-
-```
-ubuntu@ip-172-31-9-157:~$ sudo file -s /dev/nvme1n1
-/dev/nvme1n1: data
-```
 
 ## Format
 
@@ -179,16 +212,16 @@ Do not use this command if you're mounting a volume that already has data on it 
 
 
 ```
-sudo mkfs -t ext4 /dev/nvme1n1
-sudo mkfs -t ext4 /dev/nvme2n1
+sudo mkfs -t ext4 /dev/xvdb
+sudo mkfs -t ext4 /dev/xvdc
 ```
 
 For example:
 ```
-ubuntu@ip-172-31-9-157:~$ sudo mkfs -t ext4 /dev/nvme1n1
+ubuntu@ip-172-31-22-170:~$ sudo mkfs -t ext4 /dev/xvdb
 mke2fs 1.47.2 (1-Jan-2025)
 Creating filesystem with 2097152 4k blocks and 524288 inodes
-Filesystem UUID: 1a61be49-d489-4665-8798-e7cf751ae722
+Filesystem UUID: 1b9c5322-6ba4-4edc-9903-e6b5aebcba98
 Superblock backups stored on blocks:
 	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632
 
@@ -199,11 +232,14 @@ Writing superblocks and filesystem accounting information: done
 
 ```
 
-The disk now formatted
+The disks are now formatted
 
 ```
-ubuntu@ip-172-31-9-157:~$ sudo file -s /dev/nvme1n1
-/dev/nvme1n1: Linux rev 1.0 ext4 filesystem data, UUID=1a61be49-d489-4665-8798-e7cf751ae722 (needs journal recovery) (extents) (64bit) (large files) (huge files)
+ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvdb
+/dev/xvdb: Linux rev 1.0 ext4 filesystem data, UUID=1b9c5322-6ba4-4edc-9903-e6b5aebcba98 (extents) (64bit) (large files) (huge files)
+
+ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvdc
+/dev/xvdc: Linux rev 1.0 ext4 filesystem data, UUID=7281d6c8-df16-483d-b576-d738c134c0eb (extents) (64bit) (large files) (huge files)
 ```
 
 
@@ -219,62 +255,61 @@ sudo mkdir /data
 ```
 
 ```
-sudo mount /dev/nvme1n1 /opt
-sudo mount /dev/nvme2n1 /data
+sudo mount /dev/xvdb /opt
+sudo mount /dev/xvdc /data
 ```
 
 ```
-ubuntu@ip-172-31-1-227:/$ df -h
-Filesystem       Size  Used Avail Use% Mounted on
-/dev/root        6.7G  2.1G  4.6G  31% /
-tmpfs            455M     0  455M   0% /dev/shm
-tmpfs            182M  908K  181M   1% /run
-efivarfs         128K  3.7K  120K   3% /sys/firmware/efi/efivars
-none             1.0M     0  1.0M   0% /run/credentials/systemd-journald.service
-tmpfs            455M     0  455M   0% /tmp
-none             1.0M     0  1.0M   0% /run/credentials/systemd-resolved.service
-/dev/nvme0n1p13  989M   96M  826M  11% /boot
-/dev/nvme0n1p15  105M  6.3M   99M   7% /boot/efi
-none             1.0M     0  1.0M   0% /run/credentials/systemd-networkd.service
-none             1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
-none             1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyS0.service
-tmpfs             91M  8.0K   91M   1% /run/user/1000
-/dev/nvme1n1     7.8G  2.1M  7.4G   1% /opt
-/dev/nvme2n1     7.8G  2.1M  7.4G   1% /data
+ubuntu@ip-172-31-22-170:~$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       6.7G  2.1G  4.6G  31% /
+tmpfs           980M     0  980M   0% /dev/shm
+tmpfs           392M  900K  391M   1% /run
+tmpfs           980M     0  980M   0% /tmp
+none            1.0M     0  1.0M   0% /run/credentials/systemd-journald.service
+none            1.0M     0  1.0M   0% /run/credentials/systemd-resolved.service
+/dev/xvda13     989M   96M  827M  11% /boot
+/dev/xvda15     105M  6.3M   99M   7% /boot/efi
+none            1.0M     0  1.0M   0% /run/credentials/systemd-networkd.service
+none            1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyS0.service
+none            1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
+tmpfs           196M  8.0K  196M   1% /run/user/1000
+/dev/xvdb       7.8G  2.1M  7.4G   1% /opt
+/dev/xvdc       7.8G  2.1M  7.4G   1% /data
 ```
 
 ## /etc/fstab
 
 Update `/etc/fstab` to re-mount this directory after a reboot.
 
-Find the UUID of `/dev/nvme1n1`
+Find the UUIDs of `/dev/xvdb` and `/dev/xvdc`
 
 ```
 sudo blkid
 ```
 
 ```
-ubuntu@ip-172-31-1-227:/$ sudo blkid
-/dev/nvme0n1p1: LABEL="cloudimg-rootfs" UUID="6b954d12-072a-4efb-a00e-a5bbe1bc36d7" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="cloudimg-rootfs" PARTUUID="11cd87fd-6998-4910-a85d-04ba2b583906"
-/dev/nvme0n1p15: LABEL_FATBOOT="UEFI" LABEL="UEFI" UUID="955C-CD3C" BLOCK_SIZE="512" TYPE="vfat" PARTUUID="e6f25bb1-a87e-490a-a8a0-b8971de884c6"
-/dev/nvme0n1p13: LABEL="BOOT" UUID="746ae872-0923-4f92-9622-191c0ffec556" BLOCK_SIZE="4096" TYPE="ext4" PARTUUID="a7ffef85-c6c6-4abf-9a09-4b5104066c05"
+ubuntu@ip-172-31-22-170:~$ sudo blkid
+/dev/xvda1: LABEL="cloudimg-rootfs" UUID="553eb6f0-df3b-48cf-b8d3-48b8d7fe5b76" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="cloudimg-rootfs" PARTUUID="0258290b-29ad-4f2b-9001-018bec7b8627"
+/dev/xvda15: LABEL_FATBOOT="UEFI" LABEL="UEFI" UUID="032C-9E93" BLOCK_SIZE="512" TYPE="vfat" PARTUUID="66b63310-e8e5-415a-a06b-8a748e0d6984"
+/dev/xvda13: LABEL="BOOT" UUID="005a5132-2768-402e-b8f5-1e31db26b1b6" BLOCK_SIZE="4096" TYPE="ext4" PARTUUID="322f27b7-6279-4669-b459-be0125c9ee60"
 /dev/loop1: BLOCK_SIZE="131072" TYPE="squashfs"
-/dev/nvme0n1p14: PARTUUID="b6802a66-9dde-4d0b-b60d-bc57d31d2d7a"
-/dev/nvme2n1: UUID="0516d848-b2a6-49ad-b851-a6e50459fb2b" BLOCK_SIZE="4096" TYPE="ext4"
+/dev/xvdc: UUID="7281d6c8-df16-483d-b576-d738c134c0eb" BLOCK_SIZE="4096" TYPE="ext4"
+/dev/xvda14: PARTUUID="69e33d22-de01-444a-9855-edc58bb8e2c0"
 /dev/loop2: BLOCK_SIZE="131072" TYPE="squashfs"
 /dev/loop0: BLOCK_SIZE="131072" TYPE="squashfs"
-/dev/nvme1n1: UUID="ac496379-39f0-49a3-a295-06b2e8a74feb" BLOCK_SIZE="4096" TYPE="ext4"
+/dev/xvdb: UUID="1b9c5322-6ba4-4edc-9903-e6b5aebcba98" BLOCK_SIZE="4096" TYPE="ext4"
 ```
 
-Add the new disks, `nvme1n1` and `nvme2n1`, by UUID to `/etc/fstab`
+Add the new disks, `xvdb` and `xvdc`, by UUID to `/etc/fstab`
 
 ```
-ubuntu@ip-172-31-1-227:/etc$ cat fstab
+ubuntu@ip-172-31-22-170:/etc$ cat fstab
 LABEL=cloudimg-rootfs	/	 ext4	discard,commit=30,errors=remount-ro	0 1
 LABEL=BOOT	/boot	ext4	defaults	0 2
 LABEL=UEFI	/boot/efi	vfat	umask=0077	0 1
-UUID=ac496379-39f0-49a3-a295-06b2e8a74feb /data	ext4	defaults,nofail	0	2
-UUID=0516d848-b2a6-49ad-b851-a6e50459fb2b /data	ext4	defaults,nofail	0	2
+UUID=1b9c5322-6ba4-4edc-9903-e6b5aebcba98 /data	ext4	defaults,nofail	0	2
+UUID=7281d6c8-df16-483d-b576-d738c134c0eb /data	ext4	defaults,nofail	0	2
 ```
 
 ## chown
@@ -286,6 +321,8 @@ sudo chown ubuntu:ubuntu /data
 sudo chown ubuntu:ubuntu /opt
 ```
 
+Containerd is mounted in /opt after installing docker.
+
 # Docker
 
 [ssh login](#ssh-login)
@@ -293,6 +330,14 @@ sudo chown ubuntu:ubuntu /opt
 ## Install docker
 
 Follow the [ubuntu install instructions](https://docs.docker.com/engine/install/ubuntu/)
+
+Use the `apt` repository script to setup docker install.
+
+Install docker
+
+```
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
 
 ## Post install
 
@@ -342,16 +387,44 @@ Check docker info
 docker info
 ```
 
-## docker-compose
+```
+ubuntu@ip-172-31-22-170:/opt$ docker info --format '{{.LoggingDriver}}'
+local
+ubuntu@ip-17
+```
+
+
+# Deploy
+
+## Initial Install
+
+At this time the initial install takes longer than my simple deploy script support
+so it times out on big changes (this may also be due to the tiny size i was using).
+
+Use git to checkout the initial repo.
+
+```
+mkdir -p  /opt/starbug/
+```
+
+```
+ubuntu@ip-172-31-22-170:/opt/starbug/www_starbug_com$ git clone https://github.com/lrmcfarland/www_starbug_com.git
+Cloning into 'www_starbug_com'...
+remote: Enumerating objects: 973, done.
+remote: Counting objects: 100% (582/582), done.
+remote: Compressing objects: 100% (333/333), done.
+remote: Total 973 (delta 286), reused 405 (delta 219), pack-reused 391 (from 1)
+Receiving objects: 100% (973/973), 35.28 MiB | 1.19 MiB/s, done.
+Resolving deltas: 100% (470/470), done.
+```
+
+### docker-compose
 
 Use docker-compose to launch the services
 
 ```
 docker compose -f 'docker-compose.yml' up -d --build
 ```
-
-
-# Deploy
 
 ## GitHub CI/CD
 
