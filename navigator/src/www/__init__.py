@@ -1,5 +1,7 @@
 from flask import Flask
 
+from navicomp import time
+
 
 def create_app(config_class=None):
     # Create the Flask instance
@@ -14,8 +16,12 @@ def create_app(config_class=None):
         return "Hello, starbug navigator!"
 
     @app.route("/api/")
-    def hello_api():
+    def api_hello():
         return "Hello, starbug API!"
+
+    @app.route("/api/timezones")
+    def api_timezones():
+        return time.timezones()
 
     return app
 
