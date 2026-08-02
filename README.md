@@ -41,10 +41,13 @@ It is configured using
     - [logs](#logs)
 - [Deploy](#deploy)
   - [Initial Install](#initial-install)
+    - [](#)
+    - [Manually](#manually)
     - [docker-compose](#docker-compose)
   - [GitHub CI/CD](#github-cicd)
   - [GitHub Secrets](#github-secrets)
 - [Actions](#actions)
+  - [Re-hosting](#re-hosting)
 
 # Create
 
@@ -60,9 +63,9 @@ Ubuntu Server v26.04 LTS (HVM) SSD volume type, t3.small with 2GB RAM
 
 t3.micro type is getting docker out of memory errors when deploying updates CI/CD.
 It has 1GB RAM which is now too small for www.starbug.com with react, numpy and scipy.
-TODO use pre-build images.
-
-
+Also 8 GB /root disk fills up fast with containerd.
+Double that to 16 GB.
+Consider mounting on its own partition.
 
 ### KeyPair
 
@@ -75,6 +78,9 @@ and add it to the command line with the pem file and user ubuntu like
 this:
 
 ### ssh login
+
+Look up the public DNS record on the AWS console and use it with the
+KeyPair to ssh from the command line.
 
 ```
 % ssh -i "KeyPairs/www.starbug.com-2026-05-10.pem" ubuntu@ec2-54-176-196-103.us-west-1.compute.amazonaws.com
@@ -129,7 +135,7 @@ Launch the instance.
 
 # Configure
 
-Once it is running login to finish configuration.
+Once it is running ssh login to finish configuration.
 
 [ssh login](#ssh-login)
 
@@ -138,9 +144,9 @@ Once it is running login to finish configuration.
 Initialize and mount the extra disks for `/opt` and `/var`.
 
 ```
-ubuntu@ip-172-31-22-170:~$ df -h
+ubuntu@ip-172-31-13-34:~$ df -h
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/root       6.7G  2.1G  4.6G  31% /
+/dev/root        15G  2.1G   13G  15% /
 tmpfs           980M     0  980M   0% /dev/shm
 tmpfs           392M  900K  391M   1% /run
 tmpfs           980M     0  980M   0% /tmp
@@ -155,13 +161,13 @@ tmpfs           196M  8.0K  196M   1% /run/user/1000
 ```
 
 ```
-ubuntu@ip-172-31-22-170:~$ sudo lsblk -f
+ubuntu@ip-172-31-13-34:~$ sudo lsblk -f
 NAME     FSTYPE   FSVER LABEL           UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
-loop0    squashfs 4.0                                                              0   100% /snap/amazon-ssm-agent/13009
-loop1    squashfs 4.0                                                              0   100% /snap/core22/2411
+loop0    squashfs 4.0                                                              0   100% /snap/core22/2411
+loop1    squashfs 4.0                                                              0   100% /snap/amazon-ssm-agent/13009
 loop2    squashfs 4.0                                                              0   100% /snap/snapd/26865
 xvda
-├─xvda1  ext4     1.0   cloudimg-rootfs 553eb6f0-df3b-48cf-b8d3-48b8d7fe5b76    4.6G    31% /
+├─xvda1  ext4     1.0   cloudimg-rootfs 553eb6f0-df3b-48cf-b8d3-48b8d7fe5b76   12.3G    14% /
 ├─xvda13 ext4     1.0   BOOT            005a5132-2768-402e-b8f5-1e31db26b1b6    826M    10% /boot
 ├─xvda14
 └─xvda15 vfat     FAT32 UEFI            032C-9E93                              98.1M     6% /boot/efi
@@ -177,27 +183,27 @@ sudo file -s /dev/xvda
 
 For example:
 ```
-ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda
+ubuntu@ip-172-31-13-34:~$ sudo file -s /dev/xvda
 /dev/xvda: DOS/MBR boot sector, extended partition table (last)
 
-ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda1
+ubuntu@ip-172-31-13-34:~$ sudo file -s /dev/xvda1
 /dev/xvda1: Linux rev 1.0 ext4 filesystem data, UUID=553eb6f0-df3b-48cf-b8d3-48b8d7fe5b76, volume name "cloudimg-rootfs" (needs journal recovery) (extents) (64bit) (large files) (huge files)
 
-ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda13
+ubuntu@ip-172-31-13-34:~$ sudo file -s /dev/xvda13
 /dev/xvda13: Linux rev 1.0 ext4 filesystem data, UUID=005a5132-2768-402e-b8f5-1e31db26b1b6, volume name "BOOT" (needs journal recovery) (extents) (64bit) (large files) (huge files)
 
-ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda14
+ubuntu@ip-172-31-13-34:~$ sudo file -s /dev/xvda14
 /dev/xvda14: data
 
-ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvda15
+ubuntu@ip-172-31-13-34:~$ sudo file -s /dev/xvda15
 /dev/xvda15: DOS/MBR boot sector, code offset 0x58+2, OEM-ID "mkfs.fat", Media descriptor 0xf8, sectors/track 63, heads 128, hidden sectors 2107392, sectors 217035 (volumes > 32 MB), FAT (32 bit), sectors/FAT 1670, reserved 0x1, serial number 0x32c9e93, label: "UEFI       "
 
-ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvdb
+ubuntu@ip-172-31-13-34:~$ sudo file -s /dev/xvdb
 /dev/xvdb: data
 
-ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvdc
+ubuntu@ip-172-31-13-34:~$ sudo file -s /dev/xvdc
 /dev/xvdc: data
-
+ubuntu@ip-172-31-13-34:~$
 ```
 
 `/dev/xvda` is formatted with several partitions mounted
@@ -218,10 +224,24 @@ sudo mkfs -t ext4 /dev/xvdc
 
 For example:
 ```
-ubuntu@ip-172-31-22-170:~$ sudo mkfs -t ext4 /dev/xvdb
+ubuntu@ip-172-31-13-34:~$ sudo mkfs -t ext4 /dev/xvdb
 mke2fs 1.47.2 (1-Jan-2025)
 Creating filesystem with 2097152 4k blocks and 524288 inodes
-Filesystem UUID: 1b9c5322-6ba4-4edc-9903-e6b5aebcba98
+Filesystem UUID: 1491eae1-1f42-4ce7-97aa-9ef3e49e441d
+Superblock backups stored on blocks:
+	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (16384 blocks): done
+Writing superblocks and filesystem accounting information: done
+```
+
+```
+ubuntu@ip-172-31-13-34:~$ sudo mkfs -t ext4 /dev/xvdc
+mke2fs 1.47.2 (1-Jan-2025)
+Creating filesystem with 2097152 4k blocks and 524288 inodes
+Filesystem UUID: 9102dfd0-6c73-4ac6-acc9-c32496bd405d
 Superblock backups stored on blocks:
 	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632
 
@@ -235,11 +255,11 @@ Writing superblocks and filesystem accounting information: done
 The disks are now formatted
 
 ```
-ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvdb
-/dev/xvdb: Linux rev 1.0 ext4 filesystem data, UUID=1b9c5322-6ba4-4edc-9903-e6b5aebcba98 (extents) (64bit) (large files) (huge files)
+ubuntu@ip-172-31-13-34:~$ sudo file -s /dev/xvdb
+/dev/xvdb: Linux rev 1.0 ext4 filesystem data, UUID=1491eae1-1f42-4ce7-97aa-9ef3e49e441d (extents) (64bit) (large files) (huge files)
 
-ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvdc
-/dev/xvdc: Linux rev 1.0 ext4 filesystem data, UUID=7281d6c8-df16-483d-b576-d738c134c0eb (extents) (64bit) (large files) (huge files)
+ubuntu@ip-172-31-13-34:~$ sudo file -s /dev/xvdc
+/dev/xvdc: Linux rev 1.0 ext4 filesystem data, UUID=9102dfd0-6c73-4ac6-acc9-c32496bd405d (extents) (64bit) (large files) (huge files)
 ```
 
 
@@ -248,7 +268,7 @@ ubuntu@ip-172-31-22-170:~$ sudo file -s /dev/xvdc
 `/opt` already exists and is empty.
 We will mount the starbug application here.
 
-The other partition will be `/data` which we need to create.
+The other partition will be `/data` for future database use, which we need to create.
 
 ```
 sudo mkdir /data
@@ -256,13 +276,16 @@ sudo mkdir /data
 
 ```
 sudo mount /dev/xvdb /opt
+```
+
+```
 sudo mount /dev/xvdc /data
 ```
 
 ```
-ubuntu@ip-172-31-22-170:~$ df -h
+ubuntu@ip-172-31-13-34:~$ df -h
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/root       6.7G  2.1G  4.6G  31% /
+/dev/root        15G  2.1G   13G  15% /
 tmpfs           980M     0  980M   0% /dev/shm
 tmpfs           392M  900K  391M   1% /run
 tmpfs           980M     0  980M   0% /tmp
@@ -289,16 +312,16 @@ sudo blkid
 ```
 
 ```
-ubuntu@ip-172-31-22-170:~$ sudo blkid
+ubuntu@ip-172-31-13-34:~$ sudo blkid
 /dev/xvda1: LABEL="cloudimg-rootfs" UUID="553eb6f0-df3b-48cf-b8d3-48b8d7fe5b76" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="cloudimg-rootfs" PARTUUID="0258290b-29ad-4f2b-9001-018bec7b8627"
 /dev/xvda15: LABEL_FATBOOT="UEFI" LABEL="UEFI" UUID="032C-9E93" BLOCK_SIZE="512" TYPE="vfat" PARTUUID="66b63310-e8e5-415a-a06b-8a748e0d6984"
 /dev/xvda13: LABEL="BOOT" UUID="005a5132-2768-402e-b8f5-1e31db26b1b6" BLOCK_SIZE="4096" TYPE="ext4" PARTUUID="322f27b7-6279-4669-b459-be0125c9ee60"
+/dev/xvdc: UUID="9102dfd0-6c73-4ac6-acc9-c32496bd405d" BLOCK_SIZE="4096" TYPE="ext4"
 /dev/loop1: BLOCK_SIZE="131072" TYPE="squashfs"
-/dev/xvdc: UUID="7281d6c8-df16-483d-b576-d738c134c0eb" BLOCK_SIZE="4096" TYPE="ext4"
 /dev/xvda14: PARTUUID="69e33d22-de01-444a-9855-edc58bb8e2c0"
 /dev/loop2: BLOCK_SIZE="131072" TYPE="squashfs"
 /dev/loop0: BLOCK_SIZE="131072" TYPE="squashfs"
-/dev/xvdb: UUID="1b9c5322-6ba4-4edc-9903-e6b5aebcba98" BLOCK_SIZE="4096" TYPE="ext4"
+/dev/xvdb: UUID="1491eae1-1f42-4ce7-97aa-9ef3e49e441d" BLOCK_SIZE="4096" TYPE="ext4"
 ```
 
 Add the new disks, `xvdb` and `xvdc`, by UUID to `/etc/fstab`
@@ -308,8 +331,8 @@ ubuntu@ip-172-31-22-170:/etc$ cat fstab
 LABEL=cloudimg-rootfs	/	 ext4	discard,commit=30,errors=remount-ro	0 1
 LABEL=BOOT	/boot	ext4	defaults	0 2
 LABEL=UEFI	/boot/efi	vfat	umask=0077	0 1
-UUID=1b9c5322-6ba4-4edc-9903-e6b5aebcba98 /data	ext4	defaults,nofail	0	2
-UUID=7281d6c8-df16-483d-b576-d738c134c0eb /data	ext4	defaults,nofail	0	2
+UUID=9102dfd0-6c73-4ac6-acc9-c32496bd405d /data	ext4	defaults,nofail	0	2
+UUID=1491eae1-1f42-4ce7-97aa-9ef3e49e441d /data	ext4	defaults,nofail	0	2
 ```
 
 ## chown
@@ -318,6 +341,8 @@ Don't forget to make it writeable for user ubuntu.
 
 ```
 sudo chown ubuntu:ubuntu /data
+```
+```
 sudo chown ubuntu:ubuntu /opt
 ```
 
@@ -332,6 +357,31 @@ Containerd is mounted in /opt after installing docker.
 Follow the [ubuntu install instructions](https://docs.docker.com/engine/install/ubuntu/)
 
 Use the `apt` repository script to setup docker install.
+
+```
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+```
+
+```
+sudo apt upgrade -y
+```
 
 Install docker
 
@@ -348,6 +398,8 @@ Continue with the [post install](https://docs.docker.com/engine/install/linux-po
 ```
 sudo usermod -aG docker $USER
 ```
+
+"Log out and log back in so that your group membership is re-evaluated."
 
 ### Start on boot
 
@@ -384,27 +436,24 @@ sudo systemctl restart docker
 Check docker info
 
 ```
-docker info
+docker info --format '{{.LoggingDriver}}'
 ```
-
-```
-ubuntu@ip-172-31-22-170:/opt$ docker info --format '{{.LoggingDriver}}'
-local
-ubuntu@ip-17
-```
-
 
 # Deploy
 
 ## Initial Install
 
-At this time the initial install takes longer than my simple deploy script support
-so it times out on big changes (this may also be due to the tiny size i was using).
+###
+
+Update the HOST_IP and trigger a deploy update.
+This will install the source and secrets.
+
+### Manually
 
 Use git to checkout the initial repo.
 
 ```
-mkdir -p  /opt/starbug/
+mkdir -p /opt/starbug/
 ```
 
 ```
@@ -466,3 +515,8 @@ The public DNS version of the web site should now be available,
 e.g. https://ec2-13-52-213-74.us-west-1.compute.amazonaws.com/
 
 [deploy.yml](.github/workflows/deploy.yml) uses these to configure the AWS instance.
+
+## Re-hosting
+
+Update the HOST_IP in [GitHub actions](https://github.com/lrmcfarland/www_starbug_com/settings/secrets/actions)
+and use deploy to install the self signed certs from GitHub secrets.
