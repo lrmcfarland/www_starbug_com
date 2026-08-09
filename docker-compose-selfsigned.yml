@@ -50,21 +50,16 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/letsencrypt/setup/conf.d:/etc/nginx/conf.d:ro
-      - ./certbot/www:/var/www/certbot:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./nginx/selfsigned/conf.d:/etc/nginx/conf.d:ro
     secrets:
+      - nginx_crt
+      - nginx_key
       - nginx_dhparam
 
-  certbot:
-    image: certbot/certbot
-    container_name: certbot_ssl
-    volumes:
-      - ./certbot/www:/var/www/certbot:rw
-      - ./certbot/conf:/etc/letsencrypt:rw
-    # Keeps the container alive checking for renewals every 12 hours
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
-
 secrets:
+  nginx_crt:
+    file: ./nginx/certs/starbug.selfsigned.crt
+  nginx_key:
+    file: ./nginx/certs/starbug.selfsigned.key
   nginx_dhparam:
     file: ./nginx/certs/dhparam.pem
