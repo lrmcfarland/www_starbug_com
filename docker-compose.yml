@@ -50,7 +50,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/letsencrypt/setup/conf.d:/etc/nginx/conf.d:ro
+      # s/run/setup to create the initial certs.
+      - ./nginx/letsencrypt/run/conf.d:/etc/nginx/conf.d:ro
       - ./certbot/www:/var/www/certbot:ro
       - ./certbot/conf:/etc/letsencrypt:ro
     secrets:
