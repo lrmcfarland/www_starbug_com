@@ -14,6 +14,7 @@ the user's browser.
 - [Setup certbot](#setup-certbot)
   - [Initialize](#initialize)
   - [Setup](#setup)
+  - [Request certificates.](#request-certificates)
   - [Run](#run)
 
 
@@ -28,7 +29,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.k
 ```
 
 ```
-lrm@lrmz-Mac-mini-2023 certs % openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.key -out starbug.selfsigned.crt
+Mac-mini-2023 certs % openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout starbug.selfsigned.key -out starbug.selfsigned.crt
 Generating a 2048 bit RSA private key
 ..................................................................................................................+++++
 ................+++++
@@ -59,7 +60,7 @@ openssl dhparam -out dhparam.pem 2048
 ```
 
 ```
-lrm@lrmz-Mac-mini-2023 certs % openssl dhparam -out dhparam.pem 2048
+Mac-mini-2023 certs % openssl dhparam -out dhparam.pem 2048
 
 Generating DH parameters, 2048 bit long safe prime, generator 2
 This is going to take a long time
@@ -100,7 +101,7 @@ Switch to letsencrypt/run to use the new certs.
 
 Modify docker-compose.yml to mount the setup config.
 This is all unsecure port 80 http no s.
-Modify the DNS record to point to this new instance.
+Update the DNS records to point to this new instance.
 This will allow letsencrypt to install the certs.
 
 ```
@@ -115,15 +116,14 @@ This can be run on the development host.
 Test in an incognito window to "forget" ssl 301 from
 previous testing.
 
-Cut and paste into an incognito window to keep Chrome from forcing https
-
 http://localhost/
 
 http://0.0.0.0/
 
 
-Request certificates.
+## Request certificates.
 
+In a shell on the host run
 
 ```
 docker run --rm -it -v "$(pwd)/certbot/www:/var/www/certbot:rw" -v "$(pwd)/certbot/conf:/etc/letsencrypt:rw" certbot/certbot certonly --webroot --webroot-path=/var/www/certbot --email lrm@starbug.com --agree-tos --no-eff-email -d starbug.com -d www.starbug.com
@@ -150,34 +150,28 @@ If you like Certbot, please consider supporting our work by:
  * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
  * Donating to EFF:                    https://eff.org/donate-le
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-ubuntu@ip-172-31-8-19:/opt/starbug/www_starbug_com$
-
-```
-
-
-```
-ubuntu@ip-172-31-8-19:~$ cd /opt/starbug/www_starbug_com/
-
-ubuntu@ip-172-31-8-19:/opt/starbug/www_starbug_com$ ls
-LICENSE  README.md  certbot  docker-compose-selfsigned.yml  docker-compose.yml  holly  navigator  nginx
-
-ubuntu@ip-172-31-8-19:/opt/starbug/www_starbug_com$ docker compose run --rm certbot certonly \
-  --webroot \
-  --webroot-path=/var/www/certbot \
-  --email lrm@starbug.com \
-  --agree-tos \
-  --no-eff-email \
-  -d starbug.com -d www.starbug.com
-Container www_starbug_com-certbot-run-11030522325f Creating
-Container www_starbug_com-certbot-run-11030522325f Created
-Saving debug log to /var/log/letsencrypt/letsencrypt.log
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-No renewals were attempted.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 ```
 
 ## Run
 
 Switch to the letsencrypt/run/conf.d
+
+```
+Mac-mini-2023 www_starbug_com % git diff
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 939fb6a..a0c457c 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -50,7 +50,7 @@ services:
+       - "80:80"
+       - "443:443"
+     volumes:
+-      - ./nginx/letsencrypt/setup/conf.d:/etc/nginx/conf.d:ro
++      - ./nginx/letsencrypt/run/conf.d:/etc/nginx/conf.d:ro
+       - ./certbot/www:/var/www/certbot:ro
+       - ./certbot/conf:/etc/letsencrypt:ro
+     secrets:
+
+```
+
+and update deploy.
