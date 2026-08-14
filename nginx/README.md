@@ -6,6 +6,10 @@ It is a TLS endpoint so it can accept geo-location data from
 the user's browser.
 
 - [nginx](#nginx)
+- [Environment](#environment)
+  - [development](#development)
+  - [setup](#setup)
+  - [production](#production)
 - [Self Signed Certificate](#self-signed-certificate)
   - [Generate](#generate)
   - [dhparam](#dhparam)
@@ -13,10 +17,64 @@ the user's browser.
   - [curl](#curl)
 - [Setup certbot](#setup-certbot)
   - [Initialize](#initialize)
-  - [Setup](#setup)
+  - [Setup](#setup-1)
   - [Request certificates.](#request-certificates)
   - [Run](#run)
 
+# Environment
+
+There are several nginx configurations for www.starbug.com:
+letsencrypt (setup and production), selfsigned and no certs.
+
+nocerts - http only with no certificates.
+
+selfsigned - https but with self signed certs.
+
+setup (letsencrypt) - is http only with a directory mounted to receive
+letsencrypt certs. See below for how to get the initial certs.
+
+letsencrypt - is https after the certs have been setup.
+This is paired with the COMPOSE_PROFILES letsencrypt
+to include letsencrypt's certbot.
+
+## development
+
+.env
+
+```
+# starbug environment variables
+HOLLY_PORT=3000
+NAVIGATOR_PORT=5000
+# See nginx/entrypoint.sh for available options:
+NGINX_TEMPLATE_TYPE=selfsigned
+COMPOSE_PROFILES=selfsigned
+```
+
+## setup
+
+.env
+
+```
+# starbug environment variables
+HOLLY_PORT=3000
+NAVIGATOR_PORT=5000
+# See nginx/entrypoint.sh for available options
+NGINX_TEMPLATE_TYPE=setup
+COMPOSE_PROFILES=letsencrypt
+```
+
+## production
+
+.env
+
+```
+# starbug environment variables
+HOLLY_PORT=3000
+NAVIGATOR_PORT=5000
+# See nginx/entrypoint.sh for available options
+NGINX_TEMPLATE_TYPE=letsencrypt
+COMPOSE_PROFILES=letsencrypt
+```
 
 # Self Signed Certificate
 
@@ -70,7 +128,8 @@ This is going to take a long time
 
 # Debug
 
-On the running self-signed example
+Using an incognito window helps with switching certs to non certs.
+
 
 ```
 docker exec -it www_starbug_com-nginx-1 /bin/bash
@@ -89,22 +148,20 @@ docker exec www_starbug_com-nginx-1 curl -k -s -o /dev/null -w "%{http_code}\n" 
 
 # Setup certbot
 
-
 ## Initialize
 
 Set up the unsecure port 80 to have certbot initialize certs.
-Use letsencrypt/setup/conf.d
 
 ## Setup
 
 Switch to letsencrypt/run to use the new certs.
 
-Modify docker-compose.yml to set `NGINX_TEMPLATE_TYPE=setup`.
-This will unsecure port 80 (http no `s`).
-Update the DNS records to point to this new instance.
-This will allow letsencrypt to install the certs.
+Edit the .env file on the production host to have
 
-This is done by running the certbot on the deployment host.
+```
+NGINX_TEMPLATE_TYPE=setup
+COMPOSE_PROFILES=letsencrypt
+```
 
 Test this in an incognito window to "forget" ssl 301 from
 previous testing.
@@ -116,7 +173,7 @@ http://0.0.0.0/
 
 ## Request certificates.
 
-In a shell on the host run
+In a shell, on the host, run
 
 ```
 docker run --rm -it -v "$(pwd)/certbot/www:/var/www/certbot:rw" -v "$(pwd)/certbot/conf:/etc/letsencrypt:rw" certbot/certbot certonly --webroot --webroot-path=/var/www/certbot --email lrm@starbug.com --agree-tos --no-eff-email -d starbug.com -d www.starbug.com
@@ -147,24 +204,13 @@ If you like Certbot, please consider supporting our work by:
 
 ## Run
 
-Switch to the letsencrypt/run/conf.d
+Switch to the run environment.
+
+Edit .env
 
 ```
-Mac-mini-2023 www_starbug_com % git diff
-diff --git a/docker-compose.yml b/docker-compose.yml
-index 939fb6a..a0c457c 100644
---- a/docker-compose.yml
-+++ b/docker-compose.yml
-@@ -50,7 +50,7 @@ services:
-       - "80:80"
-       - "443:443"
-     volumes:
--      - ./nginx/letsencrypt/setup/conf.d:/etc/nginx/conf.d:ro
-+      - ./nginx/letsencrypt/run/conf.d:/etc/nginx/conf.d:ro
-       - ./certbot/www:/var/www/certbot:ro
-       - ./certbot/conf:/etc/letsencrypt:ro
-     secrets:
-
+NGINX_TEMPLATE_TYPE=letsencrypt
+COMPOSE_PROFILES=letsencrypt
 ```
 
-and update deploy.
+and restart the servers.
