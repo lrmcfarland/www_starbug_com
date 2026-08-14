@@ -30,9 +30,11 @@ services:
       start_period: 10s
   navigator:
     build: ./navigator
-    command: gunicorn --bind 0.0.0.0:5000 www:app
+    environment:
+      - NAVIGATOR_PORT=${NAVIGATOR_PORT:-5000}
     expose:
-      - 5000
+      - "${NAVIGATOR_PORT:-5000}"
+    command: gunicorn --bind 0.0.0.0:"${NAVIGATOR_PORT:-5000}" www:app
     networks:
       - starbug_network
     platform: linux/amd64

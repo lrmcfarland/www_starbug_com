@@ -33,7 +33,7 @@ server {
 
     # Reverse proxy for the API backend
     location /api/ {
-        proxy_pass http://navigator:5000/api/;
+        proxy_pass http://navigator:${NAVIGATOR_PORT}/api/;
 
         # Security and networking headers
         proxy_set_header Host $host;
