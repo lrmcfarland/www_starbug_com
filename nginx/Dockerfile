@@ -1,7 +1,14 @@
 # Use the official Nginx image as the base
 FROM nginx:1.31.2
 
-# Expose port 80 to the outside world
+# Copy template files
+COPY templates/ /etc/nginx/templates/
+
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Expose port 80 and 443 to the outside world
 EXPOSE 80 443
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/entrypoint.sh"]

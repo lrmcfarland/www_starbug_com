@@ -7,8 +7,10 @@ services:
     build:
       context: ./holly
       dockerfile: Dockerfile
+    environment:
+      - HOLLY_PORT=${HOLLY_PORT:-3000}
     expose:
-      - 3000
+      - "${HOLLY_PORT:-3000}"
     networks:
       - starbug_network
     platform: linux/amd64
@@ -43,14 +45,15 @@ services:
         condition: service_completed_successfully
       navigator:
         condition: service_started
+    environment:
+      - HOLLY_PORT=${HOLLY_PORT:-3000}
+      - NGINX_TEMPLATE_TYPE=selfsigned
     networks:
       - starbug_network
     platform: linux/amd64
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./nginx/selfsigned/conf.d:/etc/nginx/conf.d:ro
     secrets:
       - nginx_crt
       - nginx_key

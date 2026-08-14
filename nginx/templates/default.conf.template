@@ -1,7 +1,12 @@
-# Redirect all HTTP traffic to HTTPS
 server {
     listen 80;
-    server_name starbug.com www.starbug.com;
+    server_name localhost starbug.com www.starbug.com;
+
+    # Rule for Let's Encrypt ACME Challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
     return 301 https://$host$request_uri;
 }
 
@@ -9,15 +14,17 @@ server {
     listen 443 ssl;
     server_name starbug.com www.starbug.com;
     http2 on;
-    ssl_certificate /run/secrets/nginx_crt;
-    ssl_certificate_key /run/secrets/nginx_key;
+
+    ssl_certificate /etc/letsencrypt/live/starbug.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/starbug.com/privkey.pem;
+
     ssl_dhparam /run/secrets/nginx_dhparam;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     # frontend for the React app
     location / {
-        proxy_pass http://holly:${HOLLY_PORT:-3000}/;
+        proxy_pass http://holly:${HOLLY_PORT}/;
 
         # Security and networking headers
         proxy_set_header Host $host;
@@ -49,7 +56,7 @@ server {
 
     # Reverse proxy for the production frontend
     location /holly/ {
-        proxy_pass http://holly:${HOLLY_PORT:-3000}/;
+        proxy_pass http://holly:${HOLLY_PORT}/;
 
         # Security and networking headers
         proxy_set_header Host $host;
@@ -62,5 +69,4 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
     }
-
 }

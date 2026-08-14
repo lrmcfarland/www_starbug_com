@@ -7,8 +7,12 @@ services:
     build:
       context: ./holly
       dockerfile: Dockerfile
+    environment:
+      - HOLLY_PORT=${HOLLY_PORT:-3000}
+      # Use NGINX_TEMPLATE_TYPE setup for initial setup of Let's Encrypt
+      - NGINX_TEMPLATE_TYPE=production
     expose:
-      - 3000
+      - "${HOLLY_PORT:-3000}"
     networks:
       - starbug_network
     platform: linux/amd64
@@ -43,6 +47,8 @@ services:
         condition: service_completed_successfully
       navigator:
         condition: service_started
+    environment:
+      - HOLLY_PORT=${HOLLY_PORT:-3000}
     networks:
       - starbug_network
     platform: linux/amd64
@@ -50,8 +56,6 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      # s/run/setup to create the initial certs.
-      - ./nginx/letsencrypt/run/conf.d:/etc/nginx/conf.d:ro
       - ./certbot/www:/var/www/certbot:ro
       - ./certbot/conf:/etc/letsencrypt:ro
     secrets:
@@ -61,6 +65,8 @@ services:
     image: certbot/certbot
     container_name: certbot_ssl
     volumes:
+      # s/run/setup to create the initial certs.
+      - ./nginx/letsencrypt/run/conf.d:/etc/nginx/conf.d:ro
       - ./certbot/www:/var/www/certbot:rw
       - ./certbot/conf:/etc/letsencrypt:rw
     # Keeps the container alive checking for renewals every 12 hours

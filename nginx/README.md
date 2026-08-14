@@ -99,21 +99,14 @@ Use letsencrypt/setup/conf.d
 
 Switch to letsencrypt/run to use the new certs.
 
-Modify docker-compose.yml to mount the setup config.
-This is all unsecure port 80 http no s.
+Modify docker-compose.yml to set `NGINX_TEMPLATE_TYPE=setup`.
+This will unsecure port 80 (http no `s`).
 Update the DNS records to point to this new instance.
 This will allow letsencrypt to install the certs.
 
-```
-...
-    volumes:
-      - ./nginx/letsencrypt/setup/conf.d:/etc/nginx/conf.d:ro
+This is done by running the certbot on the deployment host.
 
-...
-```
-
-This can be run on the development host.
-Test in an incognito window to "forget" ssl 301 from
+Test this in an incognito window to "forget" ssl 301 from
 previous testing.
 
 http://localhost/
