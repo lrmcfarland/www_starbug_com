@@ -9,8 +9,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - HOLLY_PORT=${HOLLY_PORT:-3000}
-      # Use NGINX_TEMPLATE_TYPE setup for initial setup of Let's Encrypt
-      - NGINX_TEMPLATE_TYPE=production
     expose:
       - "${HOLLY_PORT:-3000}"
     networks:
@@ -52,6 +50,7 @@ services:
     environment:
       - HOLLY_PORT=${HOLLY_PORT:-3000}
       - NAVIGATOR_PORT=${NAVIGATOR_PORT:-5000}
+      - NGINX_TEMPLATE_TYPE=${NGINX_TEMPLATE_TYPE:-selfsigned}
     networks:
       - starbug_network
     platform: linux/amd64
@@ -62,11 +61,15 @@ services:
       - ./certbot/www:/var/www/certbot:ro
       - ./certbot/conf:/etc/letsencrypt:ro
     secrets:
+      - nginx_crt
+      - nginx_key
       - nginx_dhparam
 
   certbot:
     image: certbot/certbot
     container_name: certbot_ssl
+    profiles:
+      - letsencrypt
     volumes:
       - ./certbot/www:/var/www/certbot:rw
       - ./certbot/conf:/etc/letsencrypt:rw
@@ -74,5 +77,9 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
 
 secrets:
+  nginx_crt:
+    file: ./nginx/certs/starbug.selfsigned.crt
+  nginx_key:
+    file: ./nginx/certs/starbug.selfsigned.key
   nginx_dhparam:
     file: ./nginx/certs/dhparam.pem

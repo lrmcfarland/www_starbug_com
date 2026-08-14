@@ -61,7 +61,7 @@ jobs:
             echo "${{ secrets.NGINX_KEY }}" > $CERTS_DIR/starbug.selfsigned.key
             echo "${{ secrets.NGINX_DHPARAM }}" > $CERTS_DIR/dhparam.pem
             echo "Starting Docker Compose deployment..."
-            docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
+            docker compose -f 'docker-compose.yml' --profile letsencrypt up -d --build --remove-orphans
 
       # 3. Remove the IP from the firewall after deployment
       - name: Remove Runner IP from Firewall

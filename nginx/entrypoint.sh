@@ -14,11 +14,11 @@ case "$TEMPLATE_TYPE" in
   setup)
     TEMPLATE="/etc/nginx/templates/setup.conf.template"
     ;;
-  selfsigned)
-    TEMPLATE="/etc/nginx/templates/selfsigned.conf.template"
+  letsencrypt)
+    TEMPLATE="/etc/nginx/templates/default.conf.template"
     ;;
   *)
-    TEMPLATE="/etc/nginx/templates/default.conf.template"
+    TEMPLATE="/etc/nginx/templates/selfsigned.conf.template"
     ;;
 esac
 
