@@ -11,6 +11,9 @@ export NAVIGATOR_PORT="${NAVIGATOR_PORT:-5000}"
 TEMPLATE_TYPE="${NGINX_TEMPLATE_TYPE:-production}"
 
 case "$TEMPLATE_TYPE" in
+  selfsigned)
+    TEMPLATE="/etc/nginx/templates/selfsigned.conf.template"
+    ;;
   setup)
     TEMPLATE="/etc/nginx/templates/setup.conf.template"
     ;;
@@ -18,7 +21,7 @@ case "$TEMPLATE_TYPE" in
     TEMPLATE="/etc/nginx/templates/default.conf.template"
     ;;
   *)
-    TEMPLATE="/etc/nginx/templates/selfsigned.conf.template"
+    TEMPLATE="/etc/nginx/templates/nocerts.conf.template"
     ;;
 esac
 
