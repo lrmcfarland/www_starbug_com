@@ -27,5 +27,5 @@ RUN poetry run black .
 RUN poetry run pytest
 
 # Expose the internal port for Nginx to reach
-EXPOSE 5000
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "www:app"]
+EXPOSE "${NAVIGATOR_PORT:-5000}"
+CMD ["gunicorn", "-b", "0.0.0.0:${NAVIGATOR_PORT:-5000}", "www:app"]

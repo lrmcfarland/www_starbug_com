@@ -75,7 +75,7 @@ brew install poetry
 ```
 poetry add --group dev isort flake8 black
 
-lrm@lrmz-Mac-mini-2023 navigator % poetry add --group dev isort flake8 black
+Mac-mini-2023 navigator % poetry add --group dev isort flake8 black
 The following packages are already present in the pyproject.toml and will be skipped:
 
   - isort

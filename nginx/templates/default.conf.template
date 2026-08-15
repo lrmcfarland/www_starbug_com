@@ -1,0 +1,72 @@
+server {
+    listen 80;
+    server_name localhost starbug.com www.starbug.com;
+
+    # Rule for Let's Encrypt ACME Challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name starbug.com www.starbug.com;
+    http2 on;
+
+    ssl_certificate /etc/letsencrypt/live/starbug.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/starbug.com/privkey.pem;
+
+    ssl_dhparam /run/secrets/nginx_dhparam;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # frontend for the React app
+    location / {
+        proxy_pass http://holly:${HOLLY_PORT}/;
+
+        # Security and networking headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Enable WebSockets support (optional but recommended)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Reverse proxy for the API backend
+    location /api/ {
+        proxy_pass http://navigator:${NAVIGATOR_PORT}/api/;
+
+        # Security and networking headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Enable WebSockets support (optional but recommended)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Reverse proxy for the production frontend
+    location /holly/ {
+        proxy_pass http://holly:${HOLLY_PORT}/;
+
+        # Security and networking headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Enable WebSockets support (optional but recommended)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
