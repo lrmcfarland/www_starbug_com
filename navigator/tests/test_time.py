@@ -5,7 +5,12 @@ import pytest
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from navicomp.time import Julian_date, Julian_day, timezones
+from navicomp.time import (
+    Julian_date,
+    Julian_day,
+    timezones,
+    GMST,
+)
 
 
 class TestTimeZones:
@@ -124,4 +129,37 @@ class TestJulianDate:
         """
 
         result = Julian_date(a_julian_day)
+        assert result == expected
+
+
+class TestGMST:
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "expected"),
+        [
+            (
+                datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
+                13.1795463393908,
+            ),  # Meeus p. 88, Example 12.a
+            (
+                datetime(1987, 4, 10, 19, 21, tzinfo=ZoneInfo("UTC")),
+                8.582524882955477,
+            ),  # Meeus p. 89, Example 12.b
+            # (datetime(2000, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC")), "2000-01-01 12:00:00"),
+            # (datetime(1999, 1, 1, 0, 0, tzinfo=ZoneInfo("UTC")), "1999-01-01 00:00:00"),
+            # (datetime(1987, 1, 27, 0, 0, tzinfo=ZoneInfo("UTC")), "1987-01-27 00:00:00"),
+            # (datetime(1987, 6, 19, 12, 0, tzinfo=ZoneInfo("UTC")), "1987-06-19 12:00:00"),
+            # (datetime(1988, 1, 27, 0, 0, tzinfo=ZoneInfo("UTC")), "1988-01-27 00:00:00"),
+            # (datetime(1988, 6, 19, 12, 0, tzinfo=ZoneInfo("UTC")), "1988-06-19 12:00:00"),
+        ],
+    )
+    def test_GMST(self, a_datetime: datetime, expected: str):
+        """Test GMST calculation for various UTC datetimes.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (str): The expected GMST string representation.
+        """
+
+        result = GMST(a_datetime)
         assert result == expected

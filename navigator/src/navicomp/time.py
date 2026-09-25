@@ -107,3 +107,26 @@ def Julian_date(a_julian_day: np.float64) -> datetime:
     second = int((((day_fraction * 24 - hour) * 60) - minute) * 60)
 
     return datetime(year, month, int(day), hour, minute, second, tzinfo=ZoneInfo("UTC"))
+
+
+def GMST(a_datetime: datetime) -> np.float64:
+    """Calculates Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
+
+    Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 87-88
+
+    Args:
+        a_datetime (datetime): The input datetime in UTC.
+
+    Returns:
+        np.float64: The GMST in hours.
+    """
+    jd = Julian_day(a_datetime)
+    t = (jd - 2451545.0) / 36525.0
+    gmst = (
+        280.46061837
+        + 360.98564736629 * (jd - 2451545)
+        + 0.000387933 * t**2
+        - t**3 / 38710000
+    )
+    gmst = gmst % 360.0
+    return gmst / 15.0  # Convert degrees to hours
