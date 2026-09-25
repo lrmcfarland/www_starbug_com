@@ -12,6 +12,8 @@ from navicomp.time import (
     GMST,
 )
 
+from navicomp.transforms import dms_to_decimal
+
 
 class TestTimeZones:
 
@@ -135,31 +137,28 @@ class TestJulianDate:
 class TestGMST:
 
     @pytest.mark.parametrize(
-        ("a_datetime", "expected"),
+        ("a_datetime", "expected", "absolute_tolerance"),
         [
             (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
-                13.1795463393908,
+                dms_to_decimal(13, 10, 46.3668),
+                1e-7,
             ),  # Meeus p. 88, Example 12.a
             (
                 datetime(1987, 4, 10, 19, 21, tzinfo=ZoneInfo("UTC")),
-                8.582524882955477,
+                dms_to_decimal(8, 34, 57.0896),
+                1e-7,
             ),  # Meeus p. 89, Example 12.b
-            # (datetime(2000, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC")), "2000-01-01 12:00:00"),
-            # (datetime(1999, 1, 1, 0, 0, tzinfo=ZoneInfo("UTC")), "1999-01-01 00:00:00"),
-            # (datetime(1987, 1, 27, 0, 0, tzinfo=ZoneInfo("UTC")), "1987-01-27 00:00:00"),
-            # (datetime(1987, 6, 19, 12, 0, tzinfo=ZoneInfo("UTC")), "1987-06-19 12:00:00"),
-            # (datetime(1988, 1, 27, 0, 0, tzinfo=ZoneInfo("UTC")), "1988-01-27 00:00:00"),
-            # (datetime(1988, 6, 19, 12, 0, tzinfo=ZoneInfo("UTC")), "1988-06-19 12:00:00"),
         ],
     )
-    def test_GMST(self, a_datetime: datetime, expected: str):
+    def test_GMST(self, a_datetime: datetime, expected: str, absolute_tolerance: float):
         """Test GMST calculation for various UTC datetimes.
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
             expected (str): The expected GMST string representation.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
         """
 
         result = GMST(a_datetime)
-        assert result == expected
+        assert result == pytest.approx(expected, abs=absolute_tolerance)

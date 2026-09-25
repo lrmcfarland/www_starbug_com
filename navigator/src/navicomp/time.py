@@ -1,3 +1,5 @@
+"""Time and date calculations for astronomical purposes."""
+
 import json
 
 from datetime import datetime
