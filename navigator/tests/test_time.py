@@ -4,7 +4,7 @@ import json
 import numpy as np
 import pytest
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from navicomp.time import (
@@ -74,6 +74,35 @@ class TestJulianDay:
         assert result == expected
 
     @pytest.mark.parametrize(
+        ("a_datetime", "expected", "absolute_tolerance"),
+        [
+            (datetime(2026, 9, 26, 12, 0, tzinfo=ZoneInfo("UTC")), 2461310.0, 1e-10),
+            (
+                datetime(2024, 7, 10, 18, 12, 41, tzinfo=ZoneInfo("UTC")),
+                2460502.258808,
+                1e-6,
+            ),
+        ],
+    )
+    def test_Julian_day_USN(
+        self, a_datetime: datetime, expected: np.float64, absolute_tolerance: float
+    ):
+        """Test Modified Julian Date calculation for various datetimes.
+
+        US Naval Observatory data with Meeus' algorithm
+
+        https://aa.usno.navy.mil/data/JulianDate
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (np.float64): The expected Modified Julian Date.
+            absolute_tolerance (float): The absolute tolerance for the comparison.
+        """
+
+        result = Julian_day(a_datetime)
+        assert abs(result - expected) < absolute_tolerance
+
+    @pytest.mark.parametrize(
         ("a_datetime", "expected"),
         [
             (
@@ -134,6 +163,43 @@ class TestJulianDate:
 
         result = Julian_date(a_julian_day)
         assert result == expected
+
+    @pytest.mark.parametrize(
+        ("a_julian_day", "expected", "absolute_tolerance"),
+        [
+            (
+                2461305.312604,
+                datetime(2026, 9, 21, 19, 30, 9, tzinfo=ZoneInfo("UTC")),
+                timedelta(seconds=2),
+            ),
+            (
+                2460502.258808,
+                datetime(2024, 7, 10, 18, 12, 41, tzinfo=ZoneInfo("UTC")),
+                timedelta(microseconds=1),
+            ),
+        ],
+    )
+    def test_Julian_date_USN(
+        self,
+        a_julian_day: np.float64,
+        expected: datetime,
+        absolute_tolerance: timedelta,
+    ):
+        """Test Modified Julian Date calculation for various UTC datetimes.
+
+        US Naval Observatory data with Meeus' algorithm
+
+        https://aa.usno.navy.mil/data/JulianDate
+
+        Args:
+            a_julian_day (np.float64): The input Modified Julian Date.
+            expected (datetime): The expected datetime in UTC.
+            absolute_tolerance (timedelta): The absolute tolerance for the comparison.
+        """
+
+        result = Julian_date(a_julian_day)
+
+        assert abs(result - expected) < absolute_tolerance
 
 
 class TestGMST:

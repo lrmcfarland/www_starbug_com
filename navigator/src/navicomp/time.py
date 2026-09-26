@@ -9,7 +9,7 @@ import numpy as np
 
 JULIAN_EPOCH_BEGIN_NBCE = datetime(
     4713, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC")
-)  # TODO not BCE
+)  # TODO not BCE see https://aa.usno.navy.mil/data/JulianDate
 JULIAN_EPOCH_END = datetime(1582, 10, 4, tzinfo=ZoneInfo("UTC"))
 GREGORIAN_EPOCH = datetime(1582, 10, 15, tzinfo=ZoneInfo("UTC"))
 MJD_EPOCH = datetime(1858, 11, 17, tzinfo=ZoneInfo("UTC"))
