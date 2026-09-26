@@ -1,3 +1,5 @@
+"""tests for navicomp.transforms module."""
+
 import pytest
 
 from navicomp.transforms import dms_to_decimal, decimal_to_dms

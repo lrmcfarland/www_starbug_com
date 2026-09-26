@@ -1,3 +1,5 @@
+"""tests for navicomp.time module."""
+
 import json
 import numpy as np
 import pytest
