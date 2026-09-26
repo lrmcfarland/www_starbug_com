@@ -1,4 +1,4 @@
-"""tests for navicomp.time module."""
+"""Tests for navicomp.time module."""
 
 import json
 import numpy as np
@@ -7,12 +7,7 @@ import pytest
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from navicomp.time import (
-    Julian_date,
-    Julian_day,
-    timezones,
-    GMST,
-)
+import navicomp.time
 
 from navicomp.transforms import dms_to_decimal
 
@@ -20,7 +15,7 @@ from navicomp.transforms import dms_to_decimal
 class TestTimeZones:
 
     def test_available_timezones(self):
-        tzones = json.loads(timezones())
+        tzones = json.loads(navicomp.time.timezones())
         assert isinstance(tzones, list)
         assert "UTC" in tzones
 
@@ -69,8 +64,7 @@ class TestJulianDay:
             a_datetime (datetime): The input datetime in UTC.
             expected (np.float64): The expected Modified Julian Date.
         """
-
-        result = Julian_day(a_datetime)
+        result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
         assert result == expected
 
     @pytest.mark.parametrize(
@@ -98,8 +92,7 @@ class TestJulianDay:
             expected (np.float64): The expected Modified Julian Date.
             absolute_tolerance (float): The absolute tolerance for the comparison.
         """
-
-        result = Julian_day(a_datetime)
+        result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
         assert abs(result - expected) < absolute_tolerance
 
     @pytest.mark.parametrize(
@@ -120,15 +113,14 @@ class TestJulianDay:
             a_datetime (datetime): The input datetime in UTC.
             expected (np.float64): The expected Modified Julian Date.
         """
-
-        result = Julian_day(a_datetime)
+        result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
         assert result == expected
 
 
 class TestJulianDate:
 
     @pytest.mark.parametrize(
-        ("a_julian_day", "expected"),
+        ("a_Julian_day", "expected"),
         [
             (2451545.0, datetime(2000, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC"))),
             (2451179.5, datetime(1999, 1, 1, 0, 0, tzinfo=ZoneInfo("UTC"))),
@@ -151,21 +143,20 @@ class TestJulianDate:
             (1842713.0, datetime(333, 1, 27, 12, 0, tzinfo=ZoneInfo("UTC"))),
         ],
     )
-    def test_Julian_date_AA(self, a_julian_day: np.float64, expected: datetime):
+    def test_Julian_date_AA(self, a_Julian_day: np.float64, expected: datetime):
         """Test Modified Julian Date calculation for various UTC datetimes.
 
         Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 62
 
         Args:
-            a_julian_day (np.float64): The input Modified Julian Date.
+            a_Julian_day (np.float64): The input Modified Julian Date.
             expected (datetime): The expected datetime in UTC.
         """
-
-        result = Julian_date(a_julian_day)
+        result = navicomp.time.AstronomicalAlgorithms.Julian_date(a_Julian_day)
         assert result == expected
 
     @pytest.mark.parametrize(
-        ("a_julian_day", "expected", "absolute_tolerance"),
+        ("a_Julian_day", "expected", "absolute_tolerance"),
         [
             (
                 2461305.312604,
@@ -177,11 +168,16 @@ class TestJulianDate:
                 datetime(2024, 7, 10, 18, 12, 41, tzinfo=ZoneInfo("UTC")),
                 timedelta(microseconds=1),
             ),
+            (
+                2437855.798611,
+                datetime(1962, 7, 10, 7, 10, 0, tzinfo=ZoneInfo("UTC")),
+                timedelta(seconds=2),
+            ),
         ],
     )
     def test_Julian_date_USN(
         self,
-        a_julian_day: np.float64,
+        a_Julian_day: np.float64,
         expected: datetime,
         absolute_tolerance: timedelta,
     ):
@@ -192,13 +188,11 @@ class TestJulianDate:
         https://aa.usno.navy.mil/data/JulianDate
 
         Args:
-            a_julian_day (np.float64): The input Modified Julian Date.
+            a_Julian_day (np.float64): The input Modified Julian Date.
             expected (datetime): The expected datetime in UTC.
             absolute_tolerance (timedelta): The absolute tolerance for the comparison.
         """
-
-        result = Julian_date(a_julian_day)
-
+        result = navicomp.time.AstronomicalAlgorithms.Julian_date(a_Julian_day)
         assert abs(result - expected) < absolute_tolerance
 
 
@@ -217,16 +211,103 @@ class TestGMST:
                 dms_to_decimal(8, 34, 57.0896),
                 1e-7,
             ),  # Meeus p. 89, Example 12.b
+            (
+                datetime(1994, 6, 16, 18, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(11, 39, 5.0672),
+                1e-7,
+            ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
+            (
+                datetime(2050, 8, 18, 18, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(15, 49, 11.5745),
+                1e-10,
+            ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
         ],
     )
-    def test_GMST(self, a_datetime: datetime, expected: str, absolute_tolerance: float):
-        """Test GMST calculation for various UTC datetimes.
+    def test_Meeus_GMST(
+        self, a_datetime: datetime, expected: str, absolute_tolerance: float
+    ):
+        """Test Meeus GMST calculation for various UTC datetimes.
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
             expected (str): The expected GMST string representation.
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
+        result = navicomp.time.Meeus.GMST(a_datetime)
+        assert result == pytest.approx(expected, abs=absolute_tolerance)
 
-        result = GMST(a_datetime)
+    @pytest.mark.parametrize(
+        ("a_datetime", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(13, 10, 46.3668),
+                1e-5,
+            ),  # Meeus p. 88, Example 12.a
+            (
+                datetime(1987, 4, 10, 19, 21, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(8, 34, 57.0896),
+                1e-5,
+            ),  # Meeus p. 89, Example 12.b
+            (
+                datetime(1994, 6, 16, 18, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(11, 39, 5.0672),
+                1e-5,
+            ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
+            (
+                datetime(2050, 8, 18, 18, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(15, 49, 11.5745),
+                1e-5,
+            ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
+        ],
+    )
+    def test_USN_GMST(
+        self, a_datetime: datetime, expected: str, absolute_tolerance: float
+    ):
+        """Test GMST USN calculation for various UTC datetimes.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (str): The expected GMST string representation.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.USN.GMST(a_datetime)
+        assert result == pytest.approx(expected, abs=absolute_tolerance)
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(13, 10, 46.3668),
+                1e-6,
+            ),  # Meeus p. 88, Example 12.a
+            (
+                datetime(1987, 4, 10, 19, 21, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(8, 34, 57.0896),
+                1e-6,
+            ),  # Meeus p. 89, Example 12.b
+            (
+                datetime(1994, 6, 16, 18, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(11, 39, 5.0672),
+                1e-6,
+            ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
+            (
+                datetime(2050, 8, 18, 18, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(15, 49, 11.5745),
+                1e-5,
+            ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
+        ],
+    )
+    def test_USN_GMST_simplified(
+        self, a_datetime: datetime, expected: str, absolute_tolerance: float
+    ):
+        """Test GMST USN calculation for various UTC datetimes.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (str): The expected GMST string representation.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.USN.GMST_simplified(a_datetime)
         assert result == pytest.approx(expected, abs=absolute_tolerance)
