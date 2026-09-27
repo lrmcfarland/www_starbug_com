@@ -4,9 +4,10 @@
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --accent: #b45309;
+  --accent-bg: rgba(180, 83, 9, 0.1);
+  --accent-border: rgba(180, 83, 9, 0.5);
+  --accent-secondary: #0f766e;
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
@@ -38,9 +39,10 @@
     --bg: #16171d;
     --border: #2e303a;
     --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
+    --accent: #fbbf24;
+    --accent-bg: rgba(251, 191, 36, 0.15);
+    --accent-border: rgba(251, 191, 36, 0.5);
+    --accent-secondary: #2dd4bf;
     --social-bg: rgba(47, 48, 58, 0.5);
     --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
       rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
@@ -104,4 +106,32 @@ p {
   margin: 0;
   color: #ffffff;
   text-align: left;
+}
+
+a {
+  display: inline-block; /* Allows vertical margins and padding */
+  margin: 3px 3px;       /* Adds 3px space top/bottom, 3px left/right */
+  padding: 2px 2px;      /* Adds space inside the clickable area */
+  color: var(--accent-secondary);
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+button {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  margin: 4px 2px;
+}
+
+button:hover {
+  background: var(--accent);
+  color: var(--bg);
 }
