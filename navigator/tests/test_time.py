@@ -311,3 +311,26 @@ class TestGMST:
         """
         result = navicomp.time.USN.GMST_simplified(a_datetime)
         assert result == pytest.approx(expected, abs=absolute_tolerance)
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(23, 26, 27.407),
+                1e-3,
+            ),  # Meeus p. 148, Example 22.a
+        ],
+    )
+    def test_USN_obliquity(
+        self, a_datetime: datetime, expected: str, absolute_tolerance: float
+    ):
+        """Test the mean obliquity of the ecliptic calculation.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (str): The expected obliquity string representation.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.USN.obliquity(a_datetime)
+        assert result == pytest.approx(expected, abs=absolute_tolerance)

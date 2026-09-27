@@ -216,3 +216,20 @@ class USN(AstronomicalAlgorithms):
         gmst = 18.697375 + 24.065709824279 * (jd - cls.JD2k)
         gmst = gmst % 24.0
         return gmst
+
+    @classmethod
+    def obliquity(cls, a_datetime: datetime) -> np.float64:
+        """Calculates the mean obliquity of the ecliptic in degrees.
+
+        US Naval Observatory Astronomical Algorithms.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+
+        Returns:
+            np.float64: The mean obliquity of the ecliptic in degrees.
+        """
+        jd = cls.Julian_day(a_datetime)
+        t = jd - cls.JD2k
+        obliquity = 23.4393 - 0.0000004 * t
+        return obliquity
