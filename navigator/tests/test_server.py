@@ -52,3 +52,29 @@ class TestJulianDateAPI:
         assert response.status_code == 500
         data = json.loads(response.data)
         assert "error" in data
+
+
+class TestJulianDayAPI:
+
+    def test_valid_julian_day(self, app):
+        response = app.test_client().post(
+            "/api/julian_day", json={"datetime": "2000-01-01T12:00:00+00:00"}
+        )
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        assert "julian_day" in data
+        assert data["julian_day"] == 2451545.0
+
+    def test_missing_datetime(self, app):
+        response = app.test_client().post("/api/julian_day", json={})
+        assert response.status_code == 400
+        data = json.loads(response.data)
+        assert "error" in data
+
+    def test_invalid_datetime_format(self, app):
+        response = app.test_client().post(
+            "/api/julian_day", json={"datetime": "invalid_format"}
+        )
+        assert response.status_code == 500
+        data = json.loads(response.data)
+        assert "error" in data

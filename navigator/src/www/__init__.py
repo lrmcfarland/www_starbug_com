@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Flask, request, jsonify
 
 from navicomp import time
@@ -38,6 +40,25 @@ def create_app(config_class=None):
         try:
             julian_date = time.AstronomicalAlgorithms.Julian_date(julian_day)
             return jsonify({"julian_date": julian_date.isoformat()})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/julian_day", methods=["POST"])
+    def api_julian_day():
+        """Convert a datetime to a Julian day.
+        Expects a JSON payload with a 'datetime' key.
+        Returns a JSON response with the converted Julian day or an error message.
+        """
+        data = request.get_json()
+
+        if not data or "datetime" not in data:
+            return jsonify({"error": "Missing 'datetime' in request body"}), 400
+
+        datetime_str = data["datetime"]
+        try:
+            api_julian_date = datetime.datetime.fromisoformat(datetime_str)
+            julian_day = time.AstronomicalAlgorithms.Julian_day(api_julian_date)
+            return jsonify({"julian_day": julian_day})
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
