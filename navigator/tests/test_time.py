@@ -334,3 +334,26 @@ class TestGMST:
         """
         result = navicomp.time.USN.obliquity(a_datetime)
         assert result == pytest.approx(expected, abs=absolute_tolerance)
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(1994, 6, 16, 18, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(11, 39, 5.8974),
+                1e-3,
+            ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
+        ],
+    )
+    def test_USN_GAST(
+        self, a_datetime: datetime, expected: str, absolute_tolerance: float
+    ):
+        """Test Greenwich Apparent Sidereal Time (GAST).
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (str): The expected GAST string representation.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.USN.GAST(a_datetime)
+        assert result == pytest.approx(expected, abs=absolute_tolerance)

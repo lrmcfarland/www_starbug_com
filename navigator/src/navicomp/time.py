@@ -8,6 +8,8 @@ from zoneinfo import ZoneInfo, available_timezones
 
 import numpy as np
 
+from navicomp import Space
+
 
 def timezones():
     """List of available timezones."""
@@ -168,6 +170,24 @@ class USN(AstronomicalAlgorithms):
     """
 
     @classmethod
+    def JDo(cls, a_datetime: datetime) -> np.float64:
+        """Calculates the Julian date of the previous midnight.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+
+        Returns:
+            np.float64: The Julian date of the previous midnight.
+        """
+        JDtt = cls.Julian_day(a_datetime)
+        jd_floor = floor(JDtt)
+        if JDtt - jd_floor >= 0.5:
+            jdo = jd_floor + 0.5
+        else:
+            jdo = jd_floor - 0.5
+        return jdo
+
+    @classmethod
     def GMST(cls, a_datetime: datetime) -> np.float64:
         """Calculates Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
 
@@ -177,22 +197,18 @@ class USN(AstronomicalAlgorithms):
         Returns:
             np.float64: The GMST in hours.
         """
-        jd = cls.Julian_day(a_datetime)
+        JDtt = cls.Julian_day(a_datetime)
 
         # Julian date of the previous midnight
-        jd_floor = floor(jd)
-        if jd - jd_floor >= 0.5:
-            jdo = jd_floor + 0.5
-        else:
-            jdo = jd_floor - 0.5
+        jdo = cls.JDo(a_datetime)
 
-        dut = jdo - cls.JD2k
-        h = (jd - jdo) * 24.0
-        t = (jd - cls.JD2k) / 36525.0
+        Dut = jdo - cls.JD2k
+        h = (JDtt - jdo) * 24.0
+        t = (JDtt - cls.JD2k) / 36525.0
 
         gmst = (
             6.697375
-            + 0.065707485828 * dut
+            + 0.065707485828 * Dut
             + 1.0027379 * h
             + 0.0854103 * t
             + 0.0000258 * t**2
@@ -212,8 +228,8 @@ class USN(AstronomicalAlgorithms):
         Returns:
             np.float64: The GMST in hours.
         """
-        jd = cls.Julian_day(a_datetime)
-        gmst = 18.697375 + 24.065709824279 * (jd - cls.JD2k)
+        JDtt = cls.Julian_day(a_datetime)
+        gmst = 18.697375 + 24.065709824279 * (JDtt - cls.JD2k)
         gmst = gmst % 24.0
         return gmst
 
@@ -229,7 +245,32 @@ class USN(AstronomicalAlgorithms):
         Returns:
             np.float64: The mean obliquity of the ecliptic in degrees.
         """
-        jd = cls.Julian_day(a_datetime)
-        t = jd - cls.JD2k
-        obliquity = 23.4393 - 0.0000004 * t
-        return obliquity
+        JDtt = cls.Julian_day(a_datetime)
+        Dtt = JDtt - cls.JD2k
+        obliquity = 23.4393 - 0.0000004 * Dtt
+        return obliquity  # TODO radians?
+
+    @classmethod
+    def GAST(cls, a_datetime: datetime) -> np.float64:
+        """Calculates Greenwich Apparent Sidereal Time (GAST) in hours from a datetime.
+
+        US Naval Observatory Astronomical Algorithms.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+
+        Returns:
+            np.float64: The GAST in hours.
+        """
+        JDtt = cls.Julian_day(a_datetime)
+        Dtt = JDtt - cls.JD2k
+        gmst = cls.GMST(a_datetime)
+        obliquity = cls.obliquity(a_datetime)
+        ε = Space.deg2rad(obliquity)
+        Ω = Space.deg2rad(125.04 - 0.052954 * Dtt)
+        L = Space.deg2rad(280.47 + 0.98565 * Dtt)
+        # equation of the equinoxes
+        Δψ = -0.000319 * np.sin(Ω) - 0.000024 * np.sin(2 * L)
+        gast = gmst + (Δψ * np.cos(ε)) / 15.0
+        gast = gast % 24.0
+        return gast
