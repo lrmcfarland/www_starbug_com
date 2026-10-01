@@ -11,6 +11,7 @@ It is built with React and Vite, running in a Docker container.
   - [React Icons](#react-icons)
   - [React player](#react-player)
     - [To convert quicktime](#to-convert-quicktime)
+  - [React Date picker](#react-date-picker)
 - [React](#react)
   - [Create](#create)
   - [Run](#run)
@@ -80,6 +81,11 @@ brew install ffmpeg
 ffmpeg -i eskimo_roll.mov -vcodec h264 -acodec mp2 eskimo_roll.mp4
 ```
 
+## React Date picker
+
+```
+npm install react-datepicker date-fns-tz date-fns
+```
 
 # React
 
