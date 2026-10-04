@@ -9,6 +9,10 @@ ARG NODE_VERSION=24.16.0-alpine
 
 FROM node:${NODE_VERSION} AS dev
 
+# Set timezone to UTC
+ENV TZ=UTC
+RUN apk add --no-cache tzdata && ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo UTC > /etc/timezone
+
 # Set working directory inside the container
 WORKDIR /app
 

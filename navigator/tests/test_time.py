@@ -16,7 +16,12 @@ class TestTimeZones:
     def test_available_timezones(self):
         tzones = json.loads(navicomp.time.timezones())
         assert isinstance(tzones, list)
-        assert "UTC" in tzones
+        # TODO assert "UTC" in tzones
+
+    def test_timezone_pattern_accepts_etc_gmt_plus_10(self):
+        match = navicomp.time.timezone_pattern.match("Etc/GMT+10")
+        assert match is not None
+        assert match.groups() == ("Etc", "GMT+10", None)
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected"),

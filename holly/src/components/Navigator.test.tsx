@@ -1,10 +1,35 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Navigator from "./Navigator";
 
 describe("Navigator", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it("accepts keyboard changes in the datepicker time input", async () => {
+    const { container } = render(<Navigator />);
+    fireEvent.click(screen.getByRole("textbox"));
+
+    const timeInput = container.querySelector<HTMLInputElement>('input[type="time"]');
+    if (!timeInput) {
+      throw new Error("Datepicker time input was not rendered");
+    }
+
+    const initialUtcTime = screen.getByText(/^UTC:/).textContent;
+
+    // Determine a different time than current
+    const newTime = timeInput.value === "23:59" ? "00:01" : "23:59";
+
+    // Directly set the input value and trigger change event
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(timeInput, newTime);
+    fireEvent.change(timeInput, { target: { value: newTime } });
+
+    // The UTC time in the display should change when the time changes
+    await waitFor(() => {
+      const newUtcTime = screen.getByText(/^UTC:/).textContent;
+      expect(newUtcTime).not.toBe(initialUtcTime);
+    }, { timeout: 1000 });
   });
 
   it("posts the marked time and displays the returned Julian day", async () => {
@@ -17,7 +42,8 @@ describe("Navigator", () => {
     render(<Navigator />);
     fireEvent.click(screen.getByRole("button", { name: /Get Julian Day/i }));
 
-    expect(await screen.findByText(/2461311/)).toBeInTheDocument();
+    const julianDayElement = await screen.findByText(/2461311.5/);
+    expect(julianDayElement).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/julian_day",
       expect.objectContaining({

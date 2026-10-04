@@ -1,7 +1,7 @@
 """Time and date calculations for astronomical purposes."""
 
 import json
-
+import re
 from datetime import datetime
 from math import floor
 from zoneinfo import ZoneInfo, available_timezones
@@ -10,10 +10,26 @@ import numpy as np
 
 from navicomp import Space
 
+timezone_pattern = re.compile(
+    r"^([A-Za-z]+)(?:/([A-Za-z0-9_+-]+))?(?:/([A-Za-z0-9_+-]+))?$"
+)
+
 
 def timezones():
     """List of available timezones."""
-    return json.dumps(sorted(available_timezones()))
+    zone_groups = {}
+    for tz in available_timezones():
+        parts = tz.split("/")
+        group = parts[0] if parts else tz
+        if group not in zone_groups:
+            zone_groups[group] = []
+        zone_groups[group].append(tz)
+
+    zones = []
+    for group, tz_list in zone_groups.items():
+        zones.append({"group": group, "timezones": tz_list})
+
+    return json.dumps(zones)
 
 
 class AstronomicalAlgorithms:
