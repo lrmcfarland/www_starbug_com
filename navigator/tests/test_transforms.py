@@ -2,7 +2,7 @@
 
 import pytest
 
-from navicomp.transforms import dms_to_decimal, decimal_to_dms
+from navicomp.transforms import decimal_to_dms, dms_to_decimal
 
 
 class TestDecimalDegrees:

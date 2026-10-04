@@ -1,14 +1,13 @@
 """Tests for navicomp.time module."""
 
 import json
-import numpy as np
-import pytest
-
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-import navicomp.time
+import numpy as np
+import pytest
 
+import navicomp.time
 from navicomp.transforms import dms_to_decimal
 
 

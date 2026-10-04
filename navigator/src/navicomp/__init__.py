@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from scipy.spatial.transform import Rotation as R
+
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 
 
 class Space:
