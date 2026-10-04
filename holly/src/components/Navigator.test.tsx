@@ -45,7 +45,7 @@ describe("Navigator", () => {
 
     fireEvent.click(screen.getByRole("textbox"));
     const timeInput = container.querySelector<HTMLInputElement>('input[type="time"]');
-    expect(timeInput).toHaveValue("04:34:56");
+    expect(timeInput).toHaveValue("12:34:56");
 
     fireEvent.change(screen.getByRole("combobox", { name: /Select Timezone/i }), {
       target: { value: "Asia/Tokyo" },

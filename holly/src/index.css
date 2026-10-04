@@ -160,7 +160,7 @@ select {
 }
 
 .react-datepicker__input-container input {
-  width: 28ch;
+  width: 30ch;
   max-width: 100%;
   box-sizing: border-box;
   min-height: 42px;
