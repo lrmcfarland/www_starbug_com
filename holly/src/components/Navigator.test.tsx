@@ -5,6 +5,7 @@ import Navigator from "./Navigator";
 describe("Navigator", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it("posts the marked time and displays the returned Julian day", async () => {
@@ -15,9 +16,10 @@ describe("Navigator", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<Navigator />);
-    fireEvent.click(screen.getByRole("button", { name: /Get Julian Day/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Julian Day/i }));
 
-    expect(await screen.findByText(/2461311/)).toBeInTheDocument();
+    const julianDayElement = await screen.findByText(/2461311.5/);
+    expect(julianDayElement).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/julian_day",
       expect.objectContaining({
@@ -41,8 +43,36 @@ describe("Navigator", () => {
     );
 
     render(<Navigator />);
-    fireEvent.click(screen.getByRole("button", { name: /Get Julian Day/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Julian Day/i }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid datetime");
+  });
+
+  it("updates the date picker for timezone changes and uses the selected timezone on change", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-01T02:30:00.000Z"));
+
+    render(<Navigator />);
+
+    const dateInput = screen.getByRole("textbox");
+    expect(dateInput).toHaveValue("2025-01-01T02:30:00");
+
+    const timezoneSelect = document.getElementById("timezone-select") as HTMLSelectElement;
+    fireEvent.change(timezoneSelect, {
+      target: { value: "Asia/Tokyo" },
+    });
+
+    expect(dateInput).toHaveValue("2025-01-01T11:30:00");
+    expect(screen.getByText(/Time:/)).toHaveTextContent(
+      "2025-01-01T11:30:00.000+09:00",
+    );
+
+    fireEvent.change(dateInput, {
+      target: { value: "2025-01-02T11:30:00" },
+    });
+
+    expect(screen.getByText(/Time:/)).toHaveTextContent(
+      "2025-01-02T11:30:00.000+09:00",
+    );
   });
 });

@@ -19,6 +19,8 @@ services:
       context: ./holly
       dockerfile: Dockerfile.dev
     command: sh -c "npx vitest --run && touch /tmp/tests-passed || exit 1"
+    environment:
+      - TZ=UTC
     networks:
       - starbug_network
     platform: linux/amd64
