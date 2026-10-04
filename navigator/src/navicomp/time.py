@@ -13,7 +13,7 @@ from navicomp import Space
 
 def timezones():
     """List of available timezones."""
-    return json.dumps(list(available_timezones()))
+    return json.dumps(sorted(available_timezones()))
 
 
 class AstronomicalAlgorithms:

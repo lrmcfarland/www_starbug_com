@@ -4,9 +4,39 @@ import "react-datepicker/dist/react-datepicker.css";
 
 function MarkTime() {
 
-    const [markedTime, setmarkedTime] = useState<string>(new Date().toISOString());
-    const [julianDay, setJulianDay] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [julianDay, setJulianDay] = useState<number | null>(null);
+    const [markedTime, setMarkedTime] = useState<string>(new Date().toISOString());
+    const [timezoneOffset, setTimezoneOffset] = useState<number>(new Date().getTimezoneOffset());
+
+    function handleMarkCurrentTime() {
+        const timestamp = new Date().toISOString();
+        setMarkedTime(timestamp);
+        setError(null);
+        console.log(`Marked time at ${timestamp}`);
+    }
+
+    function handleTimezoneChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const newOffset = parseInt(event.target.value, 10);
+        if (!isNaN(newOffset)) {
+            setTimezoneOffset(newOffset);
+        }
+    }
+
+    function renderTimezoneInput() {
+        return (
+            <div>
+                <label htmlFor="timezone-offset">Timezone Offset (minutes): </label>
+                <input
+                    id="timezone-offset"
+                    type="number"
+                    value={timezoneOffset}
+                    onChange={handleTimezoneChange}
+                />
+            </div>
+        );
+    }
+
 
     async function handleGetJulianDay() {
         try {
@@ -27,13 +57,6 @@ function MarkTime() {
         }
     }
 
-    function handleMarkCurrentTime() {
-        const timestamp = new Date().toISOString();
-        setmarkedTime(timestamp);
-        setError(null);
-        console.log(`Marked time at ${timestamp}`);
-    }
-
     function renderJulianDay() {
         const julianDayLink = (
             <a href="https://en.wikipedia.org/wiki/Julian_day" target="_blank" rel="noopener noreferrer">
@@ -51,6 +74,9 @@ function MarkTime() {
     return (
         <div>
             <div>
+                {renderTimezoneInput()}
+            </div>
+            <div>
                 <button onClick={handleMarkCurrentTime}>
                     Mark Current Time
                 </button>
@@ -58,7 +84,7 @@ function MarkTime() {
                 <DatePicker
                 className="date-time-picker"
                 selected={new Date(markedTime)}
-                onChange={(date: Date | null) => date && setmarkedTime(date.toISOString())}
+                onChange={(date: Date | null) => date && setMarkedTime(date.toISOString())}
                 showTimeInput
                 dateFormat="yyyy-MM-dd HH:mm:ss XXX"
 
