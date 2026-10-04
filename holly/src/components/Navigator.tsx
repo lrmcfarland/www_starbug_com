@@ -1,19 +1,27 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 import "react-datepicker/dist/react-datepicker.css";
+
+const MARKED_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
 type KeyboardTimeInputProps = {
     date?: Date;
+    timeZone: string;
     value: string;
     onChange: (time: string) => void;
 };
 
-function KeyboardTimeInput({ value, onChange }: KeyboardTimeInputProps) {
+function KeyboardTimeInput({ date, timeZone, value, onChange }: KeyboardTimeInputProps) {
+    const displayedTime = date
+        ? formatInTimeZone(date, timeZone, "HH:mm:ss")
+        : value;
+
     return (
         <input
             type="time"
             step="1"
-            value={value}
+            value={displayedTime}
             onChange={(event) => onChange(event.currentTarget.value)}
         />
     );
@@ -24,10 +32,15 @@ function MarkTime() {
     const [error, setError] = useState<string | null>(null);
     const [julianDay, setJulianDay] = useState<number | null>(null);
     const [markedTime, setMarkedTime] = useState<string>(new Date().toISOString());
-    const [timezoneIANA, setTimezoneIANA] = useState<string>("America/Los_Angeles");
+    const [timezoneIANA, setTimezoneIANA] = useState<string>("UTC");
+
+    function handleTimezoneChange(timezone: string) {
+        setTimezoneIANA(timezone);
+        setMarkedTime(formatInTimeZone(new Date(markedTime), timezone, MARKED_TIME_FORMAT));
+    }
 
     function handleMarkCurrentTime() {
-        const timestamp = new Date().toISOString();
+        const timestamp = formatInTimeZone(new Date(), timezoneIANA, MARKED_TIME_FORMAT);
         setMarkedTime(timestamp);
         setError(null);
         console.log(`Marked time at ${timestamp}`);
@@ -51,7 +64,7 @@ function MarkTime() {
                 <select
                     id="timezone-select"
                     value={timezoneIANA}
-                    onChange={(e) => setTimezoneIANA(e.target.value)}
+                    onChange={(e) => handleTimezoneChange(e.target.value)}
                 >
                     {timezones.map((tz) => (
                         <option key={tz} value={tz}>
@@ -98,24 +111,23 @@ function MarkTime() {
     }
 
     function renderDatePicker() {
-        // Extract HH:mm from ISO string (which is in UTC)
-        const timeString = markedTime.slice(11, 16);
+        const timeString = formatInTimeZone(new Date(markedTime), timezoneIANA, "HH:mm:ss");
 
         return (
             <div>
                 <DatePicker
                     className="date-time-picker"
                     selected={new Date(markedTime)}
-                    onChange={(date: Date | null) => date && setMarkedTime(date.toISOString())}
+                    onChange={(date: Date | null) => date && setMarkedTime(formatInTimeZone(date, timezoneIANA, MARKED_TIME_FORMAT))}
                     showTimeInput
-                    dateFormat="yyyy-MM-dd HH:mm:ss XXX"
+                    dateFormat={MARKED_TIME_FORMAT}
                     customTimeInput={React.createElement(KeyboardTimeInput, {
+                        timeZone: timezoneIANA,
                         value: timeString,
                         onChange: (time: string) => {
-                            const [hours, minutes] = time.split(':');
-                            const newDate = new Date(markedTime);
-                            newDate.setUTCHours(parseInt(hours), parseInt(minutes), 0);
-                            setMarkedTime(newDate.toISOString());
+                            const localDate = formatInTimeZone(new Date(markedTime), timezoneIANA, "yyyy-MM-dd");
+                            const updatedDate = fromZonedTime(`${localDate}T${time}`, timezoneIANA);
+                            setMarkedTime(formatInTimeZone(updatedDate, timezoneIANA, MARKED_TIME_FORMAT));
                         }
                     })}
                     timeZone={timezoneIANA}
@@ -140,7 +152,7 @@ function MarkTime() {
                     Get Julian Day
                 </button>
             </div>
-            <div><p>UTC: {markedTime}</p></div>
+            <div><p>Selected time ({timezoneIANA}): {markedTime}</p></div>
             <div>
                 {renderJulianDay()}
                 {error && <div role="alert"><p>{error}</p></div>}
