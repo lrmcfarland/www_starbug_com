@@ -1,6 +1,6 @@
 import datetime
 
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 
 from navicomp import time
 
