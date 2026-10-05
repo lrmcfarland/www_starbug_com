@@ -60,7 +60,7 @@ function MarkTime() {
 
         return (
             <div>
-                <label htmlFor="timezone-select">Select Timezone: </label>
+                <label htmlFor="timezone-select">Timezone: </label>
                 <select
                     id="timezone-select"
                     value={timezoneIANA}
@@ -103,11 +103,14 @@ function MarkTime() {
             </a>
         );
 
-        if (julianDay === null) {
-            return <p>{julianDayLink}:</p>;
-        } else {
-            return <p>{julianDayLink}: {julianDay}</p>;
-        }
+        return (
+            <div>
+                <button onClick={handleGetJulianDay}>
+                    Get Julian Day
+                </button>
+                {julianDayLink}: {julianDay !== null ? julianDay : "TBD"}
+            </div>
+        );
     }
 
     function renderDatePicker() {
@@ -115,6 +118,10 @@ function MarkTime() {
 
         return (
             <div>
+                <button onClick={handleMarkCurrentTime}>
+                    Mark Current Time
+                </button>
+
                 <DatePicker
                     className="date-time-picker"
                     selected={new Date(markedTime)}
@@ -139,35 +146,47 @@ function MarkTime() {
     return (
         <div>
             <div>
-                {renderTimezoneSelect()}
+                {renderDatePicker()}
             </div>
             <div>
-                <button onClick={handleMarkCurrentTime}>
-                    Mark Current Time
-                </button>
-
-                {renderDatePicker()}
-
-                <button onClick={handleGetJulianDay}>
-                    Get Julian Day
-                </button>
+                {renderTimezoneSelect()}
             </div>
-            <div><p>Selected time ({timezoneIANA}): {markedTime}</p></div>
+            <div><p>Time: {markedTime} ({timezoneIANA})</p></div>
             <div>
                 {renderJulianDay()}
                 {error && <div role="alert"><p>{error}</p></div>}
             </div>
 
-            <p>
-                For more information, visit the {" "}
-                <a href="https://en.wikipedia.org/wiki/Julian_day" target="_blank" rel="noopener noreferrer">
-                    Julian day Wikipedia page
-                </a>
-                {" "} or the {" "}
-                <a href="https://aa.usno.navy.mil/data/JulianDate" target="_blank" rel="noopener noreferrer">
-                    USN Julian Date Converter
-                </a>
-            </p>
+            <div>
+                <h2>References</h2>
+                <ol>
+                    <li>
+                        <a href="https://www.epochconverter.com/" target="_blank" rel="noopener noreferrer">
+                            Epoch Converter
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.iana.org/time-zones" target="_blank" rel="noopener noreferrer">
+                            IANA Time Zone Database
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.timeanddate.com/worldclock/converter.html" target="_blank" rel="noopener noreferrer">
+                            Time Zone Converter
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.timeanddate.com/time/zones/" target="_blank" rel="noopener noreferrer">
+                            Time Zone List
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://aa.usno.navy.mil/data/JulianDate" target="_blank" rel="noopener noreferrer">
+                            USN Julian Date Converter
+                        </a>
+                    </li>
+                </ol>
+            </div>
         </div>
     );
 }
