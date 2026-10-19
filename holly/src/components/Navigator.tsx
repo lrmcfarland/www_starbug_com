@@ -1,22 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
-import { format } from "date-fns";
 import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import "react-datepicker/dist/react-datepicker.css";
+import { CascadeSelect } from 'primereact/cascadeselect';
 
 const MARKED_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 const DATE_PICKER_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
 type KeyboardTimeInputProps = {
-    date?: Date;
     value: string;
     onChange: (time: string) => void;
 };
 
-function KeyboardTimeInput({ date, value, onChange }: KeyboardTimeInputProps) {
-    const displayedTime = date
-        ? format(date, "HH:mm:ss")
-        : value;
+type TimezoneGroup = {
+    zone: string;
+    zones: { city: string; code: string }[];
+};
+
+function isTimezoneGroups(value: unknown): value is TimezoneGroup[] {
+    return (
+        Array.isArray(value) &&
+        value.every(
+            (group) =>
+                typeof group.zone === "string" &&
+                Array.isArray(group.zones) &&
+                group.zones.every(
+                    (timezone: unknown) =>
+                        typeof timezone === "object" &&
+                        timezone !== null &&
+                        "city" in timezone &&
+                        typeof timezone.city === "string" &&
+                        "code" in timezone &&
+                        typeof timezone.code === "string",
+                ),
+        )
+    );
+}
+
+function KeyboardTimeInput({ value, onChange }: KeyboardTimeInputProps) {
+    const displayedTime = value;
 
     return (
         <input
@@ -31,9 +53,94 @@ function KeyboardTimeInput({ date, value, onChange }: KeyboardTimeInputProps) {
 function MarkTime({ timezone = "UTC" }: { timezone?: string }) {
 
     const [error, setError] = useState<string | null>(null);
+    const [timezoneError, setTimezoneError] = useState<string | null>(null);
     const [julianDay, setJulianDay] = useState<number | null>(null);
-    const [timezoneIANA, setTimezoneIANA] = useState<string>(timezone);
+    const [ianaTimezones, setIanaTimezones] = useState<TimezoneGroup[]>([]);
+    const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
     const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
+
+    useEffect(() => {
+        getIANAtimezones();
+    }, []);
+
+    function handleTimezoneChange(timezone: string) {
+        setCurrentTimezone(timezone);
+        setMarkedTime(formatInTimeZone(new Date(markedTime), timezone, MARKED_TIME_FORMAT));
+    }
+
+    function handleMarkCurrentTime() {
+        const timestamp = formatInTimeZone(new Date(), currentTimezone, MARKED_TIME_FORMAT);
+        setMarkedTime(timestamp);
+        setError(null);
+    }
+
+    async function getIANAtimezones() {
+        try {
+            const response = await fetch("/api/timezones", {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+            const data: unknown = await response.json();
+
+            if (!response.ok || !isTimezoneGroups(data)) {
+                throw new Error("Unable to retrieve timezones");
+            }
+
+            setIanaTimezones(data);
+        } catch (error) {
+            console.error("Error fetching timezones:", error);
+            setTimezoneError("Unable to load timezones.");
+        }
+    }
+
+    function renderDatePicker() {
+        const timeString = formatInTimeZone(new Date(markedTime), currentTimezone, "HH:mm:ss");
+        const selectedDate = toZonedTime(new Date(markedTime), currentTimezone);
+
+        return (
+            <div className="navigator-control-row">
+                <button
+                    title="Mark Current Time"
+                    onClick={handleMarkCurrentTime}
+                >
+                    Mark
+                </button>
+
+                <DatePicker
+                    className="date-time-picker"
+                    selected={selectedDate}
+                    onChange={(date: Date | null) => {
+                        if (date) {
+                            const utcDate = fromZonedTime(date, currentTimezone);
+                            setMarkedTime(formatInTimeZone(utcDate, currentTimezone, MARKED_TIME_FORMAT));
+                        }
+                    }}
+                    showTimeInput
+                    dateFormat={DATE_PICKER_FORMAT}
+                    customTimeInput={React.createElement(KeyboardTimeInput, {
+                        value: timeString,
+                        onChange: (time: string) => {
+                            const localDate = formatInTimeZone(new Date(markedTime), currentTimezone, "yyyy-MM-dd");
+                            const updatedDate = fromZonedTime(`${localDate}T${time}`, currentTimezone);
+                            setMarkedTime(formatInTimeZone(updatedDate, currentTimezone, MARKED_TIME_FORMAT));
+                        }
+                    })}
+                />
+                <CascadeSelect
+                    value={currentTimezone}
+                    options={ianaTimezones}
+                    optionLabel="city"
+                    optionValue="code"
+                    optionGroupLabel="zone"
+                    optionGroupChildren={["zones"]}
+                    onChange={(tz: { value: string }) => handleTimezoneChange(tz.value)}
+                    placeholder="Select a City"
+                    className="navigator-timezone-select"
+                />
+                {timezoneError && <div role="alert">{timezoneError}</div>}
+            </div>
+        );
+    }
 
     async function handleJulianDay() {
         try {
@@ -53,75 +160,6 @@ function MarkTime({ timezone = "UTC" }: { timezone?: string }) {
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : "Request failed");
         }
-    }
-
-    function handleTimezoneChange(timezone: string) {
-        setTimezoneIANA(timezone);
-        setMarkedTime(formatInTimeZone(new Date(markedTime), timezone, MARKED_TIME_FORMAT));
-    }
-
-    function handleMarkCurrentTime() {
-        const timestamp = formatInTimeZone(new Date(), timezoneIANA, MARKED_TIME_FORMAT);
-        setMarkedTime(timestamp);
-        setError(null);
-    }
-
-    function renderDatePicker() {
-        const timeString = formatInTimeZone(new Date(markedTime), timezoneIANA, "HH:mm:ss");
-        const selectedDate = toZonedTime(new Date(markedTime), timezoneIANA);
-        const timezones = [
-            "UTC",
-            "America/New_York",
-            "America/Los_Angeles",
-            "America/Phoenix",
-            "Europe/London",
-            "Europe/Paris",
-            "Asia/Tokyo",
-            "Australia/Sydney"
-        ];  // TODO from navigator timezones list
-
-        return (
-            <div className="navigator-control-row">
-                <button
-                    title="Mark Current Time"
-                    onClick={handleMarkCurrentTime}
-                >
-                    Mark
-                </button>
-
-                <DatePicker
-                    className="date-time-picker"
-                    selected={selectedDate}
-                    onChange={(date: Date | null) => {
-                        if (date) {
-                            const utcDate = fromZonedTime(date, timezoneIANA);
-                            setMarkedTime(formatInTimeZone(utcDate, timezoneIANA, MARKED_TIME_FORMAT));
-                        }
-                    }}
-                    showTimeInput
-                    dateFormat={DATE_PICKER_FORMAT}
-                    customTimeInput={React.createElement(KeyboardTimeInput, {
-                        value: timeString,
-                        onChange: (time: string) => {
-                            const localDate = formatInTimeZone(new Date(markedTime), timezoneIANA, "yyyy-MM-dd");
-                            const updatedDate = fromZonedTime(`${localDate}T${time}`, timezoneIANA);
-                            setMarkedTime(formatInTimeZone(updatedDate, timezoneIANA, MARKED_TIME_FORMAT));
-                        }
-                    })}
-                />
-                <select
-                    id="timezone-select"
-                    value={timezoneIANA}
-                    onChange={(e) => handleTimezoneChange(e.target.value)}
-                >
-                    {timezones.map((tz) => (
-                        <option key={tz} value={tz}>
-                            {tz}
-                        </option>
-                    ))}
-                </select>
-            </div>
-        );
     }
 
     function renderJulianDay() {
@@ -154,12 +192,16 @@ function MarkTime({ timezone = "UTC" }: { timezone?: string }) {
                 <h2>References</h2>
                 <ol>
                     <li>
+                        <a href="https://www.iana.org/time-zones" target="_blank" rel="noopener noreferrer">
+                            IANA Time Zone Database
+                        </a>
+                    </li>
+                    <li>
                         <a href="https://aa.usno.navy.mil/data/JulianDate" target="_blank" rel="noopener noreferrer">
                             USN Julian Date Converter
                         </a>
                     </li>
                     <li>
-
                         <a href="https://en.wikipedia.org/wiki/Julian_day" target="_blank" rel="noopener noreferrer">
                             Wikipedia: Julian day
                         </a>

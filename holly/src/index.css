@@ -163,9 +163,47 @@ select {
 
 .navigator-control-row > button,
 .navigator-control-row > select,
-.navigator-control-row .date-time-picker {
+.navigator-control-row .date-time-picker,
+.navigator-control-row .navigator-timezone-select {
   height: 42px;
   min-height: 42px;
+}
+
+.navigator-timezone-select {
+  min-width: 14rem;
+  margin: 4px 2px;
+  box-sizing: border-box;
+  color: var(--text-h);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  font-family: var(--heading);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.navigator-timezone-select .p-cascadeselect-label {
+  padding: 8px 16px;
+  color: inherit;
+}
+
+.navigator-timezone-select .p-cascadeselect-trigger {
+  color: inherit;
+}
+
+.navigator-timezone-select:not(.p-disabled):hover {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.navigator-timezone-select:not(.p-disabled):hover .p-cascadeselect-trigger {
+  color: inherit;
+}
+
+.navigator-timezone-select:not(.p-disabled).p-focus {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
 }
 
 .navigator-julian-day-value {

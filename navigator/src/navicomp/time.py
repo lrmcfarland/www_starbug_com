@@ -1,6 +1,7 @@
 """Time and date calculations for astronomical purposes."""
 
 import json
+import logging
 import re
 from datetime import datetime
 from math import floor
@@ -10,25 +11,48 @@ import numpy as np
 
 from navicomp import Space
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S%z",
+)
+
 timezone_pattern = re.compile(
-    r"^([A-Za-z]+)(?:/([A-Za-z0-9_+-]+))?(?:/([A-Za-z0-9_+-]+))?$"
+    r"^(?P<continent>[A-Za-z0-9_+-]+)(?:/(?P<city>[A-Za-z0-9_+-/]*))*$"
 )
 
 
 def timezones():
-    """List of available timezones."""
-    zone_groups = {}
+    """List of available timezones.
+
+    Returns:
+        str: JSON string of IANA timezones grouped by continent.
+    """
+    continents = {"Other": []}
     for tz in available_timezones():
-        parts = tz.split("/")
-        group = parts[0] if parts else tz
-        if group not in zone_groups:
-            zone_groups[group] = []
-        zone_groups[group].append(tz)
+        if match := timezone_pattern.match(tz):
+            continent = match.group("continent")
+            city = match.group("city")
 
+            if city is None:
+                continents["Other"].append(continent)
+                continue
+
+            if continent not in continents:
+                continents[continent] = []
+            continents[continent].append(city)
+        else:
+            logging.warning(f"tz: {tz} does not match pattern. Skipping.")
+            continue
     zones = []
-    for group, tz_list in zone_groups.items():
-        zones.append({"group": group, "timezones": tz_list})
-
+    for continent, tz_list in sorted(continents.items()):
+        zones.append({"zone": continent, "zones": []})
+        for city in sorted(tz_list):
+            if continent == "Other":
+                code = city
+            else:
+                code = f"{continent}/{city}"
+            zones[-1]["zones"].append({"city": city, "code": code})
     return json.dumps(zones)
 
 

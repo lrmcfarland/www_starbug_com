@@ -14,14 +14,28 @@ from navicomp.transforms import dms_to_decimal
 class TestTimeZones:
 
     def test_available_timezones(self):
+        """Test timezones are grouped for a cascade selector."""
         tzones = json.loads(navicomp.time.timezones())
         assert isinstance(tzones, list)
-        # TODO assert "UTC" in tzones
 
-    def test_timezone_pattern_accepts_etc_gmt_plus_10(self):
-        match = navicomp.time.timezone_pattern.match("Etc/GMT+10")
-        assert match is not None
-        assert match.groups() == ("Etc", "GMT+10", None)
+        assert tzones[0]["zone"] == "Africa"
+        assert tzones[0]["zones"][0]["city"] == "Abidjan"
+        assert tzones[0]["zones"][0]["code"] == "Africa/Abidjan"
+
+        assert tzones[1]["zone"] == "America"
+        assert len(tzones[1]["zones"]) == 169
+        assert tzones[1]["zones"][0]["city"] == "Adak"
+        assert tzones[1]["zones"][0]["code"] == "America/Adak"
+
+        assert tzones[1]["zones"][88]["city"] == "Kentucky/Louisville"
+        assert tzones[1]["zones"][95]["city"] == "Louisville"
+
+        assert tzones[14]["zone"] == "Other"
+        assert len(tzones[14]["zones"]) == 45
+        assert tzones[14]["zones"][10]["city"] == "GB-Eire"
+        assert tzones[14]["zones"][14]["city"] == "GMT0"
+        assert tzones[14]["zones"][40]["city"] == "UTC"
+        assert tzones[14]["zones"][-1]["city"] == "Zulu"
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected"),
@@ -33,6 +47,7 @@ class TestTimeZones:
         ],
     )
     def test_utc(self, a_datetime: datetime, expected: str):
+        """Test datetime timezone names."""
         assert a_datetime.tzname() == expected
 
 
