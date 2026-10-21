@@ -1,5 +1,8 @@
 FROM python:3.14-slim
 
+# Use the pinned tzdata package instead of the base image's timezone database.
+ENV PYTHONTZPATH=""
+
 WORKDIR /app
 
 # Install Poetry
