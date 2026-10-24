@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { useLocalStorage } from "./useLocalStorage";
@@ -45,7 +45,9 @@ export const Layout: React.FC = () => {
           transition: "padding 0.2s ease-in-out",
         }}
       >
-        <Outlet />
+        <Suspense fallback={<div role="status">Loading page...</div>}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );

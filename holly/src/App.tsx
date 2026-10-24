@@ -1,12 +1,13 @@
-import React from "react";
+import React, { lazy } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
-import Astronomy from "./components/Astronomy";
 import Home from "./components/Home";
-import Kayaking from "./components/Kayaking";
-import Observatories from "./components/Observatories";
-import Resume from "./components/Resume";
-import Navigator from "./components/Navigator";
+
+const Astronomy = lazy(() => import("./components/Astronomy"));
+const Kayaking = lazy(() => import("./components/Kayaking"));
+const Observatories = lazy(() => import("./components/Observatories"));
+const Resume = lazy(() => import("./components/Resume"));
+const Navigator = lazy(() => import("./components/Navigator"));
 
 const router = createBrowserRouter([
   {
