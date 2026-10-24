@@ -20,10 +20,10 @@ export const Sidebar: React.FC<ExtendedSidebarProps> = ({
 }) => {
   const sidebarWidth = isMobile
     ? isCollapsed
-      ? "20px"
+      ? "48px"
       : "240px"
     : isCollapsed
-      ? "80px"
+      ? "96px"
       : "250px";
 
   return (
