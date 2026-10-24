@@ -50,7 +50,7 @@ function KeyboardTimeInput({ value, onChange }: KeyboardTimeInputProps) {
     );
 }
 
-function MarkTime({ timezone = "UTC" }: { timezone?: string }) {
+function Location({ timezone = "UTC" }: { timezone?: string }) {
 
     const [error, setError] = useState<string | null>(null);
     const [timezoneError, setTimezoneError] = useState<string | null>(null);
@@ -188,39 +188,45 @@ function MarkTime({ timezone = "UTC" }: { timezone?: string }) {
                 {error && <div role="alert"><p>{error}</p></div>}
             </div>
 
-            <div>
-                <h2>References</h2>
-                <ol>
-                    <li>
-                        <a href="https://www.iana.org/time-zones" target="_blank" rel="noopener noreferrer">
-                            IANA Time Zone Database
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://aa.usno.navy.mil/data/JulianDate" target="_blank" rel="noopener noreferrer">
-                            USN Julian Date Converter
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://en.wikipedia.org/wiki/Julian_day" target="_blank" rel="noopener noreferrer">
-                            Wikipedia: Julian day
-                        </a>
-                    </li>
-                </ol>
-            </div>
         </div>
     );
 }
 
 export const Navigator: React.FC = () => {
   return (
-    <div className="starbug-div">
-      <div>
-        <h1>Navigator</h1>
-      </div>
-      <div className="starbug-card">
-        <MarkTime timezone="UTC"/>
-      </div>
+    <div className="navigator-container">
+        <div className="starbug-div">
+            <div>
+                <h1>Navigator</h1>
+            </div>
+
+            <div className="starbug-card">
+                <Location timezone="UTC"/>
+            </div>
+
+            <div className="starbug-card">
+                <div>
+                    <h2>References</h2>
+                    <ol>
+                        <li>
+                            <a href="https://www.iana.org/time-zones" target="_blank" rel="noopener noreferrer">
+                                IANA Time Zone Database
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://aa.usno.navy.mil/data/JulianDate" target="_blank" rel="noopener noreferrer">
+                                USN Julian Date Converter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://en.wikipedia.org/wiki/Julian_day" target="_blank" rel="noopener noreferrer">
+                                Wikipedia: Julian day
+                            </a>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
     </div>
   );
 };
