@@ -6,11 +6,11 @@
 
 .starbug-card {
   text-align: left;
-  color: #ffffff;
-  background-color: #020000;
-  border: 1px solid #ddd;
+  color: var(--text);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   padding: 1rem;
   margin-bottom: 1.5rem;
 }

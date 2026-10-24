@@ -36,7 +36,7 @@ export const Sidebar: React.FC<ExtendedSidebarProps> = ({
             bottom: "20px",
             right: "20px",
             zIndex: 1000,
-            background: "#3b82f6",
+            background: "var(--sidebar-active)",
             color: "#fff",
             border: "none",
             borderRadius: "50%",
@@ -53,13 +53,13 @@ export const Sidebar: React.FC<ExtendedSidebarProps> = ({
         </button>
       )}
 
-      <IconContext.Provider value={{ color: "#94a3b8", size: "1.4rem" }}>
+      <IconContext.Provider value={{ color: "var(--sidebar-icon)", size: "1.4rem" }}>
         <nav
           style={{
             width: sidebarWidth,
             height: "100vh",
-            background: "#1e293b",
-            color: "#fff",
+            background: "var(--sidebar-bg)",
+            color: "var(--sidebar-text)",
             padding: "0.5rem",
             transition: "width 0.2s ease-in-out",
             display: "flex",
@@ -93,14 +93,16 @@ export const Sidebar: React.FC<ExtendedSidebarProps> = ({
                     to={item.path}
                     onClick={isMobile ? onToggle : undefined}
                     style={({ isActive }) => ({
-                      color: "#fff",
+                      color: isActive
+                        ? "var(--sidebar-active-text)"
+                        : "var(--sidebar-text)",
                       textDecoration: "none",
                       display: "flex",
                       alignItems: "center",
                       padding: "10px",
                       borderRadius: "4px",
                       background: isActive
-                        ? "#3b82f6"
+                        ? "var(--sidebar-active)"
                         : "transparent",
                       justifyContent: isCollapsed
                         ? "center"
@@ -124,8 +126,8 @@ export const Sidebar: React.FC<ExtendedSidebarProps> = ({
           <button
             onClick={onToggle}
             style={{
-              background: "#334155",
-              color: "#fff",
+              background: "var(--sidebar-button)",
+              color: "var(--sidebar-text)",
               border: "none",
               padding: "10px",
               borderRadius: "4px",
@@ -150,7 +152,7 @@ export const Sidebar: React.FC<ExtendedSidebarProps> = ({
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.4)",
+            background: "var(--overlay)",
             zIndex: 998,
           }}
         />

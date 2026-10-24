@@ -40,7 +40,7 @@ export const Layout: React.FC = () => {
         style={{
           flex: 1,
           padding: isMobile ? "1rem" : "2rem",
-          background: "#071625",
+          background: "var(--bg)",
           width: "100%",
           transition: "padding 0.2s ease-in-out",
         }}

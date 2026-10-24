@@ -9,8 +9,9 @@ const linkButtonStyle = {
   gap: "8px",
   padding: "10px 16px",
   textDecoration: "none",
-  color: "#d4d7e4",
-  border: "1px solid #ccc",
+  color: "var(--text-h)",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: "4px",
   cursor: "pointer",
 };
