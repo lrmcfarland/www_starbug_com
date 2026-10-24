@@ -137,7 +137,8 @@ a:hover {
 
 button,
 select,
-.react-datepicker__input-container input {
+.react-datepicker__input-container input,
+.navigator-location-input {
   font-family: var(--heading);
   font-weight: 500;
   color: var(--text-h);
@@ -152,7 +153,8 @@ select,
 
 button:hover,
 select:hover,
-.react-datepicker__input-container input:hover {
+.react-datepicker__input-container input:hover,
+.navigator-location-input:hover {
   background: var(--accent);
   color: var(--bg);
 }
@@ -180,9 +182,23 @@ select {
 .navigator-control-row > button,
 .navigator-control-row > select,
 .navigator-control-row .date-time-picker,
-.navigator-control-row .navigator-timezone-select {
+.navigator-control-row .navigator-timezone-select,
+.navigator-control-row .navigator-location-input {
   height: 42px;
   min-height: 42px;
+}
+
+.navigator-location-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 4px 2px;
+  color: var(--text-h);
+}
+
+.navigator-location-input:focus {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
 }
 
 .navigator-timezone-select {
@@ -230,7 +246,8 @@ select {
   display: inline-block;
 }
 
-.react-datepicker__input-container input {
+.react-datepicker__input-container input,
+.navigator-location-input {
   width: 24ch;
   max-width: 100%;
   box-sizing: border-box;
@@ -243,6 +260,11 @@ select {
   margin: 4px 2px;
   font-family: var(--heading);
   font-weight: 500;
+}
+
+.navigator-location-input {
+  width: 14ch;
+  cursor: text;
 }
 
 .react-datepicker__input-container input:focus {

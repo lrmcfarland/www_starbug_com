@@ -58,6 +58,8 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     const [ianaTimezones, setIanaTimezones] = useState<TimezoneGroup[]>([]);
     const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
     const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
+    const [latitude, setLatitude] = useState<string>("");
+    const [longitude, setLongitude] = useState<string>("");
 
     useEffect(() => {
         getIANAtimezones();
@@ -187,7 +189,35 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                 {renderJulianDay()}
                 {error && <div role="alert"><p>{error}</p></div>}
             </div>
+            <div className="navigator-control-row navigator-location-row">
+                <label>
+                    Latitude
+                    <input
+                        className="navigator-location-input"
+                        type="number"
+                        min="-90"
+                        max="90"
+                        step="any"
+                        value={latitude}
+                        onChange={(event) => setLatitude(event.currentTarget.value)}
+                        placeholder="e.g. 37.7749"
+                    />
+                </label>
 
+                <label>
+                    Longitude
+                    <input
+                        className="navigator-location-input"
+                        type="number"
+                        min="-180"
+                        max="180"
+                        step="any"
+                        value={longitude}
+                        onChange={(event) => setLongitude(event.currentTarget.value)}
+                        placeholder="e.g. -122.4194"
+                    />
+                </label>
+            </div>
         </div>
     );
 }
