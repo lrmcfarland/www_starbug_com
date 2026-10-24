@@ -6,8 +6,7 @@ import Home from "./components/Home";
 import Kayaking from "./components/Kayaking";
 import Observatories from "./components/Observatories";
 import Resume from "./components/Resume";
-
-const Navigation = () => <h1>Navigation Content</h1>;
+import Navigator from "./components/Navigator";
 
 const router = createBrowserRouter([
   {
@@ -19,7 +18,7 @@ const router = createBrowserRouter([
       { path: "observatories", element: <Observatories /> },
       { path: "astronomy", element: <Astronomy /> },
       { path: "kayaking", element: <Kayaking /> },
-      { path: "navigation", element: <Navigation /> },
+      { path: "navigation", element: <Navigator /> },
     ],
   },
 ]);

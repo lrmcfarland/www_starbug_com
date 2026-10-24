@@ -11,6 +11,7 @@ It is built with React and Vite, running in a Docker container.
   - [React Icons](#react-icons)
   - [React player](#react-player)
     - [To convert quicktime](#to-convert-quicktime)
+  - [React Date picker](#react-date-picker)
 - [React](#react)
   - [Create](#create)
   - [Run](#run)
@@ -26,8 +27,9 @@ It is built with React and Vite, running in a Docker container.
   - [Build the test image](#build-the-test-image)
   - [Run the unit tests](#run-the-unit-tests)
 - [Deploy](#deploy)
-  - [TODO](#todo)
   - [force an update](#force-an-update)
+- [Notes](#notes)
+  - [IANA GMT timezones](#iana-gmt-timezones)
 
 
 # Node Package Manager
@@ -80,6 +82,11 @@ brew install ffmpeg
 ffmpeg -i eskimo_roll.mov -vcodec h264 -acodec mp2 eskimo_roll.mp4
 ```
 
+## React Date picker
+
+```
+npm install react-datepicker date-fns-tz date-fns
+```
 
 # React
 
@@ -186,13 +193,6 @@ docker compose run --rm holly-test
 
 Set the VITE_ALLOWED_HOSTS in GitHub secrets to the AWS EC2 instance created to host this.
 
-## TODO
-
-The initial deploy needs to be done manually.
-The first npm download takes several minutes.
-My GitHub Deploy script currently exits before this can complete.
-After the initial deploy CI updates work as expected.
-
 ## force an update
 
 Delete all the docker images on the AWS host to force a rebuild.
@@ -210,3 +210,22 @@ docker rmi $(docker images -a -q)
 # 4. Restart the containers
 docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
 ```
+
+# Notes
+
+## IANA GMT timezones
+
+In the IANA time zone database, time zones prefixed with Etc/GMT have
+their signs intentionally inverted (reversed) compared to standard ISO 8601 formatting.
+
+• Etc/GMT+N represents an offset behind GMT (UTC -N).
+• Etc/GMT-N represents an offset ahead of GMT (UTC +N).
+
+This behavior is by design to conform with old POSIX standards.
+In POSIX systems, a positive offset denotes the number of hours
+you must add to local time to get back to UTC, effectively reversing
+the intuitive direction of time zones.
+
+The IANA time zone identifier for Beijing is Asia/Shanghai China Standard Time CST
+Daylight Saving Time is not observed.
+

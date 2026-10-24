@@ -27,6 +27,10 @@ running locally helpful for
     - [black](#black)
   - [Unit testing](#unit-testing)
     - [poetry](#poetry)
+      - [All tests](#all-tests)
+      - [Single file](#single-file)
+      - [Single class](#single-class)
+      - [Single test](#single-test)
     - [Docker](#docker)
 - [Adding numpy scipy](#adding-numpy-scipy)
 - [Force Rebuild](#force-rebuild)
@@ -158,8 +162,28 @@ In the `navigator` directory
 
 ### poetry
 
+#### All tests
+
 ```
 poetry run pytest -s -v
+```
+
+#### Single file
+
+```
+poetry run pytest -s -v tests/test_server.py
+```
+
+#### Single class
+
+```
+poetry run pytest -s -v tests/test_server.py::TestJulianDateAPI
+```
+
+#### Single test
+
+```
+poetry run pytest -s -v tests/test_server.py::TestJulianDateAPI::test_valid_julian_date
 ```
 
 ### Docker
