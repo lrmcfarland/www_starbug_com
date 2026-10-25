@@ -52,10 +52,12 @@ describe("Navigator", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<Navigator />);
-    fireEvent.click(screen.getByRole("button", { name: /Julian Day/i }));
 
     const julianDayElement = await screen.findByText(/2461311.5/);
     expect(julianDayElement).toBeInTheDocument();
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Marked Time/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Julian Day/ })).toBeInTheDocument();
 
     // Verify julian_day API was called
     const calls = (fetchMock.mock.calls as any);
@@ -87,34 +89,37 @@ describe("Navigator", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<Navigator />);
-    fireEvent.click(screen.getByRole("button", { name: /Julian Day/i }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid datetime");
   });
 
-  it("hides a Julian day result after the marked time changes", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((url: string) => {
-        if (url === "/api/timezones") {
-          return Promise.resolve({ ok: true, json: async () => [] });
-        }
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ julian_day: 2461311.5 }),
-        });
-      }),
-    );
+  it("updates the Julian day automatically when the marked time changes", async () => {
+    let julianDayRequests = 0;
+    const fetchMock = vi.fn((url: string, _options?: RequestInit) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+
+      julianDayRequests += 1;
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ julian_day: 2461311.5 + julianDayRequests - 1 }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
 
     render(<Navigator />);
-    fireEvent.click(screen.getByRole("button", { name: /Julian Day/i }));
-
     expect(await screen.findByText("2461311.5")).toBeInTheDocument();
 
     await new Promise((resolve) => setTimeout(resolve, 20));
     fireEvent.click(screen.getByRole("button", { name: "Mark" }));
 
-    expect(screen.getByText("TBD")).toBeInTheDocument();
+    expect(await screen.findByText("2461312.5")).toBeInTheDocument();
+    const julianDayCalls = fetchMock.mock.calls.filter(([url]) => url === "/api/julian_day");
+    expect(julianDayCalls).toHaveLength(2);
+    expect(JSON.parse(String(julianDayCalls[1][1]?.body)).datetime).not.toBe(
+      JSON.parse(String(julianDayCalls[0][1]?.body)).datetime,
+    );
   });
 
   it("clears the previous error after a successful retry", async () => {
@@ -140,12 +145,10 @@ describe("Navigator", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<Navigator />);
-    const julianDayButton = screen.getByRole("button", { name: /Julian Day/i });
-    fireEvent.click(julianDayButton);
-
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid datetime");
 
-    fireEvent.click(julianDayButton);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    fireEvent.click(screen.getByRole("button", { name: "Mark" }));
 
     expect(await screen.findByText("2461311.5")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -219,6 +222,6 @@ describe("Navigator", () => {
     // Verify the timezone selector component exists and changed state was triggered
     expect(timezoneSelect).toBeInTheDocument();
     // The marked time should still be displayed (we can't easily test exact offset with fake timers and UTC base time)
-    expect(screen.getByText(/Marked Time:/)).toBeInTheDocument();
+    expect(screen.getByText("Marked Time")).toBeInTheDocument();
   });
 });

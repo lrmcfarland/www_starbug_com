@@ -65,6 +65,15 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
         getIANAtimezones();
     }, []);
 
+    useEffect(() => {
+        let isCurrentRequest = true;
+        void fetchJulianDay(markedTime, () => isCurrentRequest);
+
+        return () => {
+            isCurrentRequest = false;
+        };
+    }, [markedTime]);
+
     function handleTimezoneChange(timezone: string) {
         setCurrentTimezone(timezone);
         setMarkedTime(formatInTimeZone(new Date(markedTime), timezone, MARKED_TIME_FORMAT));
@@ -144,12 +153,12 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
         );
     }
 
-    async function handleJulianDay() {
+    async function fetchJulianDay(datetime: string, isCurrentRequest: () => boolean = () => true) {
         try {
             const response = await fetch("/api/julian_day", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ datetime: markedTime }),
+                body: JSON.stringify({ datetime }),
             });
             const data: { julian_day?: number; error?: string } = await response.json();
 
@@ -157,25 +166,16 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                 throw new Error(data.error ?? "Unable to retrieve Julian day");
             }
 
-            setJulianDay({ timestamp: new Date(markedTime).getTime(), value: data.julian_day });
-            setError(null);
+            if (isCurrentRequest()) {
+                setJulianDay({ timestamp: new Date(datetime).getTime(), value: data.julian_day });
+                setError(null);
+            }
 
         } catch (requestError) {
-            setError(requestError instanceof Error ? requestError.message : "Request failed");
+            if (isCurrentRequest()) {
+                setError(requestError instanceof Error ? requestError.message : "Request failed");
+            }
         }
-    }
-
-    function renderJulianDay() {
-        return (
-            <div className="navigator-control-row">
-                <button onClick={handleJulianDay}>
-                    Julian Day
-                </button>
-                <span className="navigator-julian-day-value">
-                    {julianDay?.timestamp === new Date(markedTime).getTime() ? julianDay.value : "TBD"}
-                </span>
-            </div>
-        );
     }
 
     return (
@@ -183,14 +183,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
             <div>
                 {renderDatePicker()}
             </div>
-            <div>
-                <span>Marked Time: {markedTime}</span>
-            </div>
-            <div>
-                {renderJulianDay()}
-                {error && <div role="alert"><p>{error}</p></div>}
-            </div>
-            <div className="navigator-control-row navigator-location-row">
+                        <div className="navigator-control-row navigator-location-row">
                 <label>
                     Latitude
                     <input
@@ -219,6 +212,24 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                     />
                 </label>
             </div>
+            <div>
+                <table className="navigator-data-table">
+                    <tbody>
+                        <tr>
+                            <th scope="row">Marked Time</th>
+                            <td>{markedTime}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Julian Day</th>
+                            <td className="navigator-julian-day-value">
+                                {julianDay?.timestamp === new Date(markedTime).getTime() ? julianDay.value : "TBD"}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {error && <div role="alert"><p>{error}</p></div>}
+            </div>
+
         </div>
     );
 }

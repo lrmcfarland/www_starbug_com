@@ -193,7 +193,7 @@ select {
 }
 
 .navigator-control-row > button {
-  font-size: 0.84rem;
+  font-size: inherit;
 }
 
 .navigator-location-row label {
@@ -202,7 +202,7 @@ select {
   gap: 0.5rem;
   margin: 4px 2px;
   font-family: var(--heading);
-  font-size: 0.84rem;
+  font-size: inherit;
   font-weight: 500;
   color: var(--text-h);
 }
@@ -216,7 +216,7 @@ select {
   min-width: 14rem;
   margin: 4px 2px;
   box-sizing: border-box;
-  font-size: 0.84rem;
+  font-size: inherit;
   color: var(--text-h);
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
@@ -228,7 +228,7 @@ select {
 
 .p-cascadeselect-panel {
   font-family: var(--heading);
-  font-size: 0.84rem;
+  font-size: 1.1025em;
   font-weight: 500;
 }
 
@@ -256,8 +256,25 @@ select {
   outline-offset: 2px;
 }
 
-.navigator-julian-day-value {
-  margin-left: 0.5rem;
+.navigator-data-table {
+  border-collapse: collapse;
+  margin: 4px 2px;
+}
+
+.navigator-data-table th,
+.navigator-data-table td {
+  padding: 0.4rem 0.75rem 0.4rem 0;
+  text-align: left;
+}
+
+.navigator-data-table th {
+  color: var(--text-h);
+  font-family: var(--heading);
+  font-weight: 500;
+}
+
+.navigator-data-table td {
+  padding-left: 0.75rem;
 }
 
 .react-datepicker__input-container {
@@ -277,8 +294,12 @@ select {
   padding: 8px 16px;
   margin: 4px 2px;
   font-family: var(--heading);
-  font-size: 0.84rem;
+  font-size: inherit;
   font-weight: 500;
+}
+
+.react-datepicker__input-time-container input {
+  font-size: inherit;
 }
 
 .navigator-location-input {
@@ -296,7 +317,7 @@ select {
   border-radius: 10px;
   box-shadow: var(--shadow);
   font-family: var(--heading);
-  font-size: 0.84rem;
+  font-size: inherit;
 }
 
 .react-datepicker__header {
