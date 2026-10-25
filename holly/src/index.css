@@ -179,6 +179,10 @@ select {
   flex-wrap: wrap;
 }
 
+.navigator-container {
+  font-size: 1.1025em;
+}
+
 .navigator-control-row > button,
 .navigator-control-row > select,
 .navigator-control-row .date-time-picker,
@@ -188,11 +192,18 @@ select {
   min-height: 42px;
 }
 
+.navigator-control-row > button {
+  font-size: 0.84rem;
+}
+
 .navigator-location-row label {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   margin: 4px 2px;
+  font-family: var(--heading);
+  font-size: 0.84rem;
+  font-weight: 500;
   color: var(--text-h);
 }
 
@@ -205,7 +216,7 @@ select {
   min-width: 14rem;
   margin: 4px 2px;
   box-sizing: border-box;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   color: var(--text-h);
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
@@ -217,7 +228,7 @@ select {
 
 .p-cascadeselect-panel {
   font-family: var(--heading);
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   font-weight: 500;
 }
 
@@ -266,6 +277,7 @@ select {
   padding: 8px 16px;
   margin: 4px 2px;
   font-family: var(--heading);
+  font-size: 0.84rem;
   font-weight: 500;
 }
 
@@ -284,6 +296,7 @@ select {
   border-radius: 10px;
   box-shadow: var(--shadow);
   font-family: var(--heading);
+  font-size: 0.84rem;
 }
 
 .react-datepicker__header {
