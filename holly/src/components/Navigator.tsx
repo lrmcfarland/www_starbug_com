@@ -54,7 +54,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
 
     const [error, setError] = useState<string | null>(null);
     const [timezoneError, setTimezoneError] = useState<string | null>(null);
-    const [julianDay, setJulianDay] = useState<number | null>(null);
+    const [julianDay, setJulianDay] = useState<{ timestamp: number; value: number } | null>(null);
     const [ianaTimezones, setIanaTimezones] = useState<TimezoneGroup[]>([]);
     const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
     const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
@@ -157,7 +157,8 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                 throw new Error(data.error ?? "Unable to retrieve Julian day");
             }
 
-            setJulianDay(data.julian_day);
+            setJulianDay({ timestamp: new Date(markedTime).getTime(), value: data.julian_day });
+            setError(null);
 
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : "Request failed");
@@ -171,7 +172,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                     Julian Day
                 </button>
                 <span className="navigator-julian-day-value">
-                    {julianDay !== null ? julianDay : "TBD"}
+                    {julianDay?.timestamp === new Date(markedTime).getTime() ? julianDay.value : "TBD"}
                 </span>
             </div>
         );

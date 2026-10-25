@@ -92,6 +92,65 @@ describe("Navigator", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid datetime");
   });
 
+  it("hides a Julian day result after the marked time changes", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url === "/api/timezones") {
+          return Promise.resolve({ ok: true, json: async () => [] });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ julian_day: 2461311.5 }),
+        });
+      }),
+    );
+
+    render(<Navigator />);
+    fireEvent.click(screen.getByRole("button", { name: /Julian Day/i }));
+
+    expect(await screen.findByText("2461311.5")).toBeInTheDocument();
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    fireEvent.click(screen.getByRole("button", { name: "Mark" }));
+
+    expect(screen.getByText("TBD")).toBeInTheDocument();
+  });
+
+  it("clears the previous error after a successful retry", async () => {
+    let julianDayRequests = 0;
+    const fetchMock = vi.fn((url: string) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+
+      julianDayRequests += 1;
+      if (julianDayRequests === 1) {
+        return Promise.resolve({
+          ok: false,
+          json: async () => ({ error: "Invalid datetime" }),
+        });
+      }
+
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ julian_day: 2461311.5 }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Navigator />);
+    const julianDayButton = screen.getByRole("button", { name: /Julian Day/i });
+    fireEvent.click(julianDayButton);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Invalid datetime");
+
+    fireEvent.click(julianDayButton);
+
+    expect(await screen.findByText("2461311.5")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("renders the timezone selector", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-01T02:30:00.000Z"));
