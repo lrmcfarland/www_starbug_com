@@ -21,6 +21,25 @@ def create_app(config_class=None):
     def api_hello():
         return "Hello, starbug API!"
 
+    @app.route("/api/gmst", methods=["POST"])
+    def api_gmst():
+        """Calculate Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
+        Expects a JSON payload with a 'datetime' key.
+        Returns a JSON response with the GMST or an error message.
+        """
+        data = request.get_json()
+
+        if not data or "datetime" not in data:
+            return jsonify({"error": "Missing 'datetime' in request body"}), 400
+
+        datetime_str = data["datetime"]
+        try:
+            api_datetime = datetime.datetime.fromisoformat(datetime_str)
+            gmst = time.Meeus.GMST(api_datetime)
+            return jsonify({"gmst": gmst})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     @app.route("/api/timezones")
     def api_timezones():
         return time.timezones()

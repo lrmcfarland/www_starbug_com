@@ -52,14 +52,19 @@ function KeyboardTimeInput({ value, onChange }: KeyboardTimeInputProps) {
 
 function Location({ timezone = "UTC" }: { timezone?: string }) {
 
-    const [error, setError] = useState<string | null>(null);
+    const [julianDayError, setJulianDayError] = useState<string | null>(null);
+    const [gmstError, setGmstError] = useState<string | null>(null);
     const [timezoneError, setTimezoneError] = useState<string | null>(null);
-    const [julianDay, setJulianDay] = useState<{ timestamp: number; value: number } | null>(null);
-    const [ianaTimezones, setIanaTimezones] = useState<TimezoneGroup[]>([]);
+
     const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
-    const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
+    const [ianaTimezones, setIanaTimezones] = useState<TimezoneGroup[]>([]);
     const [latitude, setLatitude] = useState<string>("");
     const [longitude, setLongitude] = useState<string>("");
+
+    const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
+    const [julianDay, setJulianDay] = useState<{ timestamp: number; value: number } | null>(null);
+    const [gmst, setGmst] = useState<{ timestamp: number; value: number } | null>(null);
+
 
     useEffect(() => {
         getIANAtimezones();
@@ -68,6 +73,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     useEffect(() => {
         let isCurrentRequest = true;
         void fetchJulianDay(markedTime, () => isCurrentRequest);
+        void fetchGMST(markedTime, () => isCurrentRequest);
 
         return () => {
             isCurrentRequest = false;
@@ -82,7 +88,6 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     function handleMarkCurrentTime() {
         const timestamp = formatInTimeZone(new Date(), currentTimezone, MARKED_TIME_FORMAT);
         setMarkedTime(timestamp);
-        setError(null);
     }
 
     async function getIANAtimezones() {
@@ -168,12 +173,37 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
 
             if (isCurrentRequest()) {
                 setJulianDay({ timestamp: new Date(datetime).getTime(), value: data.julian_day });
-                setError(null);
+                setJulianDayError(null);
             }
 
         } catch (requestError) {
             if (isCurrentRequest()) {
-                setError(requestError instanceof Error ? requestError.message : "Request failed");
+                setJulianDayError(requestError instanceof Error ? requestError.message : "Request failed");
+            }
+        }
+    }
+
+    async function fetchGMST(datetime: string, isCurrentRequest: () => boolean = () => true) {
+        try {
+            const response = await fetch("/api/gmst", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ datetime }),
+            });
+            const data: { gmst?: number; error?: string } = await response.json();
+
+            if (!response.ok || data.gmst === undefined) {
+                throw new Error(data.error ?? "Unable to retrieve GMST");
+            }
+
+            if (isCurrentRequest()) {
+                setGmst({ timestamp: new Date(datetime).getTime(), value: data.gmst });
+                setGmstError(null);
+            }
+
+        } catch (requestError) {
+            if (isCurrentRequest()) {
+                setGmstError(requestError instanceof Error ? requestError.message : "Request failed");
             }
         }
     }
@@ -218,16 +248,34 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                         <tr>
                             <th scope="row">Marked Time</th>
                             <td>{markedTime}</td>
+                            <td><a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="noopener noreferrer">ISO 8601</a></td>
                         </tr>
                         <tr>
                             <th scope="row">Julian Day</th>
                             <td className="navigator-julian-day-value">
                                 {julianDay?.timestamp === new Date(markedTime).getTime() ? julianDay.value : "TBD"}
                             </td>
+                            <td>days</td>
+                        </tr>
+                        <tr>
+                            <th title="Greenwich Mean Sidereal Time" scope="row">GMST</th>
+                            <td className="navigator-gmst-value">
+                                {gmst?.timestamp === new Date(markedTime).getTime() ? gmst.value : "TBD"}
+                            </td>
+                            <td>hours</td>
                         </tr>
                     </tbody>
                 </table>
-                {error && <div role="alert"><p>{error}</p></div>}
+                <div>
+                    {(julianDayError || gmstError || gastError) && (
+                        <div role="alert">
+                            <h2>Error Messages</h2>
+                            <p>
+                                {julianDayError || gmstError || gastError}
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
 
         </div>
@@ -261,8 +309,23 @@ export const Navigator: React.FC = () => {
                             </a>
                         </li>
                         <li>
+                            <a href="https://en.wikipedia.org/wiki/Astronomical_coordinate_system" target="_blank" rel="noopener noreferrer">
+                                Wikipedia: Astronomical coordinate system
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://en.wikipedia.org/wiki/Geographic_coordinate_system" target="_blank" rel="noopener noreferrer">
+                                Wikipedia: Geographic coordinate system
+                            </a>
+                        </li>
+                        <li>
                             <a href="https://en.wikipedia.org/wiki/Julian_day" target="_blank" rel="noopener noreferrer">
                                 Wikipedia: Julian day
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://en.wikipedia.org/wiki/Sidereal_time" target="_blank" rel="noopener noreferrer">
+                                Wikipedia: Sidereal time
                             </a>
                         </li>
                     </ol>
