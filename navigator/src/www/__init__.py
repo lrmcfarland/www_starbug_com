@@ -40,6 +40,25 @@ def create_app(config_class=None):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+    @app.route("/api/gast", methods=["POST"])
+    def api_gast():
+        """Calculate Greenwich Apparent Sidereal Time (GAST) in hours from a datetime.
+        Expects a JSON payload with a 'datetime' key.
+        Returns a JSON response with the GAST or an error message.
+        """
+        data = request.get_json()
+
+        if not data or "datetime" not in data:
+            return jsonify({"error": "Missing 'datetime' in request body"}), 400
+
+        datetime_str = data["datetime"]
+        try:
+            api_datetime = datetime.datetime.fromisoformat(datetime_str)
+            gast = time.USN.GAST(api_datetime)
+            return jsonify({"gast": gast})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     @app.route("/api/timezones")
     def api_timezones():
         return time.timezones()

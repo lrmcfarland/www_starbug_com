@@ -54,6 +54,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
 
     const [julianDayError, setJulianDayError] = useState<string | null>(null);
     const [gmstError, setGmstError] = useState<string | null>(null);
+    const [gastError, setGastError] = useState<string | null>(null);
     const [timezoneError, setTimezoneError] = useState<string | null>(null);
 
     const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
@@ -64,6 +65,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
     const [julianDay, setJulianDay] = useState<{ timestamp: number; value: number } | null>(null);
     const [gmst, setGmst] = useState<{ timestamp: number; value: number } | null>(null);
+    const [gast, setGast] = useState<{ timestamp: number; value: number } | null>(null);
 
 
     useEffect(() => {
@@ -74,6 +76,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
         let isCurrentRequest = true;
         void fetchJulianDay(markedTime, () => isCurrentRequest);
         void fetchGMST(markedTime, () => isCurrentRequest);
+        void fetchGAST(markedTime, () => isCurrentRequest);
 
         return () => {
             isCurrentRequest = false;
@@ -208,6 +211,31 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
         }
     }
 
+    async function fetchGAST(datetime: string, isCurrentRequest: () => boolean = () => true) {
+        try {
+            const response = await fetch("/api/gast", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ datetime }),
+            });
+            const data: { gast?: number; error?: string } = await response.json();
+
+            if (!response.ok || data.gast === undefined) {
+                throw new Error(data.error ?? "Unable to retrieve GAST");
+            }
+
+            if (isCurrentRequest()) {
+                setGast({ timestamp: new Date(datetime).getTime(), value: data.gast });
+                setGastError(null);
+            }
+
+        } catch (requestError) {
+            if (isCurrentRequest()) {
+                setGastError(requestError instanceof Error ? requestError.message : "Request failed");
+            }
+        }
+    }
+
     return (
         <div>
             <div>
@@ -264,12 +292,19 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                             </td>
                             <td>hours</td>
                         </tr>
+                        <tr>
+                            <th title="Greenwich Apparent Sidereal Time" scope="row">GAST</th>
+                            <td className="navigator-gast-value">
+                                {gast?.timestamp === new Date(markedTime).getTime() ? gast.value : "TBD"}
+                            </td>
+                            <td>hours</td>
+                        </tr>
                     </tbody>
                 </table>
                 <div>
                     {(julianDayError || gmstError || gastError) && (
                         <div role="alert">
-                            <h2>Error Messages</h2>
+                            Error Messages:
                             <p>
                                 {julianDayError || gmstError || gastError}
                             </p>
@@ -277,7 +312,6 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                     )}
                 </div>
             </div>
-
         </div>
     );
 }

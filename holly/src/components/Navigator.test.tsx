@@ -50,6 +50,12 @@ describe("Navigator", () => {
           json: async () => ({ gmst: 1.5 }),
         });
       }
+      if (url === "/api/gast") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gast: 1.6 }),
+        });
+      }
       return Promise.resolve({
         ok: true,
         json: async () => ({ julian_day: 2461311.5 }),
@@ -108,6 +114,9 @@ describe("Navigator", () => {
       if (url === "/api/gmst") {
         return Promise.resolve({ ok: true, json: async () => ({ gmst: 1.5 }) });
       }
+      if (url === "/api/gast") {
+        return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
+      }
 
       julianDayRequests += 1;
       return Promise.resolve({
@@ -139,6 +148,9 @@ describe("Navigator", () => {
       }
       if (url === "/api/gmst") {
         return Promise.resolve({ ok: true, json: async () => ({ gmst: 1.5 }) });
+      }
+      if (url === "/api/gast") {
+        return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
       }
 
       julianDayRequests += 1;
