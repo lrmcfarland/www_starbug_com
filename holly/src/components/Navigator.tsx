@@ -55,6 +55,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     const [julianDayError, setJulianDayError] = useState<string | null>(null);
     const [gmstError, setGmstError] = useState<string | null>(null);
     const [gastError, setGastError] = useState<string | null>(null);
+    const [lmstError, setLmstError] = useState<string | null>(null);
     const [timezoneError, setTimezoneError] = useState<string | null>(null);
 
     const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
@@ -66,7 +67,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     const [julianDay, setJulianDay] = useState<{ timestamp: number; value: number } | null>(null);
     const [gmst, setGmst] = useState<{ timestamp: number; value: number } | null>(null);
     const [gast, setGast] = useState<{ timestamp: number; value: number } | null>(null);
-
+    const [lmst, setLmst] = useState<{ timestamp: number; value: number } | null>(null);
 
     useEffect(() => {
         getIANAtimezones();
@@ -77,11 +78,18 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
         void fetchJulianDay(markedTime, () => isCurrentRequest);
         void fetchGMST(markedTime, () => isCurrentRequest);
         void fetchGAST(markedTime, () => isCurrentRequest);
-
         return () => {
             isCurrentRequest = false;
         };
     }, [markedTime]);
+
+    useEffect(() => {
+        let isCurrentRequest = true;
+        void fetchLMST(markedTime, Number(longitude || 0), () => isCurrentRequest);
+        return () => {
+            isCurrentRequest = false;
+        };
+    }, [markedTime, longitude]);
 
     function handleTimezoneChange(timezone: string) {
         setCurrentTimezone(timezone);
@@ -236,6 +244,31 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
         }
     }
 
+    async function fetchLMST(datetime: string, longitude: number, isCurrentRequest: () => boolean = () => true) {
+        try {
+            const response = await fetch("/api/lmst", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ datetime, longitude }),
+            });
+            const data: { lmst?: number; error?: string } = await response.json();
+
+            if (!response.ok || data.lmst === undefined) {
+                throw new Error(data.error ?? "Unable to retrieve LMST");
+            }
+
+            if (isCurrentRequest()) {
+                setLmst({ timestamp: new Date(datetime).getTime(), value: data.lmst });
+                setLmstError(null);
+            }
+
+        } catch (requestError) {
+            if (isCurrentRequest()) {
+                setLmstError(requestError instanceof Error ? requestError.message : "Request failed");
+            }
+        }
+    }
+
     return (
         <div>
             <div>
@@ -299,14 +332,21 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                             </td>
                             <td>hours</td>
                         </tr>
+                        <tr>
+                            <th title="Local Mean Sidereal Time" scope="row">LMST</th>
+                            <td className="navigator-lmst-value">
+                                {lmst?.timestamp === new Date(markedTime).getTime() ? lmst.value : "TBD"}
+                            </td>
+                            <td>hours</td>
+                        </tr>
                     </tbody>
                 </table>
                 <div>
-                    {(julianDayError || gmstError || gastError) && (
+                    {(julianDayError || gmstError || gastError || lmstError) && (
                         <div role="alert">
                             Error Messages:
                             <p>
-                                {julianDayError || gmstError || gastError}
+                                {julianDayError || gmstError || gastError || lmstError}
                             </p>
                         </div>
                     )}

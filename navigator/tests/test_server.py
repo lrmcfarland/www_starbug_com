@@ -135,3 +135,27 @@ class TestGMSTAPI:
         assert response.status_code == 500
         data = json.loads(response.data)
         assert "error" in data
+
+
+class TestLMSTAPI:
+
+    def test_valid_lmst(self, app):
+        response = app.test_client().post(
+            "/api/lmst",
+            json={
+                "datetime": "1987-04-10T00:00:00+00:00",
+                "longitude": 0.0,
+            },
+        )
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        assert data["lmst"] == pytest.approx(13.179547, abs=1e-3)
+
+    def test_missing_longitude(self, app):
+        response = app.test_client().post(
+            "/api/lmst",
+            json={"datetime": "1987-04-10T00:00:00+00:00"},
+        )
+        assert response.status_code == 400
+        data = json.loads(response.data)
+        assert "error" in data

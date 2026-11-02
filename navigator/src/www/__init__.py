@@ -59,6 +59,28 @@ def create_app(config_class=None):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+    @app.route("/api/lmst", methods=["POST"])
+    def api_lmst():
+        """Calculate Local Mean Sidereal Time (LMST) in hours from a datetime.
+        Expects a JSON payload with a 'datetime' key.
+        Returns a JSON response with the LMST or an error message.
+        """
+        data = request.get_json()
+
+        if not data or "datetime" not in data:
+            return jsonify({"error": "Missing 'datetime' in request body"}), 400
+
+        if "longitude" not in data:
+            return jsonify({"error": "Missing 'longitude' in request body"}), 400
+
+        datetime_str = data["datetime"]
+        try:
+            api_datetime = datetime.datetime.fromisoformat(datetime_str)
+            lmst = time.USN.LMST(api_datetime, data.get("longitude", 0.0))
+            return jsonify({"lmst": lmst})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     @app.route("/api/julian_date", methods=["POST"])
     def api_julian_date():
         """Convert a Julian day to a datetime in ISO 8601 format.

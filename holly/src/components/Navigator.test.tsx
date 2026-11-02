@@ -26,7 +26,7 @@ vi.mock("primereact/cascadeselect", () => ({
     ),
 }));
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import Navigator from "./Navigator";
 
@@ -43,6 +43,9 @@ describe("Navigator", () => {
           ok: true,
           json: async () => [],
         });
+      }
+      if (url === "/api/lmst") {
+        return Promise.resolve({ ok: true, json: async () => ({ lmst: 1.5 }) });
       }
       if (url === "/api/gmst") {
         return Promise.resolve({
@@ -84,6 +87,43 @@ describe("Navigator", () => {
     }
   });
 
+  it("posts longitude to LMST and refreshes LMST when longitude changes", async () => {
+    const fetchMock = vi.fn((url: string, _options?: RequestInit) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (url === "/api/lmst") {
+        return Promise.resolve({ ok: true, json: async () => ({ lmst: 1.5 }) });
+      }
+      if (url === "/api/gmst") {
+        return Promise.resolve({ ok: true, json: async () => ({ gmst: 1.5 }) });
+      }
+      if (url === "/api/gast") {
+        return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ julian_day: 2461311.5 }) });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Navigator />);
+
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.filter(([url]) => url === "/api/lmst")).toHaveLength(1);
+    });
+    const lmstCalls = () => fetchMock.mock.calls.filter(([url]) => url === "/api/lmst");
+    expect(JSON.parse(String(lmstCalls()[0][1]?.body)).longitude).toBe(0);
+
+    fireEvent.change(screen.getByLabelText("Longitude"), {
+      target: { value: "-122.4194" },
+    });
+
+    await waitFor(() => {
+      expect(lmstCalls()).toHaveLength(2);
+    });
+    expect(JSON.parse(String(lmstCalls()[1][1]?.body)).longitude).toBe(-122.4194);
+    expect(fetchMock.mock.calls.filter(([url]) => url === "/api/gmst")).toHaveLength(1);
+  });
+
   it("shows an API error when the request fails", async () => {
     const fetchMock = vi.fn((url: string) => {
       if (url === "/api/timezones") {
@@ -110,6 +150,9 @@ describe("Navigator", () => {
     const fetchMock = vi.fn((url: string, _options?: RequestInit) => {
       if (url === "/api/timezones") {
         return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (url === "/api/lmst") {
+        return Promise.resolve({ ok: true, json: async () => ({ lmst: 1.5 }) });
       }
       if (url === "/api/gmst") {
         return Promise.resolve({ ok: true, json: async () => ({ gmst: 1.5 }) });
@@ -145,6 +188,9 @@ describe("Navigator", () => {
     const fetchMock = vi.fn((url: string) => {
       if (url === "/api/timezones") {
         return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (url === "/api/lmst") {
+        return Promise.resolve({ ok: true, json: async () => ({ lmst: 1.5 }) });
       }
       if (url === "/api/gmst") {
         return Promise.resolve({ ok: true, json: async () => ({ gmst: 1.5 }) });
