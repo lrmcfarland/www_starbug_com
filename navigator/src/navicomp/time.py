@@ -129,6 +129,38 @@ class AstronomicalAlgorithms:
 
         return julian_day
 
+
+class Meeus(AstronomicalAlgorithms):
+    """Astronomical Algorithms by Meeus.
+
+    Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009.
+
+    https://www.willbell.com/math/mc1.htm
+    """
+
+    @classmethod
+    def GMST(cls, a_datetime: datetime) -> np.float64:
+        """Calculates Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
+
+        Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 87-88
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+
+        Returns:
+            np.float64: The GMST in hours.
+        """
+        jd = cls.Julian_day(a_datetime)
+        t = (jd - cls.JD2k) / 36525.0
+        gmst = (
+            280.46061837
+            + 360.98564736629 * (jd - cls.JD2k)
+            + 0.000387933 * t**2
+            - t**3 / 38710000
+        )
+        gmst = gmst % 360.0
+        return gmst / 15.0  # Convert degrees to hours
+
     @staticmethod
     def Julian_date(a_Julian_day: np.float64) -> datetime:
         """Calculates datetime from Julian day number.
@@ -169,38 +201,6 @@ class AstronomicalAlgorithms:
         return datetime(
             year, month, int(day), hour, minute, second, tzinfo=ZoneInfo("UTC")
         )
-
-
-class Meeus(AstronomicalAlgorithms):
-    """Astronomical Algorithms by Meeus.
-
-    Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009.
-
-    https://www.willbell.com/math/mc1.htm
-    """
-
-    @classmethod
-    def GMST(cls, a_datetime: datetime) -> np.float64:
-        """Calculates Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
-
-        Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 87-88
-
-        Args:
-            a_datetime (datetime): The input datetime in UTC.
-
-        Returns:
-            np.float64: The GMST in hours.
-        """
-        jd = cls.Julian_day(a_datetime)
-        t = (jd - cls.JD2k) / 36525.0
-        gmst = (
-            280.46061837
-            + 360.98564736629 * (jd - cls.JD2k)
-            + 0.000387933 * t**2
-            - t**3 / 38710000
-        )
-        gmst = gmst % 360.0
-        return gmst / 15.0  # Convert degrees to hours
 
 
 class USN(AstronomicalAlgorithms):
