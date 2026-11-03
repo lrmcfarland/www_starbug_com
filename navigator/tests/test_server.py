@@ -68,7 +68,7 @@ class TestJulianDayAPI:
         assert response.status_code == 200
         data = json.loads(response.data)
         assert "julian_day" in data
-        assert data["julian_day"] == 2451545.0
+        assert data["julian_day"] == {"value": 2451545.0, "units": "days"}
 
     def test_missing_datetime(self, app):
         response = app.test_client().post("/api/julian_day", json={})
@@ -94,7 +94,9 @@ class TestGASTAPI:
         assert response.status_code == 200
         data = json.loads(response.data)
         assert "gast" in data
-        assert isinstance(data["gast"], float)
+        assert isinstance(data["gast"], dict)
+        assert isinstance(data["gast"]["value"], float)
+        assert data["gast"]["units"] == "hours"
 
     def test_missing_datetime(self, app):
         response = app.test_client().post("/api/gast", json={})
@@ -120,7 +122,9 @@ class TestGMSTAPI:
         assert response.status_code == 200
         data = json.loads(response.data)
         assert "gmst" in data
-        assert isinstance(data["gmst"], float)
+        assert isinstance(data["gmst"], dict)
+        assert isinstance(data["gmst"]["value"], float)
+        assert data["gmst"]["units"] == "hours"
 
     def test_missing_datetime(self, app):
         response = app.test_client().post("/api/gmst", json={})
@@ -149,7 +153,8 @@ class TestLMSTAPI:
         )
         assert response.status_code == 200
         data = json.loads(response.data)
-        assert data["lmst"] == pytest.approx(13.179547, abs=1e-3)
+        assert data["lmst"]["value"] == pytest.approx(13.179547, abs=1e-3)
+        assert data["lmst"]["units"] == "hours"
 
     def test_missing_longitude(self, app):
         response = app.test_client().post(
@@ -173,7 +178,8 @@ class TestLASTAPI:
         )
         assert response.status_code == 200
         data = json.loads(response.data)
-        assert data["last"] == pytest.approx(13.179547, abs=1e-3)
+        assert data["last"]["value"] == pytest.approx(13.179547, abs=1e-3)
+        assert data["last"]["units"] == "hours"
 
     def test_missing_longitude(self, app):
         response = app.test_client().post(

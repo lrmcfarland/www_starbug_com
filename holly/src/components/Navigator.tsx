@@ -17,6 +17,8 @@ type TimezoneGroup = {
     zones: { city: string; code: string }[];
 };
 
+type Measurement = { value: number; units: string };
+
 function isTimezoneGroups(value: unknown): value is TimezoneGroup[] {
     return (
         Array.isArray(value) &&
@@ -63,19 +65,19 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     const [latitude, setLatitude] = useState<string>("");
     const [longitude, setLongitude] = useState<string>("");
 
-    const [julianDay, setJulianDay] = useState<{ timestamp: number; value: number } | null>(null);
+    const [julianDay, setJulianDay] = useState<{ timestamp: number } & Measurement | null>(null);
     const [julianDayError, setJulianDayError] = useState<string | null>(null);
 
-    const [gmst, setGmst] = useState<{ timestamp: number; value: number } | null>(null);
+    const [gmst, setGmst] = useState<{ timestamp: number } & Measurement | null>(null);
     const [gmstError, setGmstError] = useState<string | null>(null);
 
-    const [gast, setGast] = useState<{ timestamp: number; value: number } | null>(null);
+    const [gast, setGast] = useState<{ timestamp: number } & Measurement | null>(null);
     const [gastError, setGastError] = useState<string | null>(null);
 
-    const [lmst, setLmst] = useState<{ timestamp: number; value: number } | null>(null);
+    const [lmst, setLmst] = useState<{ timestamp: number } & Measurement | null>(null);
     const [lmstError, setLmstError] = useState<string | null>(null);
 
-    const [last, setLast] = useState<{ timestamp: number; value: number } | null>(null);
+    const [last, setLast] = useState<{ timestamp: number } & Measurement | null>(null);
     const [lastError, setLastError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -137,14 +139,14 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ datetime }),
             });
-            const data: { julian_day?: number; error?: string } = await response.json();
+            const data: { julian_day?: { value: number; units: string }; error?: string } = await response.json();
 
             if (!response.ok || data.julian_day === undefined) {
                 throw new Error(data.error ?? "Unable to retrieve Julian day");
             }
 
             if (isCurrentRequest()) {
-                setJulianDay({ timestamp: new Date(datetime).getTime(), value: data.julian_day });
+                setJulianDay({ timestamp: new Date(datetime).getTime(), ...data.julian_day });
                 setJulianDayError(null);
             }
 
@@ -162,14 +164,14 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ datetime }),
             });
-            const data: { gmst?: number; error?: string } = await response.json();
+            const data: { gmst?: { value: number; units: string }; error?: string } = await response.json();
 
             if (!response.ok || data.gmst === undefined) {
                 throw new Error(data.error ?? "Unable to retrieve GMST");
             }
 
             if (isCurrentRequest()) {
-                setGmst({ timestamp: new Date(datetime).getTime(), value: data.gmst });
+                setGmst({ timestamp: new Date(datetime).getTime(), ...data.gmst });
                 setGmstError(null);
             }
 
@@ -187,14 +189,14 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ datetime }),
             });
-            const data: { gast?: number; error?: string } = await response.json();
+            const data: { gast?: { value: number; units: string }; error?: string } = await response.json();
 
             if (!response.ok || data.gast === undefined) {
                 throw new Error(data.error ?? "Unable to retrieve GAST");
             }
 
             if (isCurrentRequest()) {
-                setGast({ timestamp: new Date(datetime).getTime(), value: data.gast });
+                setGast({ timestamp: new Date(datetime).getTime(), ...data.gast });
                 setGastError(null);
             }
 
@@ -212,14 +214,14 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ datetime, longitude }),
             });
-            const data: { lmst?: number; error?: string } = await response.json();
+            const data: { lmst?: { value: number; units: string }; error?: string } = await response.json();
 
             if (!response.ok || data.lmst === undefined) {
                 throw new Error(data.error ?? "Unable to retrieve LMST");
             }
 
             if (isCurrentRequest()) {
-                setLmst({ timestamp: new Date(datetime).getTime(), value: data.lmst });
+                setLmst({ timestamp: new Date(datetime).getTime(), ...data.lmst });
                 setLmstError(null);
             }
 
@@ -237,14 +239,14 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ datetime, longitude }),
             });
-            const data: { last?: number; error?: string } = await response.json();
+            const data: { last?: { value: number; units: string }; error?: string } = await response.json();
 
             if (!response.ok || data.last === undefined) {
                 throw new Error(data.error ?? "Unable to retrieve LAST");
             }
 
             if (isCurrentRequest()) {
-                setLast({ timestamp: new Date(datetime).getTime(), value: data.last });
+                setLast({ timestamp: new Date(datetime).getTime(), ...data.last });
                 setLastError(null);
             }
 
@@ -269,7 +271,6 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                                 Mark
                             </button>
                         </th>
-
                         <td>
                             <DatePicker
                                 className="date-time-picker"
@@ -354,35 +355,35 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                         <td className="navigator-julian-day-value">
                             {julianDay?.timestamp === new Date(markedTime).getTime() ? julianDay.value : "TBD"}
                         </td>
-                        <td>days</td>
+                        <td>{julianDay?.units || "days"}</td>
                     </tr>
                     <tr>
                         <th title="Greenwich Mean Sidereal Time" scope="row">GMST</th>
                         <td className="navigator-gmst-value">
                             {gmst?.timestamp === new Date(markedTime).getTime() ? gmst.value : "TBD"}
                         </td>
-                        <td>hours</td>
+                        <td>{gmst?.units || "hours"}</td>
                     </tr>
                     <tr>
                         <th title="Local Mean Sidereal Time" scope="row">LMST</th>
                         <td className="navigator-lmst-value">
                             {lmst?.timestamp === new Date(markedTime).getTime() ? lmst.value : "TBD"}
                         </td>
-                        <td>hours</td>
+                        <td>{lmst?.units || "hours"}</td>
                     </tr>
                     <tr>
                         <th title="Greenwich Apparent Sidereal Time" scope="row">GAST</th>
                         <td className="navigator-gast-value">
                             {gast?.timestamp === new Date(markedTime).getTime() ? gast.value : "TBD"}
                         </td>
-                        <td>hours</td>
+                        <td>{gast?.units || "hours"}</td>
                     </tr>
                     <tr>
                         <th title="Local Apparent Sidereal Time" scope="row">LAST</th>
                         <td className="navigator-last-value">
                             {last?.timestamp === new Date(markedTime).getTime() ? last.value : "TBD"}
                         </td>
-                        <td>hours</td>
+                        <td>{last?.units || "hours"}</td>
                     </tr>
                 </tbody>
             </table>

@@ -88,7 +88,7 @@ class AstronomicalAlgorithms:
             a_datetime (datetime): The input datetime.
 
         Returns:
-            np.float64: The Modified Julian Date in local time.
+            dict: A dictionary containing the Julian day.
         """
         utc_time = a_datetime.astimezone(ZoneInfo("UTC"))
 
@@ -124,8 +124,7 @@ class AstronomicalAlgorithms:
             + (utc_time.second / 86400.0)
         )
 
-        # TODO adjust for timezone offset?
-        # julian_day -= a_datetime.utcoffset().total_seconds() / 86400.0
+        return {"value": julian_day, "units": "days"}
 
         return julian_day
 
@@ -148,9 +147,9 @@ class Meeus(AstronomicalAlgorithms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            np.float64: The GMST in hours.
+            dict: A dictionary containing the GMST value in hours.
         """
-        jd = cls.Julian_day(a_datetime)
+        jd = cls.Julian_day(a_datetime)["value"]
         t = (jd - cls.JD2k) / 36525.0
         gmst = (
             280.46061837
@@ -159,7 +158,7 @@ class Meeus(AstronomicalAlgorithms):
             - t**3 / 38710000
         )
         gmst = gmst % 360.0
-        return gmst / 15.0  # Convert degrees to hours
+        return {"value": gmst / 15.0, "units": "hours"}  # Convert degrees to hours
 
     @staticmethod
     def Julian_date(a_Julian_day: np.float64) -> datetime:
@@ -219,7 +218,7 @@ class USN(AstronomicalAlgorithms):
         Returns:
             np.float64: The Julian date of the previous midnight.
         """
-        JDtt = cls.Julian_day(a_datetime)
+        JDtt = cls.Julian_day(a_datetime)["value"]
         jd_floor = floor(JDtt)
         if JDtt - jd_floor >= 0.5:
             jdo = jd_floor + 0.5
@@ -235,9 +234,9 @@ class USN(AstronomicalAlgorithms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            np.float64: The GMST in hours.
+            dict: A dictionary containing the GMST value in hours.
         """
-        JDtt = cls.Julian_day(a_datetime)
+        JDtt = cls.Julian_day(a_datetime)["value"]
 
         # Julian date of the previous midnight
         jdo = cls.JDo(a_datetime)
@@ -254,7 +253,7 @@ class USN(AstronomicalAlgorithms):
             + 0.0000258 * t**2
         )
         gmst = gmst % 24.0
-        return gmst
+        return {"value": gmst, "units": "hours"}
 
     @classmethod
     def GMST_simplified(cls, a_datetime: datetime) -> np.float64:
@@ -266,12 +265,12 @@ class USN(AstronomicalAlgorithms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            np.float64: The GMST in hours.
+            dict: A dictionary containing the GMST value in hours.
         """
-        JDtt = cls.Julian_day(a_datetime)
+        JDtt = cls.Julian_day(a_datetime)["value"]
         gmst = 18.697375 + 24.065709824279 * (JDtt - cls.JD2k)
         gmst = gmst % 24.0
-        return gmst
+        return {"value": gmst, "units": "hours"}
 
     @classmethod
     def obliquity(cls, a_datetime: datetime) -> np.float64:
@@ -283,12 +282,12 @@ class USN(AstronomicalAlgorithms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            np.float64: The mean obliquity of the ecliptic in degrees.
+            dict: A dictionary containing the mean obliquity of the ecliptic in degrees.
         """
-        JDtt = cls.Julian_day(a_datetime)
+        JDtt = cls.Julian_day(a_datetime)["value"]
         Dtt = JDtt - cls.JD2k
         obliquity = 23.4393 - 0.0000004 * Dtt
-        return obliquity  # TODO radians?
+        return {"value": obliquity, "units": "degrees"}  # TODO radians?
 
     @classmethod
     def GAST(cls, a_datetime: datetime) -> np.float64:
@@ -300,12 +299,12 @@ class USN(AstronomicalAlgorithms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            np.float64: The GAST in hours.
+            dict: A dictionary containing the GAST value in hours.
         """
-        JDtt = cls.Julian_day(a_datetime)
+        JDtt = cls.Julian_day(a_datetime)["value"]
         Dtt = JDtt - cls.JD2k
-        gmst = cls.GMST(a_datetime)
-        obliquity = cls.obliquity(a_datetime)
+        gmst = cls.GMST(a_datetime)["value"]
+        obliquity = cls.obliquity(a_datetime)["value"]
         ε = Space.deg2rad(obliquity)
         Ω = Space.deg2rad(125.04 - 0.052954 * Dtt)
         L = Space.deg2rad(280.47 + 0.98565 * Dtt)
@@ -313,7 +312,7 @@ class USN(AstronomicalAlgorithms):
         Δψ = -0.000319 * np.sin(Ω) - 0.000024 * np.sin(2 * L)
         gast = gmst + (Δψ * np.cos(ε)) / 15.0
         gast = gast % 24.0
-        return gast
+        return {"value": gast, "units": "hours"}
 
     @classmethod
     def LMST(cls, a_datetime: datetime, a_longitude: float) -> np.float64:
@@ -328,11 +327,11 @@ class USN(AstronomicalAlgorithms):
             (positive east, negative west).
 
         Returns:
-            np.float64: The LMST in hours.
+            dict: A dictionary containing the LMST value in hours.
         """
-        gmst = cls.GMST(a_datetime)
+        gmst = cls.GMST(a_datetime)["value"]
         lmst = (gmst + a_longitude / 15.0) % 24.0
-        return lmst
+        return {"value": lmst, "units": "hours"}
 
     @classmethod
     def LAST(cls, a_datetime: datetime, a_longitude: float) -> np.float64:
@@ -347,8 +346,8 @@ class USN(AstronomicalAlgorithms):
             (positive east, negative west).
 
         Returns:
-            np.float64: The LAST in hours.
+            dict: A dictionary containing the LAST value in hours.
         """
-        gast = cls.GAST(a_datetime)
+        gast = cls.GAST(a_datetime)["value"]
         last = (gast + a_longitude / 15.0) % 24.0
-        return last
+        return {"value": last, "units": "hours"}

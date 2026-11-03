@@ -45,26 +45,26 @@ describe("Navigator", () => {
         });
       }
       if (url === "/api/lmst") {
-        return Promise.resolve({ ok: true, json: async () => ({ lmst: 1.5 }) });
+        return Promise.resolve({ ok: true, json: async () => ({ lmst: { value: 1.5, units: "hours" } }) });
       }
       if (url === "/api/gmst") {
         return Promise.resolve({
           ok: true,
-          json: async () => ({ gmst: 1.5 }),
+          json: async () => ({ gmst: { value: 1.5, units: "hours" } }),
         });
       }
       if (url === "/api/gast") {
         return Promise.resolve({
           ok: true,
-          json: async () => ({ gast: 1.6 }),
+          json: async () => ({ gast: { value: 1.6, units: "hours" } }),
         });
       }
       if (url === "/api/last") {
-        return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
+        return Promise.resolve({ ok: true, json: async () => ({ last: { value: 1.7, units: "hours" } }) });
       }
       return Promise.resolve({
         ok: true,
-        json: async () => ({ julian_day: 2461311.5 }),
+        json: async () => ({ julian_day: { value: 2461311.5, units: "days" } }),
       });
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -173,7 +173,7 @@ describe("Navigator", () => {
       julianDayRequests += 1;
       return Promise.resolve({
         ok: true,
-        json: async () => ({ julian_day: 2461311.5 + julianDayRequests - 1 }),
+        json: async () => ({ julian_day: { value: 2461311.5 + julianDayRequests - 1, units: "days" } }),
       });
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -221,7 +221,7 @@ describe("Navigator", () => {
 
       return Promise.resolve({
         ok: true,
-        json: async () => ({ julian_day: 2461311.5 }),
+        json: async () => ({ julian_day: { value: 2461311.5, units: "days" } }),
       });
     });
     vi.stubGlobal("fetch", fetchMock);

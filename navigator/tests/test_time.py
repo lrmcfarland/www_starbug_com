@@ -84,7 +84,7 @@ class TestJulianDay:
             expected (np.float64): The expected Modified Julian Date.
         """
         result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
-        assert result == expected
+        assert result["value"] == expected
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -112,7 +112,7 @@ class TestJulianDay:
             absolute_tolerance (float): The absolute tolerance for the comparison.
         """
         result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
-        assert abs(result - expected) < absolute_tolerance
+        assert abs(result["value"] - expected) < absolute_tolerance
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected"),
@@ -133,7 +133,7 @@ class TestJulianDay:
             expected (np.float64): The expected Modified Julian Date.
         """
         result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
-        assert result == expected
+        assert result["value"] == expected
 
 
 class TestJulianDate:
@@ -253,7 +253,7 @@ class TestGMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.Meeus.GMST(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -291,7 +291,7 @@ class TestGMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.GMST(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -329,7 +329,7 @@ class TestGMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.GMST_simplified(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -352,7 +352,7 @@ class TestGMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.obliquity(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -375,7 +375,7 @@ class TestGMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.GAST(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
 
 class TestLMST:
@@ -409,7 +409,7 @@ class TestLMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.LMST(a_datetime, a_longitude)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
 
 class TestLAST:
@@ -443,4 +443,4 @@ class TestLAST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.LAST(a_datetime, a_longitude)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
