@@ -267,6 +267,10 @@ select {
   text-align: left;
 }
 
+.navigator-data-table button {
+  font-size: inherit;
+}
+
 .navigator-data-table th {
   color: var(--text-h);
   font-family: var(--heading);
