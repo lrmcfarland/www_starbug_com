@@ -387,8 +387,8 @@ class TestLMST:
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
                 0.0,  # Longitude at Greenwich.
                 # AI OG: 13 + 10 / 60 + 46.3668 / 3600,
-                dms_to_decimal(13, 10, 46.1351),
-                1e-4,
+                dms_to_decimal(13, 10, 46.3668),
+                1e-5,
             ),  # Meeus, 2009, p. 88.
         ],
     )
@@ -409,4 +409,38 @@ class TestLMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.LMST(a_datetime, a_longitude)
+        assert result == pytest.approx(expected, abs=absolute_tolerance)
+
+
+class TestLAST:
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "a_longitude", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
+                0.0,  # Longitude at Greenwich.
+                # AI OG: 13 + 10 / 60 + 46.3668 / 3600,
+                dms_to_decimal(13, 10, 46.1351),
+                1e-4,
+            ),  # Meeus, 2009, p. 88.
+        ],
+    )
+    def test_USN_LAST(
+        self,
+        a_datetime: datetime,
+        a_longitude: float,
+        expected: float,
+        absolute_tolerance: float,
+    ):
+        """Test Local Apparent Sidereal Time (LAST).
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            a_longitude (float): The longitude in degrees
+            (positive east, negative west).
+            expected (float): The expected LAST in hours.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.USN.LAST(a_datetime, a_longitude)
         assert result == pytest.approx(expected, abs=absolute_tolerance)

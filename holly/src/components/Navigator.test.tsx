@@ -59,6 +59,9 @@ describe("Navigator", () => {
           json: async () => ({ gast: 1.6 }),
         });
       }
+      if (url === "/api/last") {
+        return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
+      }
       return Promise.resolve({
         ok: true,
         json: async () => ({ julian_day: 2461311.5 }),
@@ -71,7 +74,7 @@ describe("Navigator", () => {
     const julianDayElement = await screen.findByText(/2461311.5/);
     expect(julianDayElement).toBeInTheDocument();
     expect(screen.getByRole("table")).toBeInTheDocument();
-    expect(screen.getByRole("row", { name: /Marked Time/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Time/ })).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Julian Day/ })).toBeInTheDocument();
 
     // Verify julian_day API was called
@@ -100,6 +103,9 @@ describe("Navigator", () => {
       }
       if (url === "/api/gast") {
         return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
+      }
+      if (url === "/api/last") {
+        return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
       }
       return Promise.resolve({ ok: true, json: async () => ({ julian_day: 2461311.5 }) });
     });
@@ -160,6 +166,9 @@ describe("Navigator", () => {
       if (url === "/api/gast") {
         return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
       }
+      if (url === "/api/last") {
+        return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
+      }
 
       julianDayRequests += 1;
       return Promise.resolve({
@@ -197,6 +206,9 @@ describe("Navigator", () => {
       }
       if (url === "/api/gast") {
         return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
+      }
+      if (url === "/api/last") {
+        return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
       }
 
       julianDayRequests += 1;
@@ -292,6 +304,6 @@ describe("Navigator", () => {
     // Verify the timezone selector component exists and changed state was triggered
     expect(timezoneSelect).toBeInTheDocument();
     // The marked time should still be displayed (we can't easily test exact offset with fake timers and UTC base time)
-    expect(screen.getByText("Marked Time")).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Time/ })).toBeInTheDocument();
   });
 });

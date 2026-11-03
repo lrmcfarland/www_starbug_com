@@ -81,6 +81,28 @@ def create_app(config_class=None):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+    @app.route("/api/last", methods=["POST"])
+    def api_last():
+        """Calculate Local Apparent Sidereal Time (LAST) in hours from a datetime.
+        Expects a JSON payload with a 'datetime' key.
+        Returns a JSON response with the LAST or an error message.
+        """
+        data = request.get_json()
+
+        if not data or "datetime" not in data:
+            return jsonify({"error": "Missing 'datetime' in request body"}), 400
+
+        if "longitude" not in data:
+            return jsonify({"error": "Missing 'longitude' in request body"}), 400
+
+        datetime_str = data["datetime"]
+        try:
+            api_datetime = datetime.datetime.fromisoformat(datetime_str)
+            last = time.USN.LAST(api_datetime, data.get("longitude", 0.0))
+            return jsonify({"last": last})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     @app.route("/api/julian_date", methods=["POST"])
     def api_julian_date():
         """Convert a Julian day to a datetime in ISO 8601 format.

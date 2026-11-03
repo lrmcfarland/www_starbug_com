@@ -52,25 +52,31 @@ function KeyboardTimeInput({ value, onChange }: KeyboardTimeInputProps) {
 
 function Location({ timezone = "UTC" }: { timezone?: string }) {
 
-    const [julianDayError, setJulianDayError] = useState<string | null>(null);
-    const [gmstError, setGmstError] = useState<string | null>(null);
-    const [gastError, setGastError] = useState<string | null>(null);
-    const [lmstError, setLmstError] = useState<string | null>(null);
-    const [timezoneError, setTimezoneError] = useState<string | null>(null);
-
+    const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
     const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
     const [ianaTimezones, setIanaTimezones] = useState<TimezoneGroup[]>([]);
-    const [latitude, setLatitude] = useState<string>("");
-    const [longitude, setLongitude] = useState<string>("");
-
-    const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
-    const [julianDay, setJulianDay] = useState<{ timestamp: number; value: number } | null>(null);
-    const [gmst, setGmst] = useState<{ timestamp: number; value: number } | null>(null);
-    const [gast, setGast] = useState<{ timestamp: number; value: number } | null>(null);
-    const [lmst, setLmst] = useState<{ timestamp: number; value: number } | null>(null);
+    const [timezoneError, setTimezoneError] = useState<string | null>(null);
 
     const timeString = formatInTimeZone(new Date(markedTime), currentTimezone, "HH:mm:ss");
     const selectedDate = toZonedTime(new Date(markedTime), currentTimezone);
+
+    const [latitude, setLatitude] = useState<string>("");
+    const [longitude, setLongitude] = useState<string>("");
+
+    const [julianDay, setJulianDay] = useState<{ timestamp: number; value: number } | null>(null);
+    const [julianDayError, setJulianDayError] = useState<string | null>(null);
+
+    const [gmst, setGmst] = useState<{ timestamp: number; value: number } | null>(null);
+    const [gmstError, setGmstError] = useState<string | null>(null);
+
+    const [gast, setGast] = useState<{ timestamp: number; value: number } | null>(null);
+    const [gastError, setGastError] = useState<string | null>(null);
+
+    const [lmst, setLmst] = useState<{ timestamp: number; value: number } | null>(null);
+    const [lmstError, setLmstError] = useState<string | null>(null);
+
+    const [last, setLast] = useState<{ timestamp: number; value: number } | null>(null);
+    const [lastError, setLastError] = useState<string | null>(null);
 
     useEffect(() => {
         getIANAtimezones();
@@ -89,6 +95,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     useEffect(() => {
         let isCurrentRequest = true;
         void fetchLMST(markedTime, Number(longitude || 0), () => isCurrentRequest);
+        void fetchLAST(markedTime, Number(longitude || 0), () => isCurrentRequest);
         return () => {
             isCurrentRequest = false;
         };
@@ -223,6 +230,31 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
         }
     }
 
+    async function fetchLAST(datetime: string, longitude: number, isCurrentRequest: () => boolean = () => true) {
+        try {
+            const response = await fetch("/api/last", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ datetime, longitude }),
+            });
+            const data: { last?: number; error?: string } = await response.json();
+
+            if (!response.ok || data.last === undefined) {
+                throw new Error(data.error ?? "Unable to retrieve LAST");
+            }
+
+            if (isCurrentRequest()) {
+                setLast({ timestamp: new Date(datetime).getTime(), value: data.last });
+                setLastError(null);
+            }
+
+        } catch (requestError) {
+            if (isCurrentRequest()) {
+                setLastError(requestError instanceof Error ? requestError.message : "Request failed");
+            }
+        }
+    }
+
     return (
 
         <div>
@@ -313,7 +345,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                         <td>degrees</td>
                     </tr>
                     <tr>
-                        <th scope="row">Marked Time</th>
+                        <th scope="row">Time</th>
                         <td>{markedTime}</td>
                         <td><a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="noopener noreferrer">ISO 8601</a></td>
                     </tr>
@@ -345,14 +377,20 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                         </td>
                         <td>hours</td>
                     </tr>
+                    <tr>
+                        <th title="Local Apparent Sidereal Time" scope="row">LAST</th>
+                        <td className="navigator-last-value">
+                            {last?.timestamp === new Date(markedTime).getTime() ? last.value : "TBD"}
+                        </td>
+                        <td>hours</td>
+                    </tr>
                 </tbody>
             </table>
             <div>
-                {(julianDayError || gmstError || gastError || lmstError) && (
+                {(julianDayError || gmstError || gastError || lmstError || lastError) && (
                     <div role="alert">
-                        Error Messages:
                         <p>
-                            {julianDayError || gmstError || gastError || lmstError}
+                            Error Messages: {julianDayError || gmstError || gastError || lmstError || lastError}
                         </p>
                     </div>
                 )}

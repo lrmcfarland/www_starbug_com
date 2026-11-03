@@ -329,11 +329,26 @@ class USN(AstronomicalAlgorithms):
 
         Returns:
             np.float64: The LMST in hours.
-
-        TODO: adjust for timezone offset?
-
-        longitude = a_datetime.utcoffset().total_seconds() / 3600.0 * 15.0
         """
         gmst = cls.GMST(a_datetime)
         lmst = (gmst + a_longitude / 15.0) % 24.0
         return lmst
+
+    @classmethod
+    def LAST(cls, a_datetime: datetime, a_longitude: float) -> np.float64:
+        """Calculates Local Apparent Sidereal Time (LAST) in hours from a datetime.
+
+        Meeus, 2009, p. 88 with obliquity correction from the US Naval Observatory
+        Astronomical Algorithms.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            a_longitude (float): The longitude in degrees
+            (positive east, negative west).
+
+        Returns:
+            np.float64: The LAST in hours.
+        """
+        gast = cls.GAST(a_datetime)
+        last = (gast + a_longitude / 15.0) % 24.0
+        return last
