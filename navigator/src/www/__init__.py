@@ -54,7 +54,7 @@ def create_app(config_class=None):
         datetime_str = data["datetime"]
         try:
             api_datetime = datetime.datetime.fromisoformat(datetime_str)
-            gmst = time.Meeus.GMST(api_datetime)
+            gmst = time.USN.GMST(api_datetime)
             return jsonify({"gmst": gmst})
         except Exception as e:
             return jsonify({"error": str(e)}), 500
