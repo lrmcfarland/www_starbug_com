@@ -113,7 +113,7 @@ describe("Navigator", () => {
     const lmstCalls = () => fetchMock.mock.calls.filter(([url]) => url === "/api/lmst");
     expect(JSON.parse(String(lmstCalls()[0][1]?.body)).longitude).toBe(0);
 
-    fireEvent.change(screen.getByLabelText("Longitude"), {
+    fireEvent.change(screen.getByLabelText(/Longitude/), {
       target: { value: "-122.4194" },
     });
 

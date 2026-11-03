@@ -69,6 +69,9 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     const [gast, setGast] = useState<{ timestamp: number; value: number } | null>(null);
     const [lmst, setLmst] = useState<{ timestamp: number; value: number } | null>(null);
 
+    const timeString = formatInTimeZone(new Date(markedTime), currentTimezone, "HH:mm:ss");
+    const selectedDate = toZonedTime(new Date(markedTime), currentTimezone);
+
     useEffect(() => {
         getIANAtimezones();
     }, []);
@@ -118,55 +121,6 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
             console.error("Error fetching timezones:", error);
             setTimezoneError("Unable to load timezones.");
         }
-    }
-
-    function renderDatePicker() {
-        const timeString = formatInTimeZone(new Date(markedTime), currentTimezone, "HH:mm:ss");
-        const selectedDate = toZonedTime(new Date(markedTime), currentTimezone);
-
-        return (
-            <div className="navigator-control-row">
-                <button
-                    title="Mark Current Time"
-                    onClick={handleMarkCurrentTime}
-                >
-                    Mark
-                </button>
-
-                <DatePicker
-                    className="date-time-picker"
-                    selected={selectedDate}
-                    onChange={(date: Date | null) => {
-                        if (date) {
-                            const utcDate = fromZonedTime(date, currentTimezone);
-                            setMarkedTime(formatInTimeZone(utcDate, currentTimezone, MARKED_TIME_FORMAT));
-                        }
-                    }}
-                    showTimeInput
-                    dateFormat={DATE_PICKER_FORMAT}
-                    customTimeInput={React.createElement(KeyboardTimeInput, {
-                        value: timeString,
-                        onChange: (time: string) => {
-                            const localDate = formatInTimeZone(new Date(markedTime), currentTimezone, "yyyy-MM-dd");
-                            const updatedDate = fromZonedTime(`${localDate}T${time}`, currentTimezone);
-                            setMarkedTime(formatInTimeZone(updatedDate, currentTimezone, MARKED_TIME_FORMAT));
-                        }
-                    })}
-                />
-                <CascadeSelect
-                    value={currentTimezone}
-                    options={ianaTimezones}
-                    optionLabel="city"
-                    optionValue="code"
-                    optionGroupLabel="zone"
-                    optionGroupChildren={["zones"]}
-                    onChange={(tz: { value: string }) => handleTimezoneChange(tz.value)}
-                    placeholder="Select a City"
-                    className="navigator-timezone-select"
-                />
-                {timezoneError && <div role="alert">{timezoneError}</div>}
-            </div>
-        );
     }
 
     async function fetchJulianDay(datetime: string, isCurrentRequest: () => boolean = () => true) {
@@ -270,89 +224,141 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     }
 
     return (
-        <div>
-            <div>
-                {renderDatePicker()}
-            </div>
-                        <div className="navigator-control-row navigator-location-row">
-                <label>
-                    Latitude
-                    <input
-                        className="navigator-location-input"
-                        type="number"
-                        min="-90"
-                        max="90"
-                        step="any"
-                        value={latitude}
-                        onChange={(event) => setLatitude(event.currentTarget.value)}
-                        placeholder="e.g. 37.7749"
-                    />
-                </label>
 
-                <label>
-                    Longitude
-                    <input
-                        className="navigator-location-input"
-                        type="number"
-                        min="-180"
-                        max="180"
-                        step="any"
-                        value={longitude}
-                        onChange={(event) => setLongitude(event.currentTarget.value)}
-                        placeholder="e.g. -122.4194"
-                    />
-                </label>
-            </div>
+        <div>
+            <table className="navigator-data-table">
+                <tbody>
+                    <tr>
+                        <td>
+                            <button
+                                title="Mark Current Time"
+                                onClick={handleMarkCurrentTime}
+                            >
+                                Mark
+                            </button>
+                        </td>
+
+                        <td>
+                            <DatePicker
+                                className="date-time-picker"
+                                selected={selectedDate}
+                                onChange={(date: Date | null) => {
+                                    if (date) {
+                                        const utcDate = fromZonedTime(date, currentTimezone);
+                                        setMarkedTime(formatInTimeZone(utcDate, currentTimezone, MARKED_TIME_FORMAT));
+                                    }
+                                }}
+                                showTimeInput
+                                dateFormat={DATE_PICKER_FORMAT}
+                                customTimeInput={React.createElement(KeyboardTimeInput, {
+                                    value: timeString,
+                                    onChange: (time: string) => {
+                                        const localDate = formatInTimeZone(new Date(markedTime), currentTimezone, "yyyy-MM-dd");
+                                        const updatedDate = fromZonedTime(`${localDate}T${time}`, currentTimezone);
+                                        setMarkedTime(formatInTimeZone(updatedDate, currentTimezone, MARKED_TIME_FORMAT));
+                                    }
+                                })}
+                            />
+                        </td>
+                        <td>
+                            <CascadeSelect
+                                value={currentTimezone}
+                                options={ianaTimezones}
+                                optionLabel="city"
+                                optionValue="code"
+                                optionGroupLabel="zone"
+                                optionGroupChildren={["zones"]}
+                                onChange={(tz: { value: string }) => handleTimezoneChange(tz.value)}
+                                placeholder="Select a City"
+                                className="navigator-timezone-select"
+                            />
+                            {timezoneError && <div role="alert">{timezoneError}</div>}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Latitude
+                        </th>
+                        <td>
+                            <input
+                                className="navigator-location-input"
+                                type="number"
+                                min="-90"
+                                max="90"
+                                step="any"
+                                value={latitude}
+                                onChange={(event) => setLatitude(event.currentTarget.value)}
+                                placeholder="e.g. 37.7749"
+                            />
+                        </td>
+                        <td>degrees</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label htmlFor="navigator-longitude">Longitude</label>
+                        </th>
+                        <td>
+                            <input
+                                id="navigator-longitude"
+                                className="navigator-location-input"
+                                type="number"
+                                min="-180"
+                                max="180"
+                                step="any"
+                                value={longitude}
+                                onChange={(event) => setLongitude(event.currentTarget.value)}
+                                placeholder="e.g. -122.4194"
+                            />
+                        </td>
+                        <td>degrees</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Marked Time</th>
+                        <td>{markedTime}</td>
+                        <td><a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="noopener noreferrer">ISO 8601</a></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Julian Day</th>
+                        <td className="navigator-julian-day-value">
+                            {julianDay?.timestamp === new Date(markedTime).getTime() ? julianDay.value : "TBD"}
+                        </td>
+                        <td>days</td>
+                    </tr>
+                    <tr>
+                        <th title="Greenwich Mean Sidereal Time" scope="row">GMST</th>
+                        <td className="navigator-gmst-value">
+                            {gmst?.timestamp === new Date(markedTime).getTime() ? gmst.value : "TBD"}
+                        </td>
+                        <td>hours</td>
+                    </tr>
+                    <tr>
+                        <th title="Local Mean Sidereal Time" scope="row">LMST</th>
+                        <td className="navigator-lmst-value">
+                            {lmst?.timestamp === new Date(markedTime).getTime() ? lmst.value : "TBD"}
+                        </td>
+                        <td>hours</td>
+                    </tr>
+                    <tr>
+                        <th title="Greenwich Apparent Sidereal Time" scope="row">GAST</th>
+                        <td className="navigator-gast-value">
+                            {gast?.timestamp === new Date(markedTime).getTime() ? gast.value : "TBD"}
+                        </td>
+                        <td>hours</td>
+                    </tr>
+                </tbody>
+            </table>
             <div>
-                <table className="navigator-data-table">
-                    <tbody>
-                        <tr>
-                            <th scope="row">Marked Time</th>
-                            <td>{markedTime}</td>
-                            <td><a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="noopener noreferrer">ISO 8601</a></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Julian Day</th>
-                            <td className="navigator-julian-day-value">
-                                {julianDay?.timestamp === new Date(markedTime).getTime() ? julianDay.value : "TBD"}
-                            </td>
-                            <td>days</td>
-                        </tr>
-                        <tr>
-                            <th title="Greenwich Mean Sidereal Time" scope="row">GMST</th>
-                            <td className="navigator-gmst-value">
-                                {gmst?.timestamp === new Date(markedTime).getTime() ? gmst.value : "TBD"}
-                            </td>
-                            <td>hours</td>
-                        </tr>
-                        <tr>
-                            <th title="Greenwich Apparent Sidereal Time" scope="row">GAST</th>
-                            <td className="navigator-gast-value">
-                                {gast?.timestamp === new Date(markedTime).getTime() ? gast.value : "TBD"}
-                            </td>
-                            <td>hours</td>
-                        </tr>
-                        <tr>
-                            <th title="Local Mean Sidereal Time" scope="row">LMST</th>
-                            <td className="navigator-lmst-value">
-                                {lmst?.timestamp === new Date(markedTime).getTime() ? lmst.value : "TBD"}
-                            </td>
-                            <td>hours</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div>
-                    {(julianDayError || gmstError || gastError || lmstError) && (
-                        <div role="alert">
-                            Error Messages:
-                            <p>
-                                {julianDayError || gmstError || gastError || lmstError}
-                            </p>
-                        </div>
-                    )}
-                </div>
+                {(julianDayError || gmstError || gastError || lmstError) && (
+                    <div role="alert">
+                        Error Messages:
+                        <p>
+                            {julianDayError || gmstError || gastError || lmstError}
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
+
     );
 }
 
