@@ -261,14 +261,14 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
             <table className="navigator-data-table">
                 <tbody>
                     <tr>
-                        <td>
+                        <th scope="row">
                             <button
                                 title="Mark Current Time"
                                 onClick={handleMarkCurrentTime}
                             >
                                 Mark
                             </button>
-                        </td>
+                        </th>
 
                         <td>
                             <DatePicker
