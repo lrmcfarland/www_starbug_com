@@ -444,3 +444,29 @@ class TestLAST:
         """
         result = navicomp.time.USN.LAST(a_datetime, a_longitude)
         assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
+
+
+class TestERA:
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(2017, 1, 1, 0, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(100, 37, 12.4365),
+                1e-5,
+            ),  # https://en.wikipedia.org/wiki/Sidereal_time
+        ],
+    )
+    def test_AA_ERA(
+        self, a_datetime: datetime, expected: str, absolute_tolerance: float
+    ):
+        """Test Earth Rotation Angle (ERA).
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (str): The expected ERA in hours.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.AstronomicalAlgorithms.ERA(a_datetime)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)

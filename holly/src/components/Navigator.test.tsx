@@ -59,6 +59,12 @@ describe("Navigator", () => {
           json: async () => ({ gast: { value: 1.6, units: "hours" } }),
         });
       }
+      if (url === "/api/era") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ era: { value: 1.2345, units: "degrees" } }),
+        });
+      }
       if (url === "/api/last") {
         return Promise.resolve({ ok: true, json: async () => ({ last: { value: 1.7, units: "hours" } }) });
       }
@@ -76,6 +82,7 @@ describe("Navigator", () => {
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Time/ })).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Julian Day/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /ERA/ })).toHaveTextContent("1.2345");
 
     // Verify julian_day API was called
     const calls = (fetchMock.mock.calls as any);
@@ -88,6 +95,14 @@ describe("Navigator", () => {
       });
       expect(JSON.parse(julianDayCall[1].body).datetime).toBeTruthy();
     }
+
+    const eraCall = calls.find((call: any) => call[0] === "/api/era");
+    expect(eraCall).toBeDefined();
+    expect(eraCall[1]).toMatchObject({
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    expect(JSON.parse(eraCall[1].body).datetime).toBeTruthy();
   });
 
   it("posts longitude to LMST and refreshes LMST when longitude changes", async () => {
@@ -103,6 +118,9 @@ describe("Navigator", () => {
       }
       if (url === "/api/gast") {
         return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
+      }
+      if (url === "/api/era") {
+        return Promise.resolve({ ok: true, json: async () => ({ era: { value: 1.2, units: "degrees" } }) });
       }
       if (url === "/api/last") {
         return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
@@ -166,6 +184,9 @@ describe("Navigator", () => {
       if (url === "/api/gast") {
         return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
       }
+      if (url === "/api/era") {
+        return Promise.resolve({ ok: true, json: async () => ({ era: { value: 1.2, units: "degrees" } }) });
+      }
       if (url === "/api/last") {
         return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
       }
@@ -206,6 +227,9 @@ describe("Navigator", () => {
       }
       if (url === "/api/gast") {
         return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
+      }
+      if (url === "/api/era") {
+        return Promise.resolve({ ok: true, json: async () => ({ era: { value: 1.2, units: "degrees" } }) });
       }
       if (url === "/api/last") {
         return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });

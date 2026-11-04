@@ -80,6 +80,9 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
     const [last, setLast] = useState<{ timestamp: number } & Measurement | null>(null);
     const [lastError, setLastError] = useState<string | null>(null);
 
+    const [era, setEra] = useState<{ timestamp: number } & Measurement | null>(null);
+    const [eraError, setEraError] = useState<string | null>(null);
+
     useEffect(() => {
         getIANAtimezones();
     }, []);
@@ -89,6 +92,7 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
         void fetchJulianDay(markedTime, () => isCurrentRequest);
         void fetchGMST(markedTime, () => isCurrentRequest);
         void fetchGAST(markedTime, () => isCurrentRequest);
+        void fetchERA(markedTime, () => isCurrentRequest);
         return () => {
             isCurrentRequest = false;
         };
@@ -257,6 +261,31 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
         }
     }
 
+    async function fetchERA(datetime: string, isCurrentRequest: () => boolean = () => true) {
+        try {
+            const response = await fetch("/api/era", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ datetime }),
+            });
+            const data: { era?: { value: number; units: string }; error?: string } = await response.json();
+
+            if (!response.ok || data.era === undefined) {
+                throw new Error(data.error ?? "Unable to retrieve ERA");
+            }
+
+            if (isCurrentRequest()) {
+                setEra({ timestamp: new Date(datetime).getTime(), ...data.era });
+                setEraError(null);
+            }
+
+        } catch (requestError) {
+            if (isCurrentRequest()) {
+                setEraError(requestError instanceof Error ? requestError.message : "Request failed");
+            }
+        }
+    }
+
     return (
 
         <div>
@@ -385,13 +414,20 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                         </td>
                         <td>{last?.units || "hours"}</td>
                     </tr>
+                    <tr>
+                        <th title="Earth Rotation Angle" scope="row">ERA</th>
+                        <td className="navigator-era-value">
+                            {era?.timestamp === new Date(markedTime).getTime() ? era.value : "TBD"}
+                        </td>
+                        <td>{era?.units || "degrees"}</td>
+                    </tr>
                 </tbody>
             </table>
             <div>
-                {(julianDayError || gmstError || gastError || lmstError || lastError) && (
+                {(julianDayError || gmstError || gastError || lmstError || lastError || eraError) && (
                     <div role="alert">
                         <p>
-                            Error Messages: {julianDayError || gmstError || gastError || lmstError || lastError}
+                            Error Messages: {julianDayError || gmstError || gastError || lmstError || lastError || eraError}
                         </p>
                     </div>
                 )}

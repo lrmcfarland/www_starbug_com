@@ -126,7 +126,21 @@ class AstronomicalAlgorithms:
 
         return {"value": julian_day, "units": "days"}
 
-        return julian_day
+    @classmethod
+    def ERA(cls, a_datetime: datetime) -> np.float64:
+        """Calculates Earth Rotation Angle (ERA) in hours from a datetime.
+
+        https://en.wikipedia.org/wiki/Sidereal_time
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+
+        Returns:
+            dict: A dictionary containing the ERA value in degrees.
+        """
+        ut1 = cls.Julian_day(a_datetime)["value"] - cls.JD2k
+        era_radians = 2 * np.pi * (0.7790572732640 + 1.00273781191135448 * ut1)
+        return {"value": np.degrees(era_radians) % 360.0, "units": "degrees"}
 
 
 class Meeus(AstronomicalAlgorithms):

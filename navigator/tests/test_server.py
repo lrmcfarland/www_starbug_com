@@ -189,3 +189,34 @@ class TestLASTAPI:
         assert response.status_code == 400
         data = json.loads(response.data)
         assert "error" in data
+
+
+class TestERA:
+
+    def test_valid_era(self, app):
+        response = app.test_client().post(
+            "/api/era",
+            json={
+                "datetime": "2024-01-01T12:00:00+00:00",
+            },
+        )
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        assert "era" in data
+        assert isinstance(data["era"], dict)
+        assert isinstance(data["era"]["value"], float)
+        assert data["era"]["units"] == "degrees"
+
+    def test_missing_datetime(self, app):
+        response = app.test_client().post("/api/era", json={})
+        assert response.status_code == 400
+        data = json.loads(response.data)
+        assert "error" in data
+
+    def test_invalid_datetime_format(self, app):
+        response = app.test_client().post(
+            "/api/era", json={"datetime": "invalid_format"}
+        )
+        assert response.status_code == 500
+        data = json.loads(response.data)
+        assert "error" in data

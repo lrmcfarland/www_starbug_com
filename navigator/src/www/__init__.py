@@ -21,6 +21,25 @@ def create_app(config_class=None):
     def api_hello():
         return "Hello, starbug API!"
 
+    @app.route("/api/era", methods=["POST"])
+    def api_era():
+        """Calculate Earth Rotation Angle (ERA) in degrees from a datetime.
+        Expects a JSON payload with a 'datetime' key.
+        Returns a JSON response with the ERA or an error message.
+        """
+        data = request.get_json()
+
+        if not data or "datetime" not in data:
+            return jsonify({"error": "Missing 'datetime' in request body"}), 400
+
+        datetime_str = data["datetime"]
+        try:
+            api_datetime = datetime.datetime.fromisoformat(datetime_str)
+            era = time.AstronomicalAlgorithms.ERA(api_datetime)
+            return jsonify({"era": era})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     @app.route("/api/gast", methods=["POST"])
     def api_gast():
         """Calculate Greenwich Apparent Sidereal Time (GAST) in hours from a datetime.
