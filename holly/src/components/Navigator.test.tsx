@@ -82,11 +82,11 @@ describe("Navigator", () => {
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Time/ })).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Julian Day/ })).toBeInTheDocument();
-    expect(screen.getByRole("row", { name: /LMST/ })).toHaveTextContent("01°30'00.0000\"");
-    expect(screen.getByRole("row", { name: /GMST/ })).toHaveTextContent("01°30'00.0000\"");
-    expect(screen.getByRole("row", { name: /GAST/ })).toHaveTextContent("01°36'00.0000\"");
-    expect(screen.getByRole("row", { name: /LAST/ })).toHaveTextContent("01°42'00.0000\"");
-    expect(screen.getByRole("row", { name: /ERA/ })).toHaveTextContent("01°14'04.2000\"");
+    expect(screen.getByRole("row", { name: /LMST/ })).toHaveTextContent("01:30:00.00s");
+    expect(screen.getByRole("row", { name: /GMST/ })).toHaveTextContent("01:30:00.00s");
+    expect(screen.getByRole("row", { name: /GAST/ })).toHaveTextContent("01:36:00.00s");
+    expect(screen.getByRole("row", { name: /LAST/ })).toHaveTextContent("01:42:00.00s");
+    expect(screen.getByRole("row", { name: /ERA/ })).toHaveTextContent("01°14'04.20\"");
 
     // Verify julian_day API was called
     const calls = (fetchMock.mock.calls as any);

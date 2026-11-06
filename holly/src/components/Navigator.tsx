@@ -63,13 +63,14 @@ interface DMS {
 
 interface FormatOptions {
   secondsDecimals?: number; // Number of decimal places for seconds (default: 2)
+  hourFormat?: boolean; // Format as hours, minutes, and seconds instead of degrees, minutes, and seconds
 }
 
 /**
  * Converts a decimal coordinate into Degrees, Minutes, and Seconds (DMS).
  */
 function decimalToDMS(decimal: number, options: FormatOptions = {}): DMS {
-  const decimals = options.secondsDecimals ?? 4; /* TODO: Make this configurable if needed */
+  const decimals = options.secondsDecimals ?? 2; /* TODO: Make this configurable if needed */
   const absolute = Math.abs(decimal);
 
   const degrees = Math.floor(absolute);
@@ -91,7 +92,7 @@ function decimalToDMS(decimal: number, options: FormatOptions = {}): DMS {
  * Formats a DMS object into a zero-padded string: DD°MM'SS.SS"
  */
 function formatDMSString(dms: DMS, options: FormatOptions = {}): string {
-  const decimals = options.secondsDecimals ?? 4; /** TODO: Make this configurable if needed */
+  const decimals = options.secondsDecimals ?? 2; /** TODO: Make this configurable if needed */
 
   // Separate the sign from degrees for padding calculation
   const isNegative = dms.degrees < 0;
@@ -112,7 +113,11 @@ function formatDMSString(dms: DMS, options: FormatOptions = {}): string {
     : padWholeSeconds;
   const sign = isNegative ? '-' : '';
 
-  return `${sign}${padDegrees}°${padMinutes}'${padSeconds}"`;
+  if (options.hourFormat) {
+    return `${sign}${padDegrees}:${padMinutes}:${padSeconds}s`;
+  } else {
+    return `${sign}${padDegrees}°${padMinutes}'${padSeconds}"`;
+  }
 }
 
 
@@ -454,7 +459,7 @@ function SiderialTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
                         <th title="Greenwich Mean Sidereal Time" scope="row">GMST</th>
                         <td className="navigator-gmst-value">
                             {gmst?.timestamp === new Date(markedTime).getTime()
-                                ? formatDMSString(decimalToDMS(gmst.value))
+                                ? formatDMSString(decimalToDMS(gmst.value), { hourFormat: true })
                                 : "TBD"}
                         </td>
                         <td>{gmst?.units || "hours"}</td>
@@ -463,7 +468,7 @@ function SiderialTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
                         <th title="Local Mean Sidereal Time" scope="row">LMST</th>
                         <td className="navigator-lmst-value">
                             {lmst?.timestamp === new Date(markedTime).getTime()
-                                ? formatDMSString(decimalToDMS(lmst.value))
+                                ? formatDMSString(decimalToDMS(lmst.value), { hourFormat: true })
                                 : "TBD"}
                         </td>
                         <td>{lmst?.units || "hours"}</td>
@@ -472,7 +477,7 @@ function SiderialTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
                         <th title="Greenwich Apparent Sidereal Time" scope="row">GAST</th>
                         <td className="navigator-gast-value">
                             {gast?.timestamp === new Date(markedTime).getTime()
-                                ? formatDMSString(decimalToDMS(gast.value))
+                                ? formatDMSString(decimalToDMS(gast.value), { hourFormat: true })
                                 : "TBD"}
                         </td>
                         <td>{gast?.units || "hours"}</td>
@@ -481,7 +486,7 @@ function SiderialTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
                         <th title="Local Apparent Sidereal Time" scope="row">LAST</th>
                         <td className="navigator-last-value">
                             {last?.timestamp === new Date(markedTime).getTime()
-                                ? formatDMSString(decimalToDMS(last.value))
+                                ? formatDMSString(decimalToDMS(last.value), { hourFormat: true })
                                 : "TBD"}
                         </td>
                         <td>{last?.units || "hours"}</td>
