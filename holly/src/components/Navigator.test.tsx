@@ -82,7 +82,11 @@ describe("Navigator", () => {
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Time/ })).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Julian Day/ })).toBeInTheDocument();
-    expect(screen.getByRole("row", { name: /ERA/ })).toHaveTextContent("1.2345");
+    expect(screen.getByRole("row", { name: /LMST/ })).toHaveTextContent("01:30:00.00");
+    expect(screen.getByRole("row", { name: /GMST/ })).toHaveTextContent("01:30:00.00");
+    expect(screen.getByRole("row", { name: /GAST/ })).toHaveTextContent("01:36:00.00");
+    expect(screen.getByRole("row", { name: /LAST/ })).toHaveTextContent("01:42:00.00");
+    expect(screen.getByRole("row", { name: /ERA/ })).toHaveTextContent("01°14'04.20\"");
 
     // Verify julian_day API was called
     const calls = (fetchMock.mock.calls as any);
@@ -111,21 +115,36 @@ describe("Navigator", () => {
         return Promise.resolve({ ok: true, json: async () => [] });
       }
       if (url === "/api/lmst") {
-        return Promise.resolve({ ok: true, json: async () => ({ lmst: 1.5 }) });
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ lmst: { value: 1.5, units: "hours" } }),
+        });
       }
       if (url === "/api/gmst") {
-        return Promise.resolve({ ok: true, json: async () => ({ gmst: 1.5 }) });
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gmst: { value: 1.5, units: "hours" } }),
+        });
       }
       if (url === "/api/gast") {
-        return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gast: { value: 1.6, units: "hours" } }),
+        });
       }
       if (url === "/api/era") {
         return Promise.resolve({ ok: true, json: async () => ({ era: { value: 1.2, units: "degrees" } }) });
       }
       if (url === "/api/last") {
-        return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ last: { value: 1.7, units: "hours" } }),
+        });
       }
-      return Promise.resolve({ ok: true, json: async () => ({ julian_day: 2461311.5 }) });
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ julian_day: { value: 2461311.5, units: "days" } }),
+      });
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -176,19 +195,31 @@ describe("Navigator", () => {
         return Promise.resolve({ ok: true, json: async () => [] });
       }
       if (url === "/api/lmst") {
-        return Promise.resolve({ ok: true, json: async () => ({ lmst: 1.5 }) });
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ lmst: { value: 1.5, units: "hours" } }),
+        });
       }
       if (url === "/api/gmst") {
-        return Promise.resolve({ ok: true, json: async () => ({ gmst: 1.5 }) });
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gmst: { value: 1.5, units: "hours" } }),
+        });
       }
       if (url === "/api/gast") {
-        return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gast: { value: 1.6, units: "hours" } }),
+        });
       }
       if (url === "/api/era") {
         return Promise.resolve({ ok: true, json: async () => ({ era: { value: 1.2, units: "degrees" } }) });
       }
       if (url === "/api/last") {
-        return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ last: { value: 1.7, units: "hours" } }),
+        });
       }
 
       julianDayRequests += 1;
@@ -200,12 +231,12 @@ describe("Navigator", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<Navigator />);
-    expect(await screen.findByText("2461311.5")).toBeInTheDocument();
+    expect(await screen.findByText("2461311.50 days")).toBeInTheDocument();
 
     await new Promise((resolve) => setTimeout(resolve, 20));
     fireEvent.click(screen.getByRole("button", { name: "Mark" }));
 
-    expect(await screen.findByText("2461312.5")).toBeInTheDocument();
+    expect(await screen.findByText("2461312.50 days")).toBeInTheDocument();
     const julianDayCalls = fetchMock.mock.calls.filter(([url]) => url === "/api/julian_day");
     expect(julianDayCalls).toHaveLength(2);
     expect(JSON.parse(String(julianDayCalls[1][1]?.body)).datetime).not.toBe(
@@ -256,7 +287,7 @@ describe("Navigator", () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
     fireEvent.click(screen.getByRole("button", { name: "Mark" }));
 
-    expect(await screen.findByText("2461311.5")).toBeInTheDocument();
+    expect(await screen.findByText("2461311.50 days")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 

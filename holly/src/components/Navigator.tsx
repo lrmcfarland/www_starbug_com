@@ -52,7 +52,85 @@ function KeyboardTimeInput({ value, onChange }: KeyboardTimeInputProps) {
     );
 }
 
-function Location({ timezone = "UTC" }: { timezone?: string }) {
+/**
+ * Converts a decimal coordinate into Degrees, Minutes, and Seconds (DMS).
+ */
+interface DMS {
+  degrees: number;
+  minutes: number;
+  seconds: number;
+}
+
+interface FormatOptions {
+  secondsDecimals?: number; // Number of decimal places for seconds (default: 2)
+  hourFormat?: boolean; // Format as hours, minutes, and seconds instead of degrees, minutes, and seconds
+}
+
+/**
+ * Converts a decimal coordinate into Degrees, Minutes, and Seconds (DMS).
+ */
+function decimalToDMS(decimal: number, options: FormatOptions = {}): DMS {
+  const decimals = options.secondsDecimals ?? 2; /* TODO: Make this configurable if needed */
+  const absolute = Math.abs(decimal);
+
+  const degrees = Math.floor(absolute);
+
+  const minutesNotTruncated = (absolute - degrees) * 60;
+  const minutes = Math.floor(minutesNotTruncated);
+
+  // Calculate seconds and fix floating point precision based on desired decimals
+  const secondsRaw = (minutesNotTruncated - minutes) * 60;
+  const multiplier = Math.pow(10, decimals);
+  const seconds = Math.round(secondsRaw * multiplier) / multiplier;
+
+  const signedDegrees = decimal < 0 ? -degrees : degrees;
+
+  return { degrees: signedDegrees, minutes, seconds };
+}
+
+/**
+ * Formats a DMS object into a zero-padded string: DD°MM'SS.SS"
+ */
+function formatDMSString(dms: DMS, options: FormatOptions = {}): string {
+  const decimals = options.secondsDecimals ?? 2; /** TODO: Make this configurable if needed */
+
+  // Separate the sign from degrees for padding calculation
+  const isNegative = dms.degrees < 0;
+  const absDegrees = Math.abs(dms.degrees);
+
+  // Pad degrees to 2 digits, minutes to 2 digits
+  const padDegrees = String(absDegrees).padStart(2, '0');
+  const padMinutes = String(dms.minutes).padStart(2, '0');
+
+  // Format seconds with fixed decimals, then pad the whole number part to 2 digits
+  const secondsStr = dms.seconds.toFixed(decimals);
+  const [wholeSeconds, fractionalSeconds] = secondsStr.split('.');
+  const padWholeSeconds = wholeSeconds.padStart(2, '0');
+
+  // Reconstruct seconds string depending on if there are decimals
+  const padSeconds = fractionalSeconds
+    ? `${padWholeSeconds}.${fractionalSeconds}`
+    : padWholeSeconds;
+  const sign = isNegative ? '-' : '';
+
+  if (options.hourFormat) {
+    return `${sign}${padDegrees}:${padMinutes}:${padSeconds} h:m:s`;
+  } else {
+    return `${sign}${padDegrees}°${padMinutes}'${padSeconds}"`;
+  }
+}
+
+/**
+ * Formats a decimal precision.
+ */
+function formatDecimal(decimal: number, units: string, options: FormatOptions = {}): string {
+    const decimals = options.secondsDecimals ?? 2; /** TODO: Make this configurable if needed */
+    // Format seconds with fixed decimals, then pad the whole number part to 2 digits
+    const decimalStr = decimal.toFixed(decimals);
+    return `${decimalStr} ${units}`;
+}
+
+function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
 
     const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
     const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
@@ -374,52 +452,60 @@ function Location({ timezone = "UTC" }: { timezone?: string }) {
                         </td>
                         <td>degrees</td>
                     </tr>
+
+                </tbody>
+                <tbody>
                     <tr>
                         <th scope="row">Time</th>
                         <td>{markedTime}</td>
-                        <td><a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="noopener noreferrer">ISO 8601</a></td>
                     </tr>
                     <tr>
                         <th scope="row">Julian Day</th>
                         <td className="navigator-julian-day-value">
-                            {julianDay?.timestamp === new Date(markedTime).getTime() ? julianDay.value : "TBD"}
+                            {julianDay?.timestamp === new Date(markedTime).getTime()
+                                ? formatDecimal(julianDay.value, julianDay.units, { secondsDecimals: 2 })
+                                : "TBD"}
                         </td>
-                        <td>{julianDay?.units || "days"}</td>
                     </tr>
                     <tr>
                         <th title="Greenwich Mean Sidereal Time" scope="row">GMST</th>
                         <td className="navigator-gmst-value">
-                            {gmst?.timestamp === new Date(markedTime).getTime() ? gmst.value : "TBD"}
+                            {gmst?.timestamp === new Date(markedTime).getTime()
+                                ? formatDMSString(decimalToDMS(gmst.value), { hourFormat: true })
+                                : "TBD"}
                         </td>
-                        <td>{gmst?.units || "hours"}</td>
                     </tr>
                     <tr>
                         <th title="Local Mean Sidereal Time" scope="row">LMST</th>
                         <td className="navigator-lmst-value">
-                            {lmst?.timestamp === new Date(markedTime).getTime() ? lmst.value : "TBD"}
+                            {lmst?.timestamp === new Date(markedTime).getTime()
+                                ? formatDMSString(decimalToDMS(lmst.value), { hourFormat: true })
+                                : "TBD"}
                         </td>
-                        <td>{lmst?.units || "hours"}</td>
                     </tr>
                     <tr>
                         <th title="Greenwich Apparent Sidereal Time" scope="row">GAST</th>
                         <td className="navigator-gast-value">
-                            {gast?.timestamp === new Date(markedTime).getTime() ? gast.value : "TBD"}
+                            {gast?.timestamp === new Date(markedTime).getTime()
+                                ? formatDMSString(decimalToDMS(gast.value), { hourFormat: true })
+                                : "TBD"}
                         </td>
-                        <td>{gast?.units || "hours"}</td>
                     </tr>
                     <tr>
                         <th title="Local Apparent Sidereal Time" scope="row">LAST</th>
                         <td className="navigator-last-value">
-                            {last?.timestamp === new Date(markedTime).getTime() ? last.value : "TBD"}
+                            {last?.timestamp === new Date(markedTime).getTime()
+                                ? formatDMSString(decimalToDMS(last.value), { hourFormat: true })
+                                : "TBD"}
                         </td>
-                        <td>{last?.units || "hours"}</td>
                     </tr>
                     <tr>
                         <th title="Earth Rotation Angle" scope="row">ERA</th>
                         <td className="navigator-era-value">
-                            {era?.timestamp === new Date(markedTime).getTime() ? era.value : "TBD"}
+                            {era?.timestamp === new Date(markedTime).getTime()
+                                ? formatDMSString(decimalToDMS(era.value))
+                                : "TBD"}
                         </td>
-                        <td>{era?.units || "degrees"}</td>
                     </tr>
                 </tbody>
             </table>
@@ -446,7 +532,7 @@ export const Navigator: React.FC = () => {
             </div>
 
             <div className="starbug-card">
-                <Location timezone="UTC"/>
+                <SiderealTimeDisplay timezone="UTC"/>
             </div>
 
             <div className="starbug-card">
