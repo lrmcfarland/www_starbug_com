@@ -114,7 +114,7 @@ function formatDMSString(dms: DMS, options: FormatOptions = {}): string {
   const sign = isNegative ? '-' : '';
 
   if (options.hourFormat) {
-    return `${sign}${padDegrees}:${padMinutes}:${padSeconds}s`;
+    return `${sign}${padDegrees}:${padMinutes}:${padSeconds}`;
   } else {
     return `${sign}${padDegrees}°${padMinutes}'${padSeconds}"`;
   }
