@@ -257,7 +257,8 @@ select {
 }
 
 .navigator-data-table,
-.navigator-location-table {
+.navigator-location-table,
+.navigator-options-table {
   border-collapse: collapse;
   margin: 4px 2px;
 }
@@ -265,7 +266,9 @@ select {
 .navigator-data-table th,
 .navigator-data-table td,
 .navigator-location-table th,
-.navigator-location-table td {
+.navigator-location-table td,
+.navigator-options-table th,
+.navigator-options-table td {
   padding: 0.4rem 0.75rem 0.4rem 0;
   text-align: left;
 }
@@ -276,14 +279,16 @@ select {
 }
 
 .navigator-data-table th,
-.navigator-location-table th {
+.navigator-location-table th,
+.navigator-options-table th {
   color: var(--text-h);
   font-family: var(--heading);
   font-weight: 500;
 }
 
 .navigator-data-table td,
-.navigator-location-table td {
+.navigator-location-table td,
+.navigator-options-table td {
   padding-left: 0.75rem;
 }
 

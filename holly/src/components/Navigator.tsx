@@ -2,54 +2,54 @@ import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import "react-datepicker/dist/react-datepicker.css";
-import { CascadeSelect } from 'primereact/cascadeselect';
+import { CascadeSelect } from "primereact/cascadeselect";
 
 const MARKED_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 const DATE_PICKER_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
 type KeyboardTimeInputProps = {
-    value: string;
-    onChange: (time: string) => void;
+  value: string;
+  onChange: (time: string) => void;
 };
 
 type TimezoneGroup = {
-    zone: string;
-    zones: { city: string; code: string }[];
+  zone: string;
+  zones: { city: string; code: string }[];
 };
 
 type Measurement = { value: number; units: string };
 
 function isTimezoneGroups(value: unknown): value is TimezoneGroup[] {
-    return (
-        Array.isArray(value) &&
-        value.every(
-            (group) =>
-                typeof group.zone === "string" &&
-                Array.isArray(group.zones) &&
-                group.zones.every(
-                    (timezone: unknown) =>
-                        typeof timezone === "object" &&
-                        timezone !== null &&
-                        "city" in timezone &&
-                        typeof timezone.city === "string" &&
-                        "code" in timezone &&
-                        typeof timezone.code === "string",
-                ),
-        )
-    );
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (group) =>
+        typeof group.zone === "string" &&
+        Array.isArray(group.zones) &&
+        group.zones.every(
+          (timezone: unknown) =>
+            typeof timezone === "object" &&
+            timezone !== null &&
+            "city" in timezone &&
+            typeof timezone.city === "string" &&
+            "code" in timezone &&
+            typeof timezone.code === "string",
+        ),
+    )
+  );
 }
 
 function KeyboardTimeInput({ value, onChange }: KeyboardTimeInputProps) {
-    const displayedTime = value;
+  const displayedTime = value;
 
-    return (
-        <input
-            type="time"
-            step="1"
-            value={displayedTime}
-            onChange={(event) => onChange(event.currentTarget.value)}
-        />
-    );
+  return (
+    <input
+      type="time"
+      step="1"
+      value={displayedTime}
+      onChange={(event) => onChange(event.currentTarget.value)}
+    />
+  );
 }
 
 /**
@@ -62,7 +62,7 @@ interface DMS {
 }
 
 interface FormatOptions {
-  secondsDecimals?: number; // Number of decimal places for seconds (default: 2)
+  decimalPlaces?: number;
   hourFormat?: boolean; // Format as hours, minutes, and seconds instead of degrees, minutes, and seconds
 }
 
@@ -70,7 +70,7 @@ interface FormatOptions {
  * Converts a decimal coordinate into Degrees, Minutes, and Seconds (DMS).
  */
 function decimalToDMS(decimal: number, options: FormatOptions = {}): DMS {
-  const decimals = options.secondsDecimals ?? 2; /* TODO: Make this configurable if needed */
+  const decimalPlaces = options.decimalPlaces ?? 2;
   const absolute = Math.abs(decimal);
 
   const degrees = Math.floor(absolute);
@@ -78,9 +78,9 @@ function decimalToDMS(decimal: number, options: FormatOptions = {}): DMS {
   const minutesNotTruncated = (absolute - degrees) * 60;
   const minutes = Math.floor(minutesNotTruncated);
 
-  // Calculate seconds and fix floating point precision based on desired decimals
+  // Calculate seconds and fix floating point precision based on desired decimal places
   const secondsRaw = (minutesNotTruncated - minutes) * 60;
-  const multiplier = Math.pow(10, decimals);
+  const multiplier = Math.pow(10, decimalPlaces);
   const seconds = Math.round(secondsRaw * multiplier) / multiplier;
 
   const signedDegrees = decimal < 0 ? -degrees : degrees;
@@ -92,26 +92,26 @@ function decimalToDMS(decimal: number, options: FormatOptions = {}): DMS {
  * Formats a DMS object into a zero-padded string: DD°MM'SS.SS"
  */
 function formatDMSString(dms: DMS, options: FormatOptions = {}): string {
-  const decimals = options.secondsDecimals ?? 2; /** TODO: Make this configurable if needed */
+  const decimalPlaces = options.decimalPlaces ?? 2;
 
   // Separate the sign from degrees for padding calculation
   const isNegative = dms.degrees < 0;
   const absDegrees = Math.abs(dms.degrees);
 
   // Pad degrees to 2 digits, minutes to 2 digits
-  const padDegrees = String(absDegrees).padStart(2, '0');
-  const padMinutes = String(dms.minutes).padStart(2, '0');
+  const padDegrees = String(absDegrees).padStart(2, "0");
+  const padMinutes = String(dms.minutes).padStart(2, "0");
 
-  // Format seconds with fixed decimals, then pad the whole number part to 2 digits
-  const secondsStr = dms.seconds.toFixed(decimals);
-  const [wholeSeconds, fractionalSeconds] = secondsStr.split('.');
-  const padWholeSeconds = wholeSeconds.padStart(2, '0');
+  // Format seconds with fixed decimal places, then pad the whole number part to 2 digits
+  const secondsStr = dms.seconds.toFixed(decimalPlaces);
+  const [wholeSeconds, fractionalSeconds] = secondsStr.split(".");
+  const padWholeSeconds = wholeSeconds.padStart(2, "0");
 
-  // Reconstruct seconds string depending on if there are decimals
+  // Reconstruct seconds string depending on if there are decimal places
   const padSeconds = fractionalSeconds
     ? `${padWholeSeconds}.${fractionalSeconds}`
     : padWholeSeconds;
-  const sign = isNegative ? '-' : '';
+  const sign = isNegative ? "-" : "";
 
   if (options.hourFormat) {
     return `${sign}${padDegrees}:${padMinutes}:${padSeconds} h:m:s`;
@@ -123,513 +123,705 @@ function formatDMSString(dms: DMS, options: FormatOptions = {}): string {
 /**
  * Formats a decimal precision.
  */
-function formatDecimal(decimal: number, units: string, options: FormatOptions = {}): string {
-    const decimals = options.secondsDecimals ?? 2; /** TODO: Make this configurable if needed */
-    // Format seconds with fixed decimals, then pad the whole number part to 2 digits
-    const decimalStr = decimal.toFixed(decimals);
-    return `${decimalStr} ${units}`;
+function formatDecimal(
+  decimal: number,
+  units: string,
+  options: FormatOptions = {},
+): string {
+  const decimalPlaces = options.decimalPlaces ?? 2;
+  const decimalStr = decimal.toFixed(decimalPlaces);
+  return `${decimalStr} ${units}`;
 }
 
 type LocationDisplayProps = {
-    markedTime: string;
-    handleMarkCurrentTime: () => void;
-    selectedDate: Date;
-    timeString: string;
-    currentTimezone: string;
-    ianaTimezones: TimezoneGroup[];
-    timezoneError: string | null;
-    handleTimezoneChange: (timezone: string) => void;
-    setMarkedTime: (value: string) => void;
-    latitude: string;
-    longitude: string;
-    onLatitudeChange: (value: string) => void;
-    onLongitudeChange: (value: string) => void;
+  markedTime: string;
+  handleMarkCurrentTime: () => void;
+  selectedDate: Date;
+  timeString: string;
+  currentTimezone: string;
+  ianaTimezones: TimezoneGroup[];
+  timezoneError: string | null;
+  handleTimezoneChange: (timezone: string) => void;
+  setMarkedTime: (value: string) => void;
+  latitude: string;
+  longitude: string;
+  onLatitudeChange: (value: string) => void;
+  onLongitudeChange: (value: string) => void;
 };
 
 function LocationDisplay({
-    markedTime,
-    handleMarkCurrentTime,
-    selectedDate,
-    timeString,
-    currentTimezone,
-    ianaTimezones,
-    timezoneError,
-    handleTimezoneChange,
-    setMarkedTime,
-    latitude,
-    longitude,
-    onLatitudeChange,
-    onLongitudeChange,
+  markedTime,
+  handleMarkCurrentTime,
+  selectedDate,
+  timeString,
+  currentTimezone,
+  ianaTimezones,
+  timezoneError,
+  handleTimezoneChange,
+  setMarkedTime,
+  latitude,
+  longitude,
+  onLatitudeChange,
+  onLongitudeChange,
 }: LocationDisplayProps) {
-    return (
-        <>
-            <div className="navigator-location-header">
-                <table className="navigator-location-table">
-                    <tbody>
-                        <tr>
-                            <th scope="row">
-                                <button
-                                    title="Mark Current Time"
-                                    onClick={handleMarkCurrentTime}
-                                >
-                                    Mark
-                                </button>
-                            </th>
-                            <td>
-                                <DatePicker
-                                    className="date-time-picker"
-                                    selected={selectedDate}
-                                    onChange={(date: Date | null) => {
-                                        if (date) {
-                                            const utcDate = fromZonedTime(date, currentTimezone);
-                                            setMarkedTime(formatInTimeZone(utcDate, currentTimezone, MARKED_TIME_FORMAT));
-                                        }
-                                    }}
-                                    showTimeInput
-                                    dateFormat={DATE_PICKER_FORMAT}
-                                    customTimeInput={React.createElement(KeyboardTimeInput, {
-                                        value: timeString,
-                                        onChange: (time: string) => {
-                                            const localDate = formatInTimeZone(new Date(markedTime), currentTimezone, "yyyy-MM-dd");
-                                            const updatedDate = fromZonedTime(`${localDate}T${time}`, currentTimezone);
-                                            setMarkedTime(formatInTimeZone(updatedDate, currentTimezone, MARKED_TIME_FORMAT));
-                                        }
-                                    })}
-                                />
-                            </td>
-                            <td>
-                                <CascadeSelect
-                                    value={currentTimezone}
-                                    options={ianaTimezones}
-                                    optionLabel="city"
-                                    optionValue="code"
-                                    optionGroupLabel="zone"
-                                    optionGroupChildren={["zones"]}
-                                    onChange={(tz: { value: string }) => handleTimezoneChange(tz.value)}
-                                    placeholder="Select a City"
-                                    className="navigator-timezone-select"
-                                />
-                                {timezoneError && <div role="alert">{timezoneError}</div>}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Latitude</th>
-                            <td>
-                                <input
-                                    className="navigator-location-input"
-                                    type="number"
-                                    min="-90"
-                                    max="90"
-                                    step="any"
-                                    value={latitude}
-                                    onChange={(event) => onLatitudeChange(event.currentTarget.value)}
-                                    placeholder="e.g. 37.7749"
-                                />
-                            </td>
-                            <td>degrees</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label htmlFor="navigator-longitude">Longitude</label>
-                            </th>
-                            <td>
-                                <input
-                                    id="navigator-longitude"
-                                    className="navigator-location-input"
-                                    type="number"
-                                    min="-180"
-                                    max="180"
-                                    step="any"
-                                    value={longitude}
-                                    onChange={(event) => onLongitudeChange(event.currentTarget.value)}
-                                    placeholder="e.g. -122.4194"
-                                />
-                            </td>
-                            <td>degrees</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </>
-    );
+  return (
+    <>
+      <div className="navigator-location-header">
+        <table className="navigator-location-table">
+          <tbody>
+            <tr>
+              <th scope="row">
+                <button
+                  title="Mark Current Time"
+                  onClick={handleMarkCurrentTime}
+                >
+                  Mark
+                </button>
+              </th>
+              <td>
+                <DatePicker
+                  className="date-time-picker"
+                  selected={selectedDate}
+                  onChange={(date: Date | null) => {
+                    if (date) {
+                      const utcDate = fromZonedTime(date, currentTimezone);
+                      setMarkedTime(
+                        formatInTimeZone(
+                          utcDate,
+                          currentTimezone,
+                          MARKED_TIME_FORMAT,
+                        ),
+                      );
+                    }
+                  }}
+                  showTimeInput
+                  dateFormat={DATE_PICKER_FORMAT}
+                  customTimeInput={React.createElement(KeyboardTimeInput, {
+                    value: timeString,
+                    onChange: (time: string) => {
+                      const localDate = formatInTimeZone(
+                        new Date(markedTime),
+                        currentTimezone,
+                        "yyyy-MM-dd",
+                      );
+                      const updatedDate = fromZonedTime(
+                        `${localDate}T${time}`,
+                        currentTimezone,
+                      );
+                      setMarkedTime(
+                        formatInTimeZone(
+                          updatedDate,
+                          currentTimezone,
+                          MARKED_TIME_FORMAT,
+                        ),
+                      );
+                    },
+                  })}
+                />
+              </td>
+              <td>
+                <CascadeSelect
+                  value={currentTimezone}
+                  options={ianaTimezones}
+                  optionLabel="city"
+                  optionValue="code"
+                  optionGroupLabel="zone"
+                  optionGroupChildren={["zones"]}
+                  onChange={(tz: { value: string }) =>
+                    handleTimezoneChange(tz.value)
+                  }
+                  placeholder="Select a City"
+                  className="navigator-timezone-select"
+                />
+                {timezoneError && <div role="alert">{timezoneError}</div>}
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Latitude</th>
+              <td>
+                <input
+                  className="navigator-location-input"
+                  type="number"
+                  min="-90"
+                  max="90"
+                  step="any"
+                  value={latitude}
+                  onChange={(event) =>
+                    onLatitudeChange(event.currentTarget.value)
+                  }
+                  placeholder="e.g. 37.7749"
+                />
+              </td>
+              <td>degrees</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <label htmlFor="navigator-longitude">Longitude</label>
+              </th>
+              <td>
+                <input
+                  id="navigator-longitude"
+                  className="navigator-location-input"
+                  type="number"
+                  min="-180"
+                  max="180"
+                  step="any"
+                  value={longitude}
+                  onChange={(event) =>
+                    onLongitudeChange(event.currentTarget.value)
+                  }
+                  placeholder="e.g. -122.4194"
+                />
+              </td>
+              <td>degrees</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
 }
 
 function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
+  const [markedTime, setMarkedTime] = useState<string>(
+    formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT),
+  );
+  const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
+  const [ianaTimezones, setIanaTimezones] = useState<TimezoneGroup[]>([]);
+  const [timezoneError, setTimezoneError] = useState<string | null>(null);
 
-    const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
-    const [currentTimezone, setCurrentTimezone] = useState<string>(timezone);
-    const [ianaTimezones, setIanaTimezones] = useState<TimezoneGroup[]>([]);
-    const [timezoneError, setTimezoneError] = useState<string | null>(null);
+  const timeString = formatInTimeZone(
+    new Date(markedTime),
+    currentTimezone,
+    "HH:mm:ss",
+  );
+  const selectedDate = toZonedTime(new Date(markedTime), currentTimezone);
 
-    const timeString = formatInTimeZone(new Date(markedTime), currentTimezone, "HH:mm:ss");
-    const selectedDate = toZonedTime(new Date(markedTime), currentTimezone);
+  const [latitude, setLatitude] = useState<string>("");
+  const [longitude, setLongitude] = useState<string>("");
 
-    const [latitude, setLatitude] = useState<string>("");
-    const [longitude, setLongitude] = useState<string>("");
+  const [julianDay, setJulianDay] = useState<
+    ({ timestamp: number } & Measurement) | null
+  >(null);
+  const [julianDayError, setJulianDayError] = useState<string | null>(null);
 
-    const [julianDay, setJulianDay] = useState<{ timestamp: number } & Measurement | null>(null);
-    const [julianDayError, setJulianDayError] = useState<string | null>(null);
+  const [gmst, setGmst] = useState<
+    ({ timestamp: number } & Measurement) | null
+  >(null);
+  const [gmstError, setGmstError] = useState<string | null>(null);
 
-    const [gmst, setGmst] = useState<{ timestamp: number } & Measurement | null>(null);
-    const [gmstError, setGmstError] = useState<string | null>(null);
+  const [gast, setGast] = useState<
+    ({ timestamp: number } & Measurement) | null
+  >(null);
+  const [gastError, setGastError] = useState<string | null>(null);
 
-    const [gast, setGast] = useState<{ timestamp: number } & Measurement | null>(null);
-    const [gastError, setGastError] = useState<string | null>(null);
+  const [lmst, setLmst] = useState<
+    ({ timestamp: number } & Measurement) | null
+  >(null);
+  const [lmstError, setLmstError] = useState<string | null>(null);
 
-    const [lmst, setLmst] = useState<{ timestamp: number } & Measurement | null>(null);
-    const [lmstError, setLmstError] = useState<string | null>(null);
+  const [last, setLast] = useState<
+    ({ timestamp: number } & Measurement) | null
+  >(null);
+  const [lastError, setLastError] = useState<string | null>(null);
 
-    const [last, setLast] = useState<{ timestamp: number } & Measurement | null>(null);
-    const [lastError, setLastError] = useState<string | null>(null);
+  const [era, setEra] = useState<({ timestamp: number } & Measurement) | null>(
+    null,
+  );
+  const [eraError, setEraError] = useState<string | null>(null);
 
-    const [era, setEra] = useState<{ timestamp: number } & Measurement | null>(null);
-    const [eraError, setEraError] = useState<string | null>(null);
+  const [decimalPlaces, setDecimalPlaces] = useState<number>(2);
 
-    useEffect(() => {
-        getIANAtimezones();
-    }, []);
+  useEffect(() => {
+    getIANAtimezones();
+  }, []);
 
-    useEffect(() => {
-        let isCurrentRequest = true;
-        void fetchJulianDay(markedTime, () => isCurrentRequest);
-        void fetchGMST(markedTime, () => isCurrentRequest);
-        void fetchGAST(markedTime, () => isCurrentRequest);
-        void fetchERA(markedTime, () => isCurrentRequest);
-        return () => {
-            isCurrentRequest = false;
-        };
-    }, [markedTime]);
+  useEffect(() => {
+    let isCurrentRequest = true;
+    void fetchJulianDay(markedTime, () => isCurrentRequest);
+    void fetchGMST(markedTime, () => isCurrentRequest);
+    void fetchGAST(markedTime, () => isCurrentRequest);
+    void fetchERA(markedTime, () => isCurrentRequest);
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [markedTime]);
 
-    useEffect(() => {
-        let isCurrentRequest = true;
-        void fetchLMST(markedTime, Number(longitude || 0), () => isCurrentRequest);
-        void fetchLAST(markedTime, Number(longitude || 0), () => isCurrentRequest);
-        return () => {
-            isCurrentRequest = false;
-        };
-    }, [markedTime, longitude]);
+  useEffect(() => {
+    let isCurrentRequest = true;
+    void fetchLMST(markedTime, Number(longitude || 0), () => isCurrentRequest);
+    void fetchLAST(markedTime, Number(longitude || 0), () => isCurrentRequest);
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [markedTime, longitude]);
 
-    function handleTimezoneChange(timezone: string) {
-        setCurrentTimezone(timezone);
-        setMarkedTime(formatInTimeZone(new Date(markedTime), timezone, MARKED_TIME_FORMAT));
-    }
-
-    function handleMarkCurrentTime() {
-        const timestamp = formatInTimeZone(new Date(), currentTimezone, MARKED_TIME_FORMAT);
-        setMarkedTime(timestamp);
-    }
-
-    async function getIANAtimezones() {
-        try {
-            const response = await fetch("/api/timezones", {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            });
-            const data: unknown = await response.json();
-
-            if (!response.ok || !isTimezoneGroups(data)) {
-                throw new Error("Unable to retrieve timezones");
-            }
-
-            setIanaTimezones(data);
-        } catch (error) {
-            console.error("Error fetching timezones:", error);
-            setTimezoneError("Unable to load timezones.");
-        }
-    }
-
-    async function fetchJulianDay(datetime: string, isCurrentRequest: () => boolean = () => true) {
-        try {
-            const response = await fetch("/api/julian_day", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ datetime }),
-            });
-            const data: { julian_day?: { value: number; units: string }; error?: string } = await response.json();
-
-            if (!response.ok || data.julian_day === undefined) {
-                throw new Error(data.error ?? "Unable to retrieve Julian day");
-            }
-
-            if (isCurrentRequest()) {
-                setJulianDay({ timestamp: new Date(datetime).getTime(), ...data.julian_day });
-                setJulianDayError(null);
-            }
-
-        } catch (requestError) {
-            if (isCurrentRequest()) {
-                setJulianDayError(requestError instanceof Error ? requestError.message : "Request failed");
-            }
-        }
-    }
-
-    async function fetchGMST(datetime: string, isCurrentRequest: () => boolean = () => true) {
-        try {
-            const response = await fetch("/api/gmst", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ datetime }),
-            });
-            const data: { gmst?: { value: number; units: string }; error?: string } = await response.json();
-
-            if (!response.ok || data.gmst === undefined) {
-                throw new Error(data.error ?? "Unable to retrieve GMST");
-            }
-
-            if (isCurrentRequest()) {
-                setGmst({ timestamp: new Date(datetime).getTime(), ...data.gmst });
-                setGmstError(null);
-            }
-
-        } catch (requestError) {
-            if (isCurrentRequest()) {
-                setGmstError(requestError instanceof Error ? requestError.message : "Request failed");
-            }
-        }
-    }
-
-    async function fetchGAST(datetime: string, isCurrentRequest: () => boolean = () => true) {
-        try {
-            const response = await fetch("/api/gast", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ datetime }),
-            });
-            const data: { gast?: { value: number; units: string }; error?: string } = await response.json();
-
-            if (!response.ok || data.gast === undefined) {
-                throw new Error(data.error ?? "Unable to retrieve GAST");
-            }
-
-            if (isCurrentRequest()) {
-                setGast({ timestamp: new Date(datetime).getTime(), ...data.gast });
-                setGastError(null);
-            }
-
-        } catch (requestError) {
-            if (isCurrentRequest()) {
-                setGastError(requestError instanceof Error ? requestError.message : "Request failed");
-            }
-        }
-    }
-
-    async function fetchLMST(datetime: string, longitude: number, isCurrentRequest: () => boolean = () => true) {
-        try {
-            const response = await fetch("/api/lmst", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ datetime, longitude }),
-            });
-            const data: { lmst?: { value: number; units: string }; error?: string } = await response.json();
-
-            if (!response.ok || data.lmst === undefined) {
-                throw new Error(data.error ?? "Unable to retrieve LMST");
-            }
-
-            if (isCurrentRequest()) {
-                setLmst({ timestamp: new Date(datetime).getTime(), ...data.lmst });
-                setLmstError(null);
-            }
-
-        } catch (requestError) {
-            if (isCurrentRequest()) {
-                setLmstError(requestError instanceof Error ? requestError.message : "Request failed");
-            }
-        }
-    }
-
-    async function fetchLAST(datetime: string, longitude: number, isCurrentRequest: () => boolean = () => true) {
-        try {
-            const response = await fetch("/api/last", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ datetime, longitude }),
-            });
-            const data: { last?: { value: number; units: string }; error?: string } = await response.json();
-
-            if (!response.ok || data.last === undefined) {
-                throw new Error(data.error ?? "Unable to retrieve LAST");
-            }
-
-            if (isCurrentRequest()) {
-                setLast({ timestamp: new Date(datetime).getTime(), ...data.last });
-                setLastError(null);
-            }
-
-        } catch (requestError) {
-            if (isCurrentRequest()) {
-                setLastError(requestError instanceof Error ? requestError.message : "Request failed");
-            }
-        }
-    }
-
-    async function fetchERA(datetime: string, isCurrentRequest: () => boolean = () => true) {
-        try {
-            const response = await fetch("/api/era", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ datetime }),
-            });
-            const data: { era?: { value: number; units: string }; error?: string } = await response.json();
-
-            if (!response.ok || data.era === undefined) {
-                throw new Error(data.error ?? "Unable to retrieve ERA");
-            }
-
-            if (isCurrentRequest()) {
-                setEra({ timestamp: new Date(datetime).getTime(), ...data.era });
-                setEraError(null);
-            }
-
-        } catch (requestError) {
-            if (isCurrentRequest()) {
-                setEraError(requestError instanceof Error ? requestError.message : "Request failed");
-            }
-        }
-    }
-
-    return (
-
-        <div>
-          <div className="starbug-card">
-            <LocationDisplay
-                handleMarkCurrentTime={handleMarkCurrentTime}
-                selectedDate={selectedDate}
-                timeString={timeString}
-                currentTimezone={currentTimezone}
-                ianaTimezones={ianaTimezones}
-                timezoneError={timezoneError}
-                handleTimezoneChange={handleTimezoneChange}
-                setMarkedTime={setMarkedTime}
-                markedTime={markedTime}
-                latitude={latitude}
-                longitude={longitude}
-                onLatitudeChange={setLatitude}
-                onLongitudeChange={setLongitude}
-            />
-          </div>
-        <div className="starbug-card">
-            <table className="navigator-data-table">
-                <tbody>
-                    <tr>
-                        <th scope="row">Time</th>
-                        <td>{markedTime}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Julian Day</th>
-                        <td className="navigator-julian-day-value">
-                            {julianDay?.timestamp === new Date(markedTime).getTime()
-                                ? formatDecimal(julianDay.value, julianDay.units, { secondsDecimals: 2 })
-                                : "TBD"}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th title="Greenwich Mean Sidereal Time" scope="row">GMST</th>
-                        <td className="navigator-gmst-value">
-                            {gmst?.timestamp === new Date(markedTime).getTime()
-                                ? formatDMSString(decimalToDMS(gmst.value), { hourFormat: true })
-                                : "TBD"}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th title="Local Mean Sidereal Time" scope="row">LMST</th>
-                        <td className="navigator-lmst-value">
-                            {lmst?.timestamp === new Date(markedTime).getTime()
-                                ? formatDMSString(decimalToDMS(lmst.value), { hourFormat: true })
-                                : "TBD"}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th title="Greenwich Apparent Sidereal Time" scope="row">GAST</th>
-                        <td className="navigator-gast-value">
-                            {gast?.timestamp === new Date(markedTime).getTime()
-                                ? formatDMSString(decimalToDMS(gast.value), { hourFormat: true })
-                                : "TBD"}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th title="Local Apparent Sidereal Time" scope="row">LAST</th>
-                        <td className="navigator-last-value">
-                            {last?.timestamp === new Date(markedTime).getTime()
-                                ? formatDMSString(decimalToDMS(last.value), { hourFormat: true })
-                                : "TBD"}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th title="Earth Rotation Angle" scope="row">ERA</th>
-                        <td className="navigator-era-value">
-                            {era?.timestamp === new Date(markedTime).getTime()
-                                ? formatDMSString(decimalToDMS(era.value))
-                                : "TBD"}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div>
-                {(julianDayError || gmstError || gastError || lmstError || lastError || eraError) && (
-                    <div role="alert">
-                        <p>
-                            Error Messages: {julianDayError || gmstError || gastError || lmstError || lastError || eraError}
-                        </p>
-                    </div>
-                )}
-            </div>
-        </div>
-        </div>
-
+  function handleTimezoneChange(timezone: string) {
+    setCurrentTimezone(timezone);
+    setMarkedTime(
+      formatInTimeZone(new Date(markedTime), timezone, MARKED_TIME_FORMAT),
     );
+  }
+
+  function handleMarkCurrentTime() {
+    const timestamp = formatInTimeZone(
+      new Date(),
+      currentTimezone,
+      MARKED_TIME_FORMAT,
+    );
+    setMarkedTime(timestamp);
+  }
+
+  async function getIANAtimezones() {
+    try {
+      const response = await fetch("/api/timezones", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data: unknown = await response.json();
+
+      if (!response.ok || !isTimezoneGroups(data)) {
+        throw new Error("Unable to retrieve timezones");
+      }
+
+      setIanaTimezones(data);
+    } catch (error) {
+      console.error("Error fetching timezones:", error);
+      setTimezoneError("Unable to load timezones.");
+    }
+  }
+
+  async function fetchJulianDay(
+    datetime: string,
+    isCurrentRequest: () => boolean = () => true,
+  ) {
+    try {
+      const response = await fetch("/api/julian_day", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ datetime }),
+      });
+      const data: {
+        julian_day?: { value: number; units: string };
+        error?: string;
+      } = await response.json();
+
+      if (!response.ok || data.julian_day === undefined) {
+        throw new Error(data.error ?? "Unable to retrieve Julian day");
+      }
+
+      if (isCurrentRequest()) {
+        setJulianDay({
+          timestamp: new Date(datetime).getTime(),
+          ...data.julian_day,
+        });
+        setJulianDayError(null);
+      }
+    } catch (requestError) {
+      if (isCurrentRequest()) {
+        setJulianDayError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Request failed",
+        );
+      }
+    }
+  }
+
+  async function fetchGMST(
+    datetime: string,
+    isCurrentRequest: () => boolean = () => true,
+  ) {
+    try {
+      const response = await fetch("/api/gmst", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ datetime }),
+      });
+      const data: { gmst?: { value: number; units: string }; error?: string } =
+        await response.json();
+
+      if (!response.ok || data.gmst === undefined) {
+        throw new Error(data.error ?? "Unable to retrieve GMST");
+      }
+
+      if (isCurrentRequest()) {
+        setGmst({ timestamp: new Date(datetime).getTime(), ...data.gmst });
+        setGmstError(null);
+      }
+    } catch (requestError) {
+      if (isCurrentRequest()) {
+        setGmstError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Request failed",
+        );
+      }
+    }
+  }
+
+  async function fetchGAST(
+    datetime: string,
+    isCurrentRequest: () => boolean = () => true,
+  ) {
+    try {
+      const response = await fetch("/api/gast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ datetime }),
+      });
+      const data: { gast?: { value: number; units: string }; error?: string } =
+        await response.json();
+
+      if (!response.ok || data.gast === undefined) {
+        throw new Error(data.error ?? "Unable to retrieve GAST");
+      }
+
+      if (isCurrentRequest()) {
+        setGast({ timestamp: new Date(datetime).getTime(), ...data.gast });
+        setGastError(null);
+      }
+    } catch (requestError) {
+      if (isCurrentRequest()) {
+        setGastError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Request failed",
+        );
+      }
+    }
+  }
+
+  async function fetchLMST(
+    datetime: string,
+    longitude: number,
+    isCurrentRequest: () => boolean = () => true,
+  ) {
+    try {
+      const response = await fetch("/api/lmst", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ datetime, longitude }),
+      });
+      const data: { lmst?: { value: number; units: string }; error?: string } =
+        await response.json();
+
+      if (!response.ok || data.lmst === undefined) {
+        throw new Error(data.error ?? "Unable to retrieve LMST");
+      }
+
+      if (isCurrentRequest()) {
+        setLmst({ timestamp: new Date(datetime).getTime(), ...data.lmst });
+        setLmstError(null);
+      }
+    } catch (requestError) {
+      if (isCurrentRequest()) {
+        setLmstError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Request failed",
+        );
+      }
+    }
+  }
+
+  async function fetchLAST(
+    datetime: string,
+    longitude: number,
+    isCurrentRequest: () => boolean = () => true,
+  ) {
+    try {
+      const response = await fetch("/api/last", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ datetime, longitude }),
+      });
+      const data: { last?: { value: number; units: string }; error?: string } =
+        await response.json();
+
+      if (!response.ok || data.last === undefined) {
+        throw new Error(data.error ?? "Unable to retrieve LAST");
+      }
+
+      if (isCurrentRequest()) {
+        setLast({ timestamp: new Date(datetime).getTime(), ...data.last });
+        setLastError(null);
+      }
+    } catch (requestError) {
+      if (isCurrentRequest()) {
+        setLastError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Request failed",
+        );
+      }
+    }
+  }
+
+  async function fetchERA(
+    datetime: string,
+    isCurrentRequest: () => boolean = () => true,
+  ) {
+    try {
+      const response = await fetch("/api/era", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ datetime }),
+      });
+      const data: { era?: { value: number; units: string }; error?: string } =
+        await response.json();
+
+      if (!response.ok || data.era === undefined) {
+        throw new Error(data.error ?? "Unable to retrieve ERA");
+      }
+
+      if (isCurrentRequest()) {
+        setEra({ timestamp: new Date(datetime).getTime(), ...data.era });
+        setEraError(null);
+      }
+    } catch (requestError) {
+      if (isCurrentRequest()) {
+        setEraError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Request failed",
+        );
+      }
+    }
+  }
+
+  return (
+    <div>
+      <div className="starbug-card">
+        <LocationDisplay
+          handleMarkCurrentTime={handleMarkCurrentTime}
+          selectedDate={selectedDate}
+          timeString={timeString}
+          currentTimezone={currentTimezone}
+          ianaTimezones={ianaTimezones}
+          timezoneError={timezoneError}
+          handleTimezoneChange={handleTimezoneChange}
+          setMarkedTime={setMarkedTime}
+          markedTime={markedTime}
+          latitude={latitude}
+          longitude={longitude}
+          onLatitudeChange={setLatitude}
+          onLongitudeChange={setLongitude}
+        />
+      </div>
+      <div className="starbug-card">
+        <table className="navigator-data-table">
+          <tbody>
+            <tr>
+              <th scope="row">Time</th>
+              <td>{markedTime}</td>
+            </tr>
+            <tr>
+              <th scope="row">Julian Day</th>
+              <td className="navigator-julian-day-value">
+                {julianDay?.timestamp === new Date(markedTime).getTime()
+                  ? formatDecimal(julianDay.value, julianDay.units, {
+                      decimalPlaces: decimalPlaces,
+                    })
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Greenwich Mean Sidereal Time" scope="row">
+                GMST
+              </th>
+              <td className="navigator-gmst-value">
+                {gmst?.timestamp === new Date(markedTime).getTime()
+                  ? formatDMSString(
+                      decimalToDMS(gmst.value, { decimalPlaces: decimalPlaces }),
+                      { hourFormat: true, decimalPlaces: decimalPlaces },
+                    )
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Local Mean Sidereal Time" scope="row">
+                LMST
+              </th>
+              <td className="navigator-lmst-value">
+                {lmst?.timestamp === new Date(markedTime).getTime()
+                  ? formatDMSString(
+                      decimalToDMS(lmst.value, { decimalPlaces: decimalPlaces }),
+                      {
+                        hourFormat: true,
+                        decimalPlaces: decimalPlaces,
+                      },
+                    )
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Greenwich Apparent Sidereal Time" scope="row">
+                GAST
+              </th>
+              <td className="navigator-gast-value">
+                {gast?.timestamp === new Date(markedTime).getTime()
+                  ? formatDMSString(
+                      decimalToDMS(gast.value, { decimalPlaces: decimalPlaces }),
+                      {
+                        hourFormat: true,
+                        decimalPlaces: decimalPlaces,
+                      },
+                    )
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Local Apparent Sidereal Time" scope="row">
+                LAST
+              </th>
+              <td className="navigator-last-value">
+                {last?.timestamp === new Date(markedTime).getTime()
+                  ? formatDMSString(
+                      decimalToDMS(last.value, { decimalPlaces: decimalPlaces }),
+                      {
+                        hourFormat: true,
+                        decimalPlaces: decimalPlaces,
+                      },
+                    )
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Earth Rotation Angle" scope="row">
+                ERA
+              </th>
+              <td className="navigator-era-value">
+                {era?.timestamp === new Date(markedTime).getTime()
+                  ? formatDMSString(decimalToDMS(era.value, { decimalPlaces: decimalPlaces }), {
+                      hourFormat: false,
+                      decimalPlaces: decimalPlaces,
+                    })
+                  : "TBD"}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div className="navigator-error-messages">
+          {(julianDayError ||
+            gmstError ||
+            gastError ||
+            lmstError ||
+            lastError ||
+            eraError) && (
+            <div role="alert">
+              <p>
+                Error Messages:{" "}
+                {julianDayError ||
+                  gmstError ||
+                  gastError ||
+                  lmstError ||
+                  lastError ||
+                  eraError}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="starbug-card">
+        <table className="navigator-options-table">
+          <tbody>
+            <tr>
+              <th scope="row">
+                <label htmlFor="decimalPlaces">Decimal Places</label>
+              </th>
+              <td>
+                <input
+                  id="decimalPlaces"
+                  type="number"
+                  min="0"
+                  max="16"
+                  value={decimalPlaces}
+                  onChange={(e) => setDecimalPlaces(Number(e.target.value))}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
 export const Navigator: React.FC = () => {
   return (
     <div className="navigator-container">
-        <div className="starbug-div">
-            <div>
-                <h1>Navigator</h1>
-            </div>
-
-            <div className="starbug-card">
-                <SiderealTimeDisplay timezone="UTC"/>
-            </div>
-
-            <div className="starbug-card">
-                <div>
-                    <h2>References</h2>
-                    <ol>
-                        <li>
-                            <a href="https://www.iana.org/time-zones" target="_blank" rel="noopener noreferrer">
-                                IANA Time Zone Database
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://aa.usno.navy.mil/data/JulianDate" target="_blank" rel="noopener noreferrer">
-                                USN Julian Date Converter
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://en.wikipedia.org/wiki/Astronomical_coordinate_system" target="_blank" rel="noopener noreferrer">
-                                Wikipedia: Astronomical coordinate system
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://en.wikipedia.org/wiki/Geographic_coordinate_system" target="_blank" rel="noopener noreferrer">
-                                Wikipedia: Geographic coordinate system
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://en.wikipedia.org/wiki/Julian_day" target="_blank" rel="noopener noreferrer">
-                                Wikipedia: Julian day
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://en.wikipedia.org/wiki/Sidereal_time" target="_blank" rel="noopener noreferrer">
-                                Wikipedia: Sidereal time
-                            </a>
-                        </li>
-                    </ol>
-                </div>
-            </div>
+      <div className="starbug-div">
+        <div>
+          <h1>Navigator</h1>
         </div>
+
+        <div className="starbug-card">
+          <SiderealTimeDisplay timezone="UTC" />
+        </div>
+
+        <div className="starbug-card">
+          <div>
+            <h2>References</h2>
+            <ol>
+              <li>
+                <a
+                  href="https://www.iana.org/time-zones"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  IANA Time Zone Database
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://aa.usno.navy.mil/data/JulianDate"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  USN Julian Date Converter
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://en.wikipedia.org/wiki/Astronomical_coordinate_system"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Wikipedia: Astronomical coordinate system
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://en.wikipedia.org/wiki/Geographic_coordinate_system"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Wikipedia: Geographic coordinate system
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://en.wikipedia.org/wiki/Julian_day"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Wikipedia: Julian day
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://en.wikipedia.org/wiki/Sidereal_time"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Wikipedia: Sidereal time
+                </a>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
