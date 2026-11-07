@@ -79,7 +79,7 @@ describe("Navigator", () => {
 
     const julianDayElement = await screen.findByText(/2461311.5/);
     expect(julianDayElement).toBeInTheDocument();
-    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(document.querySelector(".navigator-data-table")).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Time/ })).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Julian Day/ })).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /LMST/ })).toHaveTextContent("01:30:00.00");

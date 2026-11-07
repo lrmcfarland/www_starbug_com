@@ -256,28 +256,34 @@ select {
   outline-offset: 2px;
 }
 
-.navigator-data-table {
+.navigator-data-table,
+.navigator-location-table {
   border-collapse: collapse;
   margin: 4px 2px;
 }
 
 .navigator-data-table th,
-.navigator-data-table td {
+.navigator-data-table td,
+.navigator-location-table th,
+.navigator-location-table td {
   padding: 0.4rem 0.75rem 0.4rem 0;
   text-align: left;
 }
 
-.navigator-data-table button {
+.navigator-data-table button,
+.navigator-location-table button {
   font-size: inherit;
 }
 
-.navigator-data-table th {
+.navigator-data-table th,
+.navigator-location-table th {
   color: var(--text-h);
   font-family: var(--heading);
   font-weight: 500;
 }
 
-.navigator-data-table td {
+.navigator-data-table td,
+.navigator-location-table td {
   padding-left: 0.75rem;
 }
 

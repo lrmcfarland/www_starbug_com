@@ -130,6 +130,130 @@ function formatDecimal(decimal: number, units: string, options: FormatOptions = 
     return `${decimalStr} ${units}`;
 }
 
+type LocationDisplayProps = {
+    markedTime: string;
+    handleMarkCurrentTime: () => void;
+    selectedDate: Date;
+    timeString: string;
+    currentTimezone: string;
+    ianaTimezones: TimezoneGroup[];
+    timezoneError: string | null;
+    handleTimezoneChange: (timezone: string) => void;
+    setMarkedTime: (value: string) => void;
+    latitude: string;
+    longitude: string;
+    onLatitudeChange: (value: string) => void;
+    onLongitudeChange: (value: string) => void;
+};
+
+function LocationDisplay({
+    markedTime,
+    handleMarkCurrentTime,
+    selectedDate,
+    timeString,
+    currentTimezone,
+    ianaTimezones,
+    timezoneError,
+    handleTimezoneChange,
+    setMarkedTime,
+    latitude,
+    longitude,
+    onLatitudeChange,
+    onLongitudeChange,
+}: LocationDisplayProps) {
+    return (
+        <>
+            <div className="navigator-location-header">
+                <table className="navigator-location-table">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <button
+                                    title="Mark Current Time"
+                                    onClick={handleMarkCurrentTime}
+                                >
+                                    Mark
+                                </button>
+                            </th>
+                            <td>
+                                <DatePicker
+                                    className="date-time-picker"
+                                    selected={selectedDate}
+                                    onChange={(date: Date | null) => {
+                                        if (date) {
+                                            const utcDate = fromZonedTime(date, currentTimezone);
+                                            setMarkedTime(formatInTimeZone(utcDate, currentTimezone, MARKED_TIME_FORMAT));
+                                        }
+                                    }}
+                                    showTimeInput
+                                    dateFormat={DATE_PICKER_FORMAT}
+                                    customTimeInput={React.createElement(KeyboardTimeInput, {
+                                        value: timeString,
+                                        onChange: (time: string) => {
+                                            const localDate = formatInTimeZone(new Date(markedTime), currentTimezone, "yyyy-MM-dd");
+                                            const updatedDate = fromZonedTime(`${localDate}T${time}`, currentTimezone);
+                                            setMarkedTime(formatInTimeZone(updatedDate, currentTimezone, MARKED_TIME_FORMAT));
+                                        }
+                                    })}
+                                />
+                            </td>
+                            <td>
+                                <CascadeSelect
+                                    value={currentTimezone}
+                                    options={ianaTimezones}
+                                    optionLabel="city"
+                                    optionValue="code"
+                                    optionGroupLabel="zone"
+                                    optionGroupChildren={["zones"]}
+                                    onChange={(tz: { value: string }) => handleTimezoneChange(tz.value)}
+                                    placeholder="Select a City"
+                                    className="navigator-timezone-select"
+                                />
+                                {timezoneError && <div role="alert">{timezoneError}</div>}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Latitude</th>
+                            <td>
+                                <input
+                                    className="navigator-location-input"
+                                    type="number"
+                                    min="-90"
+                                    max="90"
+                                    step="any"
+                                    value={latitude}
+                                    onChange={(event) => onLatitudeChange(event.currentTarget.value)}
+                                    placeholder="e.g. 37.7749"
+                                />
+                            </td>
+                            <td>degrees</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label htmlFor="navigator-longitude">Longitude</label>
+                            </th>
+                            <td>
+                                <input
+                                    id="navigator-longitude"
+                                    className="navigator-location-input"
+                                    type="number"
+                                    min="-180"
+                                    max="180"
+                                    step="any"
+                                    value={longitude}
+                                    onChange={(event) => onLongitudeChange(event.currentTarget.value)}
+                                    placeholder="e.g. -122.4194"
+                                />
+                            </td>
+                            <td>degrees</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </>
+    );
+}
+
 function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
 
     const [markedTime, setMarkedTime] = useState<string>(formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT));
@@ -367,93 +491,25 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
     return (
 
         <div>
+          <div className="starbug-card">
+            <LocationDisplay
+                handleMarkCurrentTime={handleMarkCurrentTime}
+                selectedDate={selectedDate}
+                timeString={timeString}
+                currentTimezone={currentTimezone}
+                ianaTimezones={ianaTimezones}
+                timezoneError={timezoneError}
+                handleTimezoneChange={handleTimezoneChange}
+                setMarkedTime={setMarkedTime}
+                markedTime={markedTime}
+                latitude={latitude}
+                longitude={longitude}
+                onLatitudeChange={setLatitude}
+                onLongitudeChange={setLongitude}
+            />
+          </div>
+        <div className="starbug-card">
             <table className="navigator-data-table">
-                <tbody>
-                    <tr>
-                        <th scope="row">
-                            <button
-                                title="Mark Current Time"
-                                onClick={handleMarkCurrentTime}
-                            >
-                                Mark
-                            </button>
-                        </th>
-                        <td>
-                            <DatePicker
-                                className="date-time-picker"
-                                selected={selectedDate}
-                                onChange={(date: Date | null) => {
-                                    if (date) {
-                                        const utcDate = fromZonedTime(date, currentTimezone);
-                                        setMarkedTime(formatInTimeZone(utcDate, currentTimezone, MARKED_TIME_FORMAT));
-                                    }
-                                }}
-                                showTimeInput
-                                dateFormat={DATE_PICKER_FORMAT}
-                                customTimeInput={React.createElement(KeyboardTimeInput, {
-                                    value: timeString,
-                                    onChange: (time: string) => {
-                                        const localDate = formatInTimeZone(new Date(markedTime), currentTimezone, "yyyy-MM-dd");
-                                        const updatedDate = fromZonedTime(`${localDate}T${time}`, currentTimezone);
-                                        setMarkedTime(formatInTimeZone(updatedDate, currentTimezone, MARKED_TIME_FORMAT));
-                                    }
-                                })}
-                            />
-                        </td>
-                        <td>
-                            <CascadeSelect
-                                value={currentTimezone}
-                                options={ianaTimezones}
-                                optionLabel="city"
-                                optionValue="code"
-                                optionGroupLabel="zone"
-                                optionGroupChildren={["zones"]}
-                                onChange={(tz: { value: string }) => handleTimezoneChange(tz.value)}
-                                placeholder="Select a City"
-                                className="navigator-timezone-select"
-                            />
-                            {timezoneError && <div role="alert">{timezoneError}</div>}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">
-                            Latitude
-                        </th>
-                        <td>
-                            <input
-                                className="navigator-location-input"
-                                type="number"
-                                min="-90"
-                                max="90"
-                                step="any"
-                                value={latitude}
-                                onChange={(event) => setLatitude(event.currentTarget.value)}
-                                placeholder="e.g. 37.7749"
-                            />
-                        </td>
-                        <td>degrees</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">
-                            <label htmlFor="navigator-longitude">Longitude</label>
-                        </th>
-                        <td>
-                            <input
-                                id="navigator-longitude"
-                                className="navigator-location-input"
-                                type="number"
-                                min="-180"
-                                max="180"
-                                step="any"
-                                value={longitude}
-                                onChange={(event) => setLongitude(event.currentTarget.value)}
-                                placeholder="e.g. -122.4194"
-                            />
-                        </td>
-                        <td>degrees</td>
-                    </tr>
-
-                </tbody>
                 <tbody>
                     <tr>
                         <th scope="row">Time</th>
@@ -518,6 +574,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
                     </div>
                 )}
             </div>
+        </div>
         </div>
 
     );
