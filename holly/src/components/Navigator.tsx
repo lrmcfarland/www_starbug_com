@@ -434,6 +434,66 @@ function SiderealTimeDisplay({
   );
 }
 
+type OptionsDisplayProps = {
+  decimalPlaces: number;
+  onDecimalPlacesChange: (decimalPlaces: number) => void;
+  isDMSFormat: boolean;
+  onDMSFormatChange: (isDMSFormat: boolean) => void;
+};
+
+function OptionsDisplay({
+  decimalPlaces,
+  onDecimalPlacesChange,
+  isDMSFormat,
+  onDMSFormatChange,
+}: OptionsDisplayProps) {
+  return (
+    <>
+      <div className="navigator-options-header">
+        <h2>Options</h2>
+      </div>
+      <div className="navigator-options-content">
+        <table className="navigator-options-table">
+          <tbody>
+            <tr>
+              <th scope="row">
+                <label htmlFor="decimalPlaces">Decimal Places</label>
+              </th>
+              <td>
+                <input
+                  id="decimalPlaces"
+                  type="number"
+                  min="0"
+                  max="16"
+                  value={decimalPlaces}
+                  onChange={(event) =>
+                    onDecimalPlacesChange(Number(event.currentTarget.value))
+                  }
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <label htmlFor="dmsFormatToggle">DMS Format</label>
+              </th>
+              <td>
+                <input
+                  id="dmsFormatToggle"
+                  type="checkbox"
+                  checked={isDMSFormat}
+                  onChange={(event) =>
+                    onDMSFormatChange(event.currentTarget.checked)
+                  }
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
 function NavigatorDisplay({ timezone = "UTC" }: { timezone?: string }) {
   const [markedTime, setMarkedTime] = useState<string>(
     formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT),
@@ -498,10 +558,6 @@ function NavigatorDisplay({ timezone = "UTC" }: { timezone?: string }) {
       isCurrentRequest = false;
     };
   }, [markedTime, longitude]);
-
-  const handleDMSFormatToggle = (isDMS: boolean) => {
-    setIsDMSFormat(isDMS);
-  };
 
   function handleTimezoneChange(timezone: string) {
     setCurrentTimezone(timezone);
@@ -769,41 +825,82 @@ function NavigatorDisplay({ timezone = "UTC" }: { timezone?: string }) {
         />
       </div>
       <div className="starbug-card">
-        <h2>Options</h2>
-        <table className="navigator-options-table">
-          <tbody>
-            <tr>
-              <th scope="row">
-                <label htmlFor="decimalPlaces">Decimal Places</label>
-              </th>
-              <td>
-                <input
-                  id="decimalPlaces"
-                  type="number"
-                  min="0"
-                  max="16"
-                  value={decimalPlaces}
-                  onChange={(e) => setDecimalPlaces(Number(e.target.value))}
-                />
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">
-                <label htmlFor="dmsFormatToggle">DMS Format</label>
-              </th>
-              <td>
-                <input
-                  id="dmsFormatToggle"
-                  type="checkbox"
-                  checked={isDMSFormat}
-                  onChange={(e) => handleDMSFormatToggle(e.target.checked)}
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <OptionsDisplay
+          decimalPlaces={decimalPlaces}
+          onDecimalPlacesChange={setDecimalPlaces}
+          isDMSFormat={isDMSFormat}
+          onDMSFormatChange={setIsDMSFormat}
+        />
       </div>
     </div>
+  );
+}
+
+function ReferencesDisplay() {
+  return (
+    <>
+      <div className="navigator-references-header">
+        <h2>References</h2>
+      </div>
+      <div className="navigator-references-content">
+        <ol>
+          <li>
+            <a
+              href="https://www.iana.org/time-zones"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              IANA Time Zone Database
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://aa.usno.navy.mil/data/JulianDate"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              USN Julian Date Converter
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://en.wikipedia.org/wiki/Astronomical_coordinate_system"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Wikipedia: Astronomical coordinate system
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://en.wikipedia.org/wiki/Geographic_coordinate_system"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Wikipedia: Geographic coordinate system
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://en.wikipedia.org/wiki/Julian_day"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Wikipedia: Julian day
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://en.wikipedia.org/wiki/Sidereal_time"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Wikipedia: Sidereal time
+            </a>
+          </li>
+        </ol>
+      </div>
+    </>
   );
 }
 
@@ -820,65 +917,7 @@ export const Navigator: React.FC = () => {
         </div>
 
         <div className="starbug-card">
-          <div>
-            <h2>References</h2>
-            <ol>
-              <li>
-                <a
-                  href="https://www.iana.org/time-zones"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  IANA Time Zone Database
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://aa.usno.navy.mil/data/JulianDate"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  USN Julian Date Converter
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://en.wikipedia.org/wiki/Astronomical_coordinate_system"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Wikipedia: Astronomical coordinate system
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://en.wikipedia.org/wiki/Geographic_coordinate_system"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Wikipedia: Geographic coordinate system
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://en.wikipedia.org/wiki/Julian_day"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Wikipedia: Julian day
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://en.wikipedia.org/wiki/Sidereal_time"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Wikipedia: Sidereal time
-                </a>
-              </li>
-            </ol>
-          </div>
+          <ReferencesDisplay />
         </div>
       </div>
     </div>
