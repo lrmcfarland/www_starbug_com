@@ -213,10 +213,12 @@ select {
 }
 
 .navigator-timezone-select {
+  height: 42px;
+  min-height: 42px;
   min-width: 14rem;
   margin: 4px 2px;
   box-sizing: border-box;
-  font-size: inherit;
+  font-size: 1rem;
   color: var(--text-h);
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
@@ -228,12 +230,13 @@ select {
 
 .p-cascadeselect-panel {
   font-family: var(--heading);
-  font-size: 1.1025em;
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .navigator-timezone-select .p-cascadeselect-label {
   padding: 8px 16px;
+  font-size: inherit;
   color: inherit;
 }
 
