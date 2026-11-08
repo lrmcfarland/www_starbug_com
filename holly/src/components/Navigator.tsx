@@ -18,6 +18,7 @@ type TimezoneGroup = {
 };
 
 type Measurement = { value: number; units: string };
+type TimestampedMeasurement = Measurement & { timestamp: number };
 
 function isTimezoneGroups(value: unknown): value is TimezoneGroup[] {
   return (
@@ -314,7 +315,126 @@ function LocationDisplay({
   );
 }
 
-function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
+type SiderealTimeDisplayProps = {
+  markedTime: string;
+  julianDay: TimestampedMeasurement | null;
+  gmst: TimestampedMeasurement | null;
+  lmst: TimestampedMeasurement | null;
+  gast: TimestampedMeasurement | null;
+  last: TimestampedMeasurement | null;
+  era: TimestampedMeasurement | null;
+  decimalPlaces: number;
+  isDMSFormat: boolean;
+};
+
+function SiderealTimeDisplay({
+  markedTime,
+  julianDay,
+  gmst,
+  lmst,
+  gast,
+  last,
+  era,
+  decimalPlaces,
+  isDMSFormat,
+}: SiderealTimeDisplayProps) {
+  const markedTimestamp = new Date(markedTime).getTime();
+
+  return (
+    <>
+      <div className="navigator-sidereal-header">
+        <h2>Sidereal Time</h2>
+      </div>
+      <div className="navigator-sidereal-content">
+        <table className="navigator-data-table">
+          <tbody>
+            <tr>
+              <th scope="row">Time</th>
+              <td>{markedTime}</td>
+            </tr>
+            <tr>
+              <th scope="row">Julian Day</th>
+              <td className="navigator-julian-day-value">
+                {julianDay?.timestamp === markedTimestamp
+                  ? formatDecimal(julianDay.value, julianDay.units, {
+                      decimalPlaces,
+                    })
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Greenwich Mean Sidereal Time" scope="row">
+                GMST
+              </th>
+              <td className="navigator-gmst-value">
+                {gmst?.timestamp === markedTimestamp
+                  ? formatSiderealMeasurement(gmst, isDMSFormat, {
+                      hourFormat: true,
+                      decimalPlaces,
+                    })
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Local Mean Sidereal Time" scope="row">
+                LMST
+              </th>
+              <td className="navigator-lmst-value">
+                {lmst?.timestamp === markedTimestamp
+                  ? formatSiderealMeasurement(lmst, isDMSFormat, {
+                      hourFormat: true,
+                      decimalPlaces,
+                    })
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Greenwich Apparent Sidereal Time" scope="row">
+                GAST
+              </th>
+              <td className="navigator-gast-value">
+                {gast?.timestamp === markedTimestamp
+                  ? formatSiderealMeasurement(gast, isDMSFormat, {
+                      hourFormat: true,
+                      decimalPlaces,
+                    })
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Local Apparent Sidereal Time" scope="row">
+                LAST
+              </th>
+              <td className="navigator-last-value">
+                {last?.timestamp === markedTimestamp
+                  ? formatSiderealMeasurement(last, isDMSFormat, {
+                      hourFormat: true,
+                      decimalPlaces,
+                    })
+                  : "TBD"}
+              </td>
+            </tr>
+            <tr>
+              <th title="Earth Rotation Angle" scope="row">
+                ERA
+              </th>
+              <td className="navigator-era-value">
+                {era?.timestamp === markedTimestamp
+                  ? formatSiderealMeasurement(era, isDMSFormat, {
+                      hourFormat: false,
+                      decimalPlaces,
+                    })
+                  : "TBD"}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function NavigatorDisplay({ timezone = "UTC" }: { timezone?: string }) {
   const [markedTime, setMarkedTime] = useState<string>(
     formatInTimeZone(new Date(), timezone, MARKED_TIME_FORMAT),
   );
@@ -332,34 +452,23 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
   const [latitude, setLatitude] = useState<string>("");
   const [longitude, setLongitude] = useState<string>("");
 
-  const [julianDay, setJulianDay] = useState<
-    ({ timestamp: number } & Measurement) | null
-  >(null);
+  const [julianDay, setJulianDay] =
+    useState<TimestampedMeasurement | null>(null);
   const [julianDayError, setJulianDayError] = useState<string | null>(null);
 
-  const [gmst, setGmst] = useState<
-    ({ timestamp: number } & Measurement) | null
-  >(null);
+  const [gmst, setGmst] = useState<TimestampedMeasurement | null>(null);
   const [gmstError, setGmstError] = useState<string | null>(null);
 
-  const [gast, setGast] = useState<
-    ({ timestamp: number } & Measurement) | null
-  >(null);
+  const [gast, setGast] = useState<TimestampedMeasurement | null>(null);
   const [gastError, setGastError] = useState<string | null>(null);
 
-  const [lmst, setLmst] = useState<
-    ({ timestamp: number } & Measurement) | null
-  >(null);
+  const [lmst, setLmst] = useState<TimestampedMeasurement | null>(null);
   const [lmstError, setLmstError] = useState<string | null>(null);
 
-  const [last, setLast] = useState<
-    ({ timestamp: number } & Measurement) | null
-  >(null);
+  const [last, setLast] = useState<TimestampedMeasurement | null>(null);
   const [lastError, setLastError] = useState<string | null>(null);
 
-  const [era, setEra] = useState<({ timestamp: number } & Measurement) | null>(
-    null,
-  );
+  const [era, setEra] = useState<TimestampedMeasurement | null>(null);
   const [eraError, setEraError] = useState<string | null>(null);
 
   const [decimalPlaces, setDecimalPlaces] = useState<number>(2);
@@ -647,90 +756,17 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
         />
       </div>
       <div className="starbug-card">
-        <h2>Sidereal Time</h2>
-        <table className="navigator-data-table">
-          <tbody>
-            <tr>
-              <th scope="row">Time</th>
-              <td>{markedTime}</td>
-            </tr>
-            <tr>
-              <th scope="row">Julian Day</th>
-              <td className="navigator-julian-day-value">
-                {julianDay?.timestamp === new Date(markedTime).getTime()
-                  ? formatDecimal(julianDay.value, julianDay.units, {
-                      decimalPlaces: decimalPlaces,
-                    })
-                  : "TBD"}
-              </td>
-            </tr>
-            <tr>
-              <th title="Greenwich Mean Sidereal Time" scope="row">
-                GMST
-              </th>
-              <td className="navigator-gmst-value">
-                {gmst?.timestamp === new Date(markedTime).getTime()
-                  ? formatSiderealMeasurement(gmst, isDMSFormat, {
-                      hourFormat: true,
-                      decimalPlaces: decimalPlaces,
-                    })
-                  : "TBD"}
-              </td>
-            </tr>
-            <tr>
-              <th title="Local Mean Sidereal Time" scope="row">
-                LMST
-              </th>
-              <td className="navigator-lmst-value">
-                {lmst?.timestamp === new Date(markedTime).getTime()
-                  ? formatSiderealMeasurement(lmst, isDMSFormat, {
-                      hourFormat: true,
-                      decimalPlaces: decimalPlaces,
-                    })
-                  : "TBD"}
-              </td>
-            </tr>
-            <tr>
-              <th title="Greenwich Apparent Sidereal Time" scope="row">
-                GAST
-              </th>
-              <td className="navigator-gast-value">
-                {gast?.timestamp === new Date(markedTime).getTime()
-                  ? formatSiderealMeasurement(gast, isDMSFormat, {
-                      hourFormat: true,
-                      decimalPlaces: decimalPlaces,
-                    })
-                  : "TBD"}
-              </td>
-            </tr>
-            <tr>
-              <th title="Local Apparent Sidereal Time" scope="row">
-                LAST
-              </th>
-              <td className="navigator-last-value">
-                {last?.timestamp === new Date(markedTime).getTime()
-                  ? formatSiderealMeasurement(last, isDMSFormat, {
-                      hourFormat: true,
-                      decimalPlaces: decimalPlaces,
-                    })
-                  : "TBD"}
-              </td>
-            </tr>
-            <tr>
-              <th title="Earth Rotation Angle" scope="row">
-                ERA
-              </th>
-              <td className="navigator-era-value">
-                {era?.timestamp === new Date(markedTime).getTime()
-                  ? formatSiderealMeasurement(era, isDMSFormat, {
-                      hourFormat: false,
-                      decimalPlaces: decimalPlaces,
-                    })
-                  : "TBD"}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <SiderealTimeDisplay
+          markedTime={markedTime}
+          julianDay={julianDay}
+          gmst={gmst}
+          lmst={lmst}
+          gast={gast}
+          last={last}
+          era={era}
+          decimalPlaces={decimalPlaces}
+          isDMSFormat={isDMSFormat}
+        />
       </div>
       <div className="starbug-card">
         <h2>Options</h2>
@@ -780,7 +816,7 @@ export const Navigator: React.FC = () => {
         </div>
 
         <div className="starbug-card">
-          <SiderealTimeDisplay timezone="UTC" />
+          <NavigatorDisplay timezone="UTC" />
         </div>
 
         <div className="starbug-card">
