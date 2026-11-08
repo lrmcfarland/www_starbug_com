@@ -2,6 +2,7 @@
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
+  --surface: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #b45309;
@@ -9,6 +10,13 @@
   --accent-border: rgba(180, 83, 9, 0.5);
   --accent-secondary: #0f766e;
   --social-bg: rgba(244, 243, 236, 0.5);
+  --sidebar-bg: #f4f3ec;
+  --sidebar-text: #08060d;
+  --sidebar-icon: #0f766e;
+  --sidebar-active: #b45309;
+  --sidebar-active-text: #fff;
+  --sidebar-button: #e5e4e7;
+  --overlay: rgba(0, 0, 0, 0.4);
   --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
@@ -37,6 +45,7 @@
     --text: #9ca3af;
     --text-h: #f3f4f6;
     --bg: #16171d;
+    --surface: #1f2028;
     --border: #2e303a;
     --code-bg: #1f2028;
     --accent: #fbbf24;
@@ -44,6 +53,13 @@
     --accent-border: rgba(251, 191, 36, 0.5);
     --accent-secondary: #2dd4bf;
     --social-bg: rgba(47, 48, 58, 0.5);
+    --sidebar-bg: #1e293b;
+    --sidebar-text: #fff;
+    --sidebar-icon: #94a3b8;
+    --sidebar-active: #3b82f6;
+    --sidebar-active-text: #fff;
+    --sidebar-button: #334155;
+    --overlay: rgba(0, 0, 0, 0.4);
     --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
       rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
@@ -104,7 +120,7 @@ h2 {
 
 p {
   margin: 0;
-  color: #ffffff;
+  color: var(--text);
   text-align: left;
 }
 
@@ -121,7 +137,8 @@ a:hover {
 
 button,
 select,
-.react-datepicker__input-container input {
+.react-datepicker__input-container input,
+.navigator-location-input {
   font-family: var(--heading);
   font-weight: 500;
   color: var(--text-h);
@@ -136,7 +153,8 @@ select,
 
 button:hover,
 select:hover,
-.react-datepicker__input-container input:hover {
+.react-datepicker__input-container input:hover,
+.navigator-location-input:hover {
   background: var(--accent);
   color: var(--bg);
 }
@@ -161,18 +179,46 @@ select {
   flex-wrap: wrap;
 }
 
+.navigator-container {
+  font-size: 1.1025em;
+}
+
 .navigator-control-row > button,
 .navigator-control-row > select,
 .navigator-control-row .date-time-picker,
-.navigator-control-row .navigator-timezone-select {
+.navigator-control-row .navigator-timezone-select,
+.navigator-control-row .navigator-location-input {
   height: 42px;
   min-height: 42px;
 }
 
+.navigator-control-row > button {
+  font-size: inherit;
+}
+
+.navigator-location-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 4px 2px;
+  font-family: var(--heading);
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.navigator-location-input:focus {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
 .navigator-timezone-select {
+  height: 42px;
+  min-height: 42px;
   min-width: 14rem;
   margin: 4px 2px;
   box-sizing: border-box;
+  font-size: 1rem;
   color: var(--text-h);
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
@@ -182,8 +228,15 @@ select {
   cursor: pointer;
 }
 
+.p-cascadeselect-panel {
+  font-family: var(--heading);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
 .navigator-timezone-select .p-cascadeselect-label {
   padding: 8px 16px;
+  font-size: inherit;
   color: inherit;
 }
 
@@ -206,16 +259,49 @@ select {
   outline-offset: 2px;
 }
 
-.navigator-julian-day-value {
-  margin-left: 0.5rem;
+.navigator-data-table,
+.navigator-location-table,
+.navigator-options-table {
+  border-collapse: collapse;
+  margin: 4px 2px;
+}
+
+.navigator-data-table th,
+.navigator-data-table td,
+.navigator-location-table th,
+.navigator-location-table td,
+.navigator-options-table th,
+.navigator-options-table td {
+  padding: 0.4rem 0.75rem 0.4rem 0;
+  text-align: left;
+}
+
+.navigator-data-table button,
+.navigator-location-table button {
+  font-size: inherit;
+}
+
+.navigator-data-table th,
+.navigator-location-table th,
+.navigator-options-table th {
+  color: var(--text-h);
+  font-family: var(--heading);
+  font-weight: 500;
+}
+
+.navigator-data-table td,
+.navigator-location-table td,
+.navigator-options-table td {
+  padding-left: 0.75rem;
 }
 
 .react-datepicker__input-container {
   display: inline-block;
 }
 
-.react-datepicker__input-container input {
-  width: 24ch;
+.react-datepicker__input-container input,
+.navigator-location-input {
+  width: 19ch;
   max-width: 100%;
   box-sizing: border-box;
   min-height: 42px;
@@ -226,7 +312,17 @@ select {
   padding: 8px 16px;
   margin: 4px 2px;
   font-family: var(--heading);
+  font-size: inherit;
   font-weight: 500;
+}
+
+.react-datepicker__input-time-container input {
+  font-size: inherit;
+}
+
+.navigator-location-input {
+  width: 14ch;
+  cursor: text;
 }
 
 .react-datepicker__input-container input:focus {
@@ -239,6 +335,7 @@ select {
   border-radius: 10px;
   box-shadow: var(--shadow);
   font-family: var(--heading);
+  font-size: inherit;
 }
 
 .react-datepicker__header {

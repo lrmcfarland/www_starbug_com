@@ -26,7 +26,7 @@ vi.mock("primereact/cascadeselect", () => ({
     ),
 }));
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import Navigator from "./Navigator";
 
@@ -44,18 +44,53 @@ describe("Navigator", () => {
           json: async () => [],
         });
       }
+      if (url === "/api/lmst") {
+        return Promise.resolve({ ok: true, json: async () => ({ lmst: { value: 1.5, units: "hours" } }) });
+      }
+      if (url === "/api/gmst") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gmst: { value: 1.5, units: "hours" } }),
+        });
+      }
+      if (url === "/api/gast") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gast: { value: 1.6, units: "hours" } }),
+        });
+      }
+      if (url === "/api/era") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ era: { value: 1.2345, units: "degrees" } }),
+        });
+      }
+      if (url === "/api/last") {
+        return Promise.resolve({ ok: true, json: async () => ({ last: { value: 1.7, units: "hours" } }) });
+      }
       return Promise.resolve({
         ok: true,
-        json: async () => ({ julian_day: 2461311.5 }),
+        json: async () => ({ julian_day: { value: 2461311.5, units: "days" } }),
       });
     });
     vi.stubGlobal("fetch", fetchMock);
 
     render(<Navigator />);
-    fireEvent.click(screen.getByRole("button", { name: /Julian Day/i }));
 
     const julianDayElement = await screen.findByText(/2461311.5/);
     expect(julianDayElement).toBeInTheDocument();
+    expect(document.querySelector(".navigator-data-table")).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /^Time\b/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Julian Day/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /LMST/ })).toHaveTextContent("01:30:00.00");
+    expect(screen.getByRole("row", { name: /GMST/ })).toHaveTextContent("01:30:00.00");
+    expect(screen.getByRole("row", { name: /GAST/ })).toHaveTextContent("01:36:00.00");
+    expect(screen.getByRole("row", { name: /LAST/ })).toHaveTextContent("01:42:00.00");
+    expect(screen.getByRole("row", { name: /ERA/ })).toHaveTextContent("01°14'04.20\"");
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "DMS Format" }));
+    expect(screen.getByRole("row", { name: /GMST/ })).toHaveTextContent("1.50 hours");
+    expect(screen.getByRole("row", { name: /ERA/ })).toHaveTextContent("1.23 degrees");
 
     // Verify julian_day API was called
     const calls = (fetchMock.mock.calls as any);
@@ -68,6 +103,72 @@ describe("Navigator", () => {
       });
       expect(JSON.parse(julianDayCall[1].body).datetime).toBeTruthy();
     }
+
+    const eraCall = calls.find((call: any) => call[0] === "/api/era");
+    expect(eraCall).toBeDefined();
+    expect(eraCall[1]).toMatchObject({
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    expect(JSON.parse(eraCall[1].body).datetime).toBeTruthy();
+  });
+
+  it("posts longitude to LMST and refreshes LMST when longitude changes", async () => {
+    const fetchMock = vi.fn((url: string, _options?: RequestInit) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (url === "/api/lmst") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ lmst: { value: 1.5, units: "hours" } }),
+        });
+      }
+      if (url === "/api/gmst") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gmst: { value: 1.5, units: "hours" } }),
+        });
+      }
+      if (url === "/api/gast") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gast: { value: 1.6, units: "hours" } }),
+        });
+      }
+      if (url === "/api/era") {
+        return Promise.resolve({ ok: true, json: async () => ({ era: { value: 1.2, units: "degrees" } }) });
+      }
+      if (url === "/api/last") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ last: { value: 1.7, units: "hours" } }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ julian_day: { value: 2461311.5, units: "days" } }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Navigator />);
+
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.filter(([url]) => url === "/api/lmst")).toHaveLength(1);
+    });
+    const lmstCalls = () => fetchMock.mock.calls.filter(([url]) => url === "/api/lmst");
+    expect(JSON.parse(String(lmstCalls()[0][1]?.body)).longitude).toBe(0);
+
+    fireEvent.change(screen.getByLabelText(/Longitude/), {
+      target: { value: "-122.4194" },
+    });
+
+    await waitFor(() => {
+      expect(lmstCalls()).toHaveLength(2);
+    });
+    expect(JSON.parse(String(lmstCalls()[1][1]?.body)).longitude).toBe(-122.4194);
+    expect(fetchMock.mock.calls.filter(([url]) => url === "/api/gmst")).toHaveLength(1);
   });
 
   it("shows an API error when the request fails", async () => {
@@ -87,9 +188,150 @@ describe("Navigator", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<Navigator />);
-    fireEvent.click(screen.getByRole("button", { name: /Julian Day/i }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid datetime");
+  });
+
+  it("shows a clear message when the Navigator service is unavailable", async () => {
+    const fetchMock = vi.fn((url: string) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      return Promise.reject(new TypeError("Failed to fetch"));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Navigator />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Navigator service is unavailable. Please check your connection and try again.",
+    );
+  });
+
+  it("shows a clear message when the Navigator service returns HTML instead of JSON", async () => {
+    const fetchMock = vi.fn((url: string) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      return Promise.resolve({
+        ok: false,
+        json: async () => {
+          throw new SyntaxError(`Unexpected token '<', "<html> <h"... is not valid JSON`);
+        },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Navigator />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Navigator service returned an unexpected response. Please check that the service is running and try again.",
+    );
+    expect(screen.getByRole("alert")).not.toHaveTextContent("Unexpected token");
+    expect(screen.getByRole("alert")).toHaveClass("navigator-error-messages");
+  });
+
+  it("updates the Julian day automatically when the marked time changes", async () => {
+    let julianDayRequests = 0;
+    const fetchMock = vi.fn((url: string, _options?: RequestInit) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (url === "/api/lmst") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ lmst: { value: 1.5, units: "hours" } }),
+        });
+      }
+      if (url === "/api/gmst") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gmst: { value: 1.5, units: "hours" } }),
+        });
+      }
+      if (url === "/api/gast") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ gast: { value: 1.6, units: "hours" } }),
+        });
+      }
+      if (url === "/api/era") {
+        return Promise.resolve({ ok: true, json: async () => ({ era: { value: 1.2, units: "degrees" } }) });
+      }
+      if (url === "/api/last") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ last: { value: 1.7, units: "hours" } }),
+        });
+      }
+
+      julianDayRequests += 1;
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ julian_day: { value: 2461311.5 + julianDayRequests - 1, units: "days" } }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Navigator />);
+    expect(await screen.findByText("2461311.50 days")).toBeInTheDocument();
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    fireEvent.click(screen.getByRole("button", { name: "Mark" }));
+
+    expect(await screen.findByText("2461312.50 days")).toBeInTheDocument();
+    const julianDayCalls = fetchMock.mock.calls.filter(([url]) => url === "/api/julian_day");
+    expect(julianDayCalls).toHaveLength(2);
+    expect(JSON.parse(String(julianDayCalls[1][1]?.body)).datetime).not.toBe(
+      JSON.parse(String(julianDayCalls[0][1]?.body)).datetime,
+    );
+  });
+
+  it("clears the previous error after a successful retry", async () => {
+    let julianDayRequests = 0;
+    const fetchMock = vi.fn((url: string) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (url === "/api/lmst") {
+        return Promise.resolve({ ok: true, json: async () => ({ lmst: 1.5 }) });
+      }
+      if (url === "/api/gmst") {
+        return Promise.resolve({ ok: true, json: async () => ({ gmst: 1.5 }) });
+      }
+      if (url === "/api/gast") {
+        return Promise.resolve({ ok: true, json: async () => ({ gast: 1.6 }) });
+      }
+      if (url === "/api/era") {
+        return Promise.resolve({ ok: true, json: async () => ({ era: { value: 1.2, units: "degrees" } }) });
+      }
+      if (url === "/api/last") {
+        return Promise.resolve({ ok: true, json: async () => ({ last: 1.7 }) });
+      }
+
+      julianDayRequests += 1;
+      if (julianDayRequests === 1) {
+        return Promise.resolve({
+          ok: false,
+          json: async () => ({ error: "Invalid datetime" }),
+        });
+      }
+
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ julian_day: { value: 2461311.5, units: "days" } }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Navigator />);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Invalid datetime");
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    fireEvent.click(screen.getByRole("button", { name: "Mark" }));
+
+    expect(await screen.findByText("2461311.50 days")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("renders the timezone selector", () => {
@@ -160,6 +402,6 @@ describe("Navigator", () => {
     // Verify the timezone selector component exists and changed state was triggered
     expect(timezoneSelect).toBeInTheDocument();
     // The marked time should still be displayed (we can't easily test exact offset with fake timers and UTC base time)
-    expect(screen.getByText(/Marked Time:/)).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /^Time\b/ })).toBeInTheDocument();
   });
 });

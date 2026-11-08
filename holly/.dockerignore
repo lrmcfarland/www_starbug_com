@@ -44,14 +44,7 @@ Thumbs.db
 *.tmp
 *.bak
 
-# Test files and fixtures
-*.test.ts
-*.test.tsx
-*.spec.ts
-*.spec.tsx
-__tests__/
-test/
-tests/
+# E2E artifacts only; unit tests are needed in the holly-test image
 e2e/
 
 # Docker-related files

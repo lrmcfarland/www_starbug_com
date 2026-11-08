@@ -17,6 +17,7 @@ the user's browser.
   - [curl](#curl)
 - [Setup certbot](#setup-certbot)
   - [Initialize](#initialize)
+    - [Create the challenge directory](#create-the-challenge-directory)
   - [Setup](#setup-1)
   - [Request certificates.](#request-certificates)
   - [Run](#run)
@@ -151,6 +152,19 @@ docker exec www_starbug_com-nginx-1 curl -k -s -o /dev/null -w "%{http_code}\n" 
 ## Initialize
 
 Set up the unsecure port 80 to have certbot initialize certs.
+
+
+### Create the challenge directory
+
+This needs to be the ubuntu user. Everything else should be root.
+
+```
+sudo mkdir -p certbot/www/.well-known/acme-challenge
+sudo chown -R ubuntu:ubuntu certbot/www
+```
+
+This is needed for the renewal.
+
 
 ## Setup
 

@@ -6,11 +6,33 @@
 
 .starbug-card {
   text-align: left;
-  color: #ffffff;
-  background-color: #020000;
-  border: 1px solid #ddd;
+  color: var(--text);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   padding: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.navigator-error-messages {
+  color: #991b1b;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.navigator-error-messages ul {
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .navigator-error-messages {
+    color: #fecaca;
+    background-color: #450a0a;
+    border-color: #991b1b;
+  }
 }

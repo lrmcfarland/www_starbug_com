@@ -84,7 +84,7 @@ class TestJulianDay:
             expected (np.float64): The expected Modified Julian Date.
         """
         result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
-        assert result == expected
+        assert result["value"] == expected
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -112,7 +112,7 @@ class TestJulianDay:
             absolute_tolerance (float): The absolute tolerance for the comparison.
         """
         result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
-        assert abs(result - expected) < absolute_tolerance
+        assert abs(result["value"] - expected) < absolute_tolerance
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected"),
@@ -133,7 +133,7 @@ class TestJulianDay:
             expected (np.float64): The expected Modified Julian Date.
         """
         result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
-        assert result == expected
+        assert result["value"] == expected
 
 
 class TestJulianDate:
@@ -171,7 +171,7 @@ class TestJulianDate:
             a_Julian_day (np.float64): The input Modified Julian Date.
             expected (datetime): The expected datetime in UTC.
         """
-        result = navicomp.time.AstronomicalAlgorithms.Julian_date(a_Julian_day)
+        result = navicomp.time.Meeus.Julian_date(a_Julian_day)
         assert result == expected
 
     @pytest.mark.parametrize(
@@ -211,7 +211,7 @@ class TestJulianDate:
             expected (datetime): The expected datetime in UTC.
             absolute_tolerance (timedelta): The absolute tolerance for the comparison.
         """
-        result = navicomp.time.AstronomicalAlgorithms.Julian_date(a_Julian_day)
+        result = navicomp.time.Meeus.Julian_date(a_Julian_day)
         assert abs(result - expected) < absolute_tolerance
 
 
@@ -253,7 +253,7 @@ class TestGMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.Meeus.GMST(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -291,7 +291,7 @@ class TestGMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.GMST(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -329,7 +329,7 @@ class TestGMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.GMST_simplified(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -352,7 +352,7 @@ class TestGMST:
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.obliquity(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
     @pytest.mark.parametrize(
         ("a_datetime", "expected", "absolute_tolerance"),
@@ -371,8 +371,102 @@ class TestGMST:
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
-            expected (str): The expected GAST string representation.
+            expected (str): The expected GAST jn hours.
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
         result = navicomp.time.USN.GAST(a_datetime)
-        assert result == pytest.approx(expected, abs=absolute_tolerance)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
+
+
+class TestLMST:
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "a_longitude", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
+                0.0,  # Longitude at Greenwich.
+                # AI OG: 13 + 10 / 60 + 46.3668 / 3600,
+                dms_to_decimal(13, 10, 46.3668),
+                1e-5,
+            ),  # Meeus, 2009, p. 88.
+        ],
+    )
+    def test_USN_LMST(
+        self,
+        a_datetime: datetime,
+        a_longitude: float,
+        expected: float,
+        absolute_tolerance: float,
+    ):
+        """Test Local Mean Sidereal Time (LMST).
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            a_longitude (float): The longitude in degrees
+            (positive east, negative west).
+            expected (float): The expected LMST in hours.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.USN.LMST(a_datetime, a_longitude)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
+
+
+class TestLAST:
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "a_longitude", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
+                0.0,  # Longitude at Greenwich.
+                # AI OG: 13 + 10 / 60 + 46.3668 / 3600,
+                dms_to_decimal(13, 10, 46.1351),
+                1e-4,
+            ),  # Meeus, 2009, p. 88.
+        ],
+    )
+    def test_USN_LAST(
+        self,
+        a_datetime: datetime,
+        a_longitude: float,
+        expected: float,
+        absolute_tolerance: float,
+    ):
+        """Test Local Apparent Sidereal Time (LAST).
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            a_longitude (float): The longitude in degrees
+            (positive east, negative west).
+            expected (float): The expected LAST in hours.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.USN.LAST(a_datetime, a_longitude)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
+
+
+class TestERA:
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(2017, 1, 1, 0, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_decimal(100, 37, 12.4365),
+                1e-5,
+            ),  # https://en.wikipedia.org/wiki/Sidereal_time
+        ],
+    )
+    def test_AA_ERA(
+        self, a_datetime: datetime, expected: str, absolute_tolerance: float
+    ):
+        """Test Earth Rotation Angle (ERA).
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (str): The expected ERA in hours.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.AstronomicalAlgorithms.ERA(a_datetime)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
