@@ -188,6 +188,45 @@ describe("Navigator", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid datetime");
   });
 
+  it("shows a clear message when the Navigator service is unavailable", async () => {
+    const fetchMock = vi.fn((url: string) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      return Promise.reject(new TypeError("Failed to fetch"));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Navigator />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Navigator service is unavailable. Please check your connection and try again.",
+    );
+  });
+
+  it("shows a clear message when the Navigator service returns HTML instead of JSON", async () => {
+    const fetchMock = vi.fn((url: string) => {
+      if (url === "/api/timezones") {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      return Promise.resolve({
+        ok: false,
+        json: async () => {
+          throw new SyntaxError(`Unexpected token '<', "<html> <h"... is not valid JSON`);
+        },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Navigator />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Navigator service returned an unexpected response. Please check that the service is running and try again.",
+    );
+    expect(screen.getByRole("alert")).not.toHaveTextContent("Unexpected token");
+    expect(screen.getByRole("alert")).toHaveClass("navigator-error-messages");
+  });
+
   it("updates the Julian day automatically when the marked time changes", async () => {
     let julianDayRequests = 0;
     const fetchMock = vi.fn((url: string, _options?: RequestInit) => {

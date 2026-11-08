@@ -39,6 +39,18 @@ function isTimezoneGroups(value: unknown): value is TimezoneGroup[] {
   );
 }
 
+function getRequestErrorMessage(error: unknown): string {
+  if (error instanceof TypeError) {
+    return "Navigator service is unavailable. Please check your connection and try again.";
+  }
+
+  if (error instanceof SyntaxError) {
+    return "Navigator service returned an unexpected response. Please check that the service is running and try again.";
+  }
+
+  return error instanceof Error ? error.message : "Request failed";
+}
+
 function KeyboardTimeInput({ value, onChange }: KeyboardTimeInputProps) {
   const displayedTime = value;
 
@@ -140,7 +152,6 @@ type LocationDisplayProps = {
   timeString: string;
   currentTimezone: string;
   ianaTimezones: TimezoneGroup[];
-  timezoneError: string | null;
   handleTimezoneChange: (timezone: string) => void;
   setMarkedTime: (value: string) => void;
   latitude: string;
@@ -156,7 +167,6 @@ function LocationDisplay({
   timeString,
   currentTimezone,
   ianaTimezones,
-  timezoneError,
   handleTimezoneChange,
   setMarkedTime,
   latitude,
@@ -233,7 +243,6 @@ function LocationDisplay({
                   placeholder="Select a City"
                   className="navigator-timezone-select"
                 />
-                {timezoneError && <div role="alert">{timezoneError}</div>}
               </td>
             </tr>
             <tr>
@@ -387,7 +396,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
       setIanaTimezones(data);
     } catch (error) {
       console.error("Error fetching timezones:", error);
-      setTimezoneError("Unable to load timezones.");
+      setTimezoneError(getRequestErrorMessage(error));
     }
   }
 
@@ -419,11 +428,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
       }
     } catch (requestError) {
       if (isCurrentRequest()) {
-        setJulianDayError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Request failed",
-        );
+        setJulianDayError(getRequestErrorMessage(requestError));
       }
     }
   }
@@ -451,11 +456,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
       }
     } catch (requestError) {
       if (isCurrentRequest()) {
-        setGmstError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Request failed",
-        );
+        setGmstError(getRequestErrorMessage(requestError));
       }
     }
   }
@@ -483,11 +484,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
       }
     } catch (requestError) {
       if (isCurrentRequest()) {
-        setGastError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Request failed",
-        );
+        setGastError(getRequestErrorMessage(requestError));
       }
     }
   }
@@ -516,11 +513,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
       }
     } catch (requestError) {
       if (isCurrentRequest()) {
-        setLmstError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Request failed",
-        );
+        setLmstError(getRequestErrorMessage(requestError));
       }
     }
   }
@@ -549,11 +542,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
       }
     } catch (requestError) {
       if (isCurrentRequest()) {
-        setLastError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Request failed",
-        );
+        setLastError(getRequestErrorMessage(requestError));
       }
     }
   }
@@ -581,17 +570,37 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
       }
     } catch (requestError) {
       if (isCurrentRequest()) {
-        setEraError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Request failed",
-        );
+        setEraError(getRequestErrorMessage(requestError));
       }
     }
   }
 
+  const errors = Array.from(
+    new Set(
+      [
+        timezoneError,
+        julianDayError,
+        gmstError,
+        gastError,
+        lmstError,
+        lastError,
+        eraError,
+      ].filter((error): error is string => error !== null),
+    ),
+  );
+
   return (
     <div>
+      {errors.length > 0 && (
+        <div className="navigator-error-messages" role="alert" aria-live="assertive">
+          <strong>Navigator error</strong>
+          <ul>
+            {errors.map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="starbug-card">
         <LocationDisplay
           handleMarkCurrentTime={handleMarkCurrentTime}
@@ -599,7 +608,6 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
           timeString={timeString}
           currentTimezone={currentTimezone}
           ianaTimezones={ianaTimezones}
-          timezoneError={timezoneError}
           handleTimezoneChange={handleTimezoneChange}
           setMarkedTime={setMarkedTime}
           markedTime={markedTime}
@@ -702,26 +710,6 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
             </tr>
           </tbody>
         </table>
-        <div className="navigator-error-messages">
-          {(julianDayError ||
-            gmstError ||
-            gastError ||
-            lmstError ||
-            lastError ||
-            eraError) && (
-            <div role="alert">
-              <p>
-                Error Messages:{" "}
-                {julianDayError ||
-                  gmstError ||
-                  gastError ||
-                  lmstError ||
-                  lastError ||
-                  eraError}
-              </p>
-            </div>
-          )}
-        </div>
       </div>
       <div className="starbug-card">
         <table className="navigator-options-table">
