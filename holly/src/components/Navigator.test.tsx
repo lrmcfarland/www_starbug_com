@@ -80,7 +80,7 @@ describe("Navigator", () => {
     const julianDayElement = await screen.findByText(/2461311.5/);
     expect(julianDayElement).toBeInTheDocument();
     expect(document.querySelector(".navigator-data-table")).toBeInTheDocument();
-    expect(screen.getByRole("row", { name: /Time/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /^Time\b/ })).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /Julian Day/ })).toBeInTheDocument();
     expect(screen.getByRole("row", { name: /LMST/ })).toHaveTextContent("01:30:00.00");
     expect(screen.getByRole("row", { name: /GMST/ })).toHaveTextContent("01:30:00.00");
@@ -398,6 +398,6 @@ describe("Navigator", () => {
     // Verify the timezone selector component exists and changed state was triggered
     expect(timezoneSelect).toBeInTheDocument();
     // The marked time should still be displayed (we can't easily test exact offset with fake timers and UTC base time)
-    expect(screen.getByRole("row", { name: /Time/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /^Time\b/ })).toBeInTheDocument();
   });
 });

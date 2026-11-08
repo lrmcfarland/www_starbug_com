@@ -177,6 +177,9 @@ function LocationDisplay({
   return (
     <>
       <div className="navigator-location-header">
+        <h2>Location</h2>
+      </div>
+      <div className="navigator-location-content">
         <table className="navigator-location-table">
           <tbody>
             <tr>
@@ -229,6 +232,11 @@ function LocationDisplay({
                   })}
                 />
               </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <label htmlFor="navigator-timezone">Timezone</label>
+              </th>
               <td>
                 <CascadeSelect
                   value={currentTimezone}
@@ -618,6 +626,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
         />
       </div>
       <div className="starbug-card">
+        <h2>Sidereal Time</h2>
         <table className="navigator-data-table">
           <tbody>
             <tr>
@@ -712,6 +721,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
         </table>
       </div>
       <div className="starbug-card">
+        <h2>Options</h2>
         <table className="navigator-options-table">
           <tbody>
             <tr>
