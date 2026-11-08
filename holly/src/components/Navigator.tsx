@@ -145,6 +145,21 @@ function formatDecimal(
   return `${decimalStr} ${units}`;
 }
 
+function formatSiderealMeasurement(
+  measurement: Measurement,
+  isDMSFormat: boolean,
+  options: FormatOptions = {},
+): string {
+  if (!isDMSFormat) {
+    return formatDecimal(measurement.value, measurement.units, options);
+  }
+
+  return formatDMSString(
+    decimalToDMS(measurement.value, options),
+    options,
+  );
+}
+
 type LocationDisplayProps = {
   markedTime: string;
   handleMarkCurrentTime: () => void;
@@ -349,6 +364,8 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
 
   const [decimalPlaces, setDecimalPlaces] = useState<number>(2);
 
+  const [isDMSFormat, setIsDMSFormat] = useState<boolean>(true);
+
   useEffect(() => {
     getIANAtimezones();
   }, []);
@@ -372,6 +389,10 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
       isCurrentRequest = false;
     };
   }, [markedTime, longitude]);
+
+  const handleDMSFormatToggle = (isDMS: boolean) => {
+    setIsDMSFormat(isDMS);
+  };
 
   function handleTimezoneChange(timezone: string) {
     setCurrentTimezone(timezone);
@@ -649,10 +670,10 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
               </th>
               <td className="navigator-gmst-value">
                 {gmst?.timestamp === new Date(markedTime).getTime()
-                  ? formatDMSString(
-                      decimalToDMS(gmst.value, { decimalPlaces: decimalPlaces }),
-                      { hourFormat: true, decimalPlaces: decimalPlaces },
-                    )
+                  ? formatSiderealMeasurement(gmst, isDMSFormat, {
+                      hourFormat: true,
+                      decimalPlaces: decimalPlaces,
+                    })
                   : "TBD"}
               </td>
             </tr>
@@ -662,13 +683,10 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
               </th>
               <td className="navigator-lmst-value">
                 {lmst?.timestamp === new Date(markedTime).getTime()
-                  ? formatDMSString(
-                      decimalToDMS(lmst.value, { decimalPlaces: decimalPlaces }),
-                      {
-                        hourFormat: true,
-                        decimalPlaces: decimalPlaces,
-                      },
-                    )
+                  ? formatSiderealMeasurement(lmst, isDMSFormat, {
+                      hourFormat: true,
+                      decimalPlaces: decimalPlaces,
+                    })
                   : "TBD"}
               </td>
             </tr>
@@ -678,13 +696,10 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
               </th>
               <td className="navigator-gast-value">
                 {gast?.timestamp === new Date(markedTime).getTime()
-                  ? formatDMSString(
-                      decimalToDMS(gast.value, { decimalPlaces: decimalPlaces }),
-                      {
-                        hourFormat: true,
-                        decimalPlaces: decimalPlaces,
-                      },
-                    )
+                  ? formatSiderealMeasurement(gast, isDMSFormat, {
+                      hourFormat: true,
+                      decimalPlaces: decimalPlaces,
+                    })
                   : "TBD"}
               </td>
             </tr>
@@ -694,13 +709,10 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
               </th>
               <td className="navigator-last-value">
                 {last?.timestamp === new Date(markedTime).getTime()
-                  ? formatDMSString(
-                      decimalToDMS(last.value, { decimalPlaces: decimalPlaces }),
-                      {
-                        hourFormat: true,
-                        decimalPlaces: decimalPlaces,
-                      },
-                    )
+                  ? formatSiderealMeasurement(last, isDMSFormat, {
+                      hourFormat: true,
+                      decimalPlaces: decimalPlaces,
+                    })
                   : "TBD"}
               </td>
             </tr>
@@ -710,7 +722,7 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
               </th>
               <td className="navigator-era-value">
                 {era?.timestamp === new Date(markedTime).getTime()
-                  ? formatDMSString(decimalToDMS(era.value, { decimalPlaces: decimalPlaces }), {
+                  ? formatSiderealMeasurement(era, isDMSFormat, {
                       hourFormat: false,
                       decimalPlaces: decimalPlaces,
                     })
@@ -736,6 +748,19 @@ function SiderealTimeDisplay({ timezone = "UTC" }: { timezone?: string }) {
                   max="16"
                   value={decimalPlaces}
                   onChange={(e) => setDecimalPlaces(Number(e.target.value))}
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <label htmlFor="dmsFormatToggle">DMS Format</label>
+              </th>
+              <td>
+                <input
+                  id="dmsFormatToggle"
+                  type="checkbox"
+                  checked={isDMSFormat}
+                  onChange={(e) => handleDMSFormatToggle(e.target.checked)}
                 />
               </td>
             </tr>

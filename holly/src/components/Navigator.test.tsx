@@ -88,6 +88,10 @@ describe("Navigator", () => {
     expect(screen.getByRole("row", { name: /LAST/ })).toHaveTextContent("01:42:00.00");
     expect(screen.getByRole("row", { name: /ERA/ })).toHaveTextContent("01°14'04.20\"");
 
+    fireEvent.click(screen.getByRole("checkbox", { name: "DMS Format" }));
+    expect(screen.getByRole("row", { name: /GMST/ })).toHaveTextContent("1.50 hours");
+    expect(screen.getByRole("row", { name: /ERA/ })).toHaveTextContent("1.23 degrees");
+
     // Verify julian_day API was called
     const calls = (fetchMock.mock.calls as any);
     const julianDayCall = calls.find((call: any) => call[0] === "/api/julian_day");
