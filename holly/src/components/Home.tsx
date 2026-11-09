@@ -59,16 +59,59 @@ export const Home: React.FC = () => {
           loading="lazy"
           style={{
             width: "100%",
-            height: "auto"
+            height: "auto",
           }}
         />
         <p>
-          This iteration explores the use of React/Vite as the
-          frontend, Flask as the backend API, and Nginx as a
-          TLS-enabled reverse proxy server. It is deployed from a
-          GitHub CI/CD pipeline to an AWS EC2 instance as a
-          collection of microservices running in Docker
-          containers.
+          This iteration explores the use of{" "}
+          <a
+            href="https://react.dev/learn/typescript"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            React using TypeScript
+          </a>{" "}
+          as the frontend,{" "}
+          <a
+            href="https://flask.palletsprojects.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Flask
+          </a>{" "}
+          as the backend API, and{" "}
+          <a
+            href="https://nginx.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Nginx
+          </a>{" "}
+          as a TLS-enabled reverse proxy server for{" "}
+          <a
+            href="https://letsencrypt.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Let's Encrypt
+          </a>. It is deployed from a GitHub CI/CD pipeline to an AWS EC2
+          instance as a collection of microservices running in{" "}
+          <a
+            href="https://www.docker.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Docker
+          </a>{" "}
+          containers. The source code for this site is available on{" "}
+          <a
+            href="https://github.com/lrmcfarland/www_starbug_com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
+          .
         </p>
       </div>
       <br />

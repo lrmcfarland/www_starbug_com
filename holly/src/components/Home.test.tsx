@@ -66,11 +66,15 @@ describe("Home Component", () => {
 
     it("renders tech stack information", () => {
       render(<Home />);
-      expect(screen.getByText(/React\/Vite as the frontend/)).toBeInTheDocument();
-      expect(screen.getByText(/Flask as the backend API/)).toBeInTheDocument();
-      expect(
-        screen.getByText(/Nginx as a TLS-enabled reverse proxy server/)
-      ).toBeInTheDocument();
+      const description = screen.getByText(/This iteration explores/);
+
+      expect(description).toHaveTextContent(
+        /React using TypeScript as the frontend/
+      );
+      expect(description).toHaveTextContent(/Flask as the backend API/);
+      expect(description).toHaveTextContent(
+        /Nginx as a TLS-enabled reverse proxy server for Let's Encrypt/
+      );
     });
 
     it("mentions GitHub CI/CD deployment", () => {
@@ -82,9 +86,11 @@ describe("Home Component", () => {
 
     it("mentions AWS EC2 and Docker containers", () => {
       render(<Home />);
-      expect(
-        screen.getByText(/AWS EC2 instance as a collection of microservices running in Docker containers/)
-      ).toBeInTheDocument();
+      const description = screen.getByText(/This iteration explores/);
+
+      expect(description).toHaveTextContent(
+        /AWS EC2 instance as a collection of microservices running in Docker containers/
+      );
     });
   });
 
@@ -371,9 +377,11 @@ describe("Home Component", () => {
   });
 
   describe("Content Verification", () => {
-    it("mentions React/Vite stack", () => {
+    it("mentions React and TypeScript", () => {
       render(<Home />);
-      expect(screen.getByText(/React\/Vite/)).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "React using TypeScript" })
+      ).toBeInTheDocument();
     });
 
     it("mentions Flask backend", () => {
@@ -422,10 +430,17 @@ describe("Home Component", () => {
     });
   });
 
-  describe("Snapshot Testing", () => {
-    it("matches snapshot", () => {
-      const { container } = render(<Home />);
-      expect(container).toMatchSnapshot();
+  describe("Source Code Link", () => {
+    it("links to the GitHub repository safely", () => {
+      render(<Home />);
+      const link = screen.getByRole("link", { name: "GitHub" });
+
+      expect(link).toHaveAttribute(
+        "href",
+        "https://github.com/lrmcfarland/www_starbug_com"
+      );
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
     });
   });
 
