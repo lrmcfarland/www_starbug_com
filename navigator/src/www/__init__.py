@@ -136,9 +136,7 @@ def create_app(config_class=None):
         julian_day = data["julian_day"]
         try:
             julian_date = time.Meeus.Julian_date(julian_day)
-            return jsonify(
-                {"julian_date": julian_date.isoformat()}
-            )
+            return jsonify({"julian_date": julian_date.isoformat()})
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 

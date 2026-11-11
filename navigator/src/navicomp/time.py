@@ -14,7 +14,6 @@ import numpy as np
 from navicomp import Space
 from navicomp.transforms import dms_to_decimal
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -322,9 +321,7 @@ class USN(AstronomicalAlgorithms):
         return {"value": gast, "units": "hours"}
 
     @classmethod
-    def LMST(
-        cls, a_datetime: datetime, a_longitude: float
-    ) -> ValueWithUnits:
+    def LMST(cls, a_datetime: datetime, a_longitude: float) -> ValueWithUnits:
         """Calculates Local Mean Sidereal Time (LMST) in hours from a datetime.
 
         Meeus, 2009, p. 88 with obliquity correction from the US Naval Observatory
@@ -364,7 +361,6 @@ class USN(AstronomicalAlgorithms):
 
 class Wikipedia(AstronomicalAlgorithms):
 
-
     # from http://en.wikipedia.org/wiki/Axial_tilt
     obe = list()
     obe.append(dms_to_decimal(23, 26, 21.45))
@@ -373,14 +369,13 @@ class Wikipedia(AstronomicalAlgorithms):
     obe.append(dms_to_decimal(0, 0, 0.00181))
     # TODO more terms, updated
 
-
     @classmethod
     def obliquity(cls, a_datetime: datetime) -> np.float64:
         """Calculates the obliquity of the ecliptic given the datetime
 
         a_datetime (coords.datetime): The time of the observation.
         """
-        T = cls.Julian_day(a_datetime)["value"] - cls.JD2k
+        T = (cls.Julian_day(a_datetime)["value"] - cls.JD2k) / 36525.0
         eps = 0
         for i in range(len(cls.obe)):
             eps += cls.obe[i] * math.pow(T, i)
