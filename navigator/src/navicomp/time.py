@@ -5,6 +5,7 @@ import logging
 import re
 from datetime import datetime
 from math import floor
+from typing import TypedDict
 from zoneinfo import ZoneInfo, available_timezones
 
 import numpy as np
@@ -20,6 +21,11 @@ logging.basicConfig(
 timezone_pattern = re.compile(
     r"^(?P<continent>[A-Za-z0-9_+-]+)(?:/(?P<city>[A-Za-z0-9_+-/]*))*$"
 )
+
+
+class ValueWithUnits(TypedDict):
+    value: float
+    units: str
 
 
 def timezones():
@@ -78,7 +84,7 @@ class AstronomicalAlgorithms:
     MJD_EPOCH = datetime(1858, 11, 17, tzinfo=ZoneInfo("UTC"))
 
     @staticmethod
-    def Julian_day(a_datetime: datetime) -> np.float64:
+    def Julian_day(a_datetime: datetime) -> ValueWithUnits:
         """Calculates Julian day number from a datetime adjusted to UTC.
 
         Meeus, 2009, p. 62
@@ -152,7 +158,7 @@ class Meeus(AstronomicalAlgorithms):
     """
 
     @classmethod
-    def GMST(cls, a_datetime: datetime) -> np.float64:
+    def GMST(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
 
         Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 87-88
@@ -175,13 +181,13 @@ class Meeus(AstronomicalAlgorithms):
         return {"value": gmst / 15.0, "units": "hours"}  # Convert degrees to hours
 
     @staticmethod
-    def Julian_date(a_Julian_day: np.float64) -> datetime:
+    def Julian_date(a_Julian_day: float) -> datetime:
         """Calculates datetime from Julian day number.
 
         Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 63
 
         Args:
-            a_Julian_day (np.float64): The input Julian day number.
+            a_Julian_day (float): The input Julian day number.
 
         Returns:
             datetime: The corresponding datetime in UTC.
@@ -223,14 +229,14 @@ class USN(AstronomicalAlgorithms):
     """
 
     @classmethod
-    def JDo(cls, a_datetime: datetime) -> np.float64:
+    def JDo(cls, a_datetime: datetime) -> float:
         """Calculates the Julian date of the previous midnight.
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            np.float64: The Julian date of the previous midnight.
+            float: The Julian date of the previous midnight.
         """
         JDtt = cls.Julian_day(a_datetime)["value"]
         jd_floor = floor(JDtt)
@@ -241,7 +247,7 @@ class USN(AstronomicalAlgorithms):
         return jdo
 
     @classmethod
-    def GMST(cls, a_datetime: datetime) -> np.float64:
+    def GMST(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
 
         Args:
@@ -270,7 +276,7 @@ class USN(AstronomicalAlgorithms):
         return {"value": gmst, "units": "hours"}
 
     @classmethod
-    def GMST_simplified(cls, a_datetime: datetime) -> np.float64:
+    def GMST_simplified(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
 
         US Naval Observatory simplified algorithm.
@@ -287,7 +293,7 @@ class USN(AstronomicalAlgorithms):
         return {"value": gmst, "units": "hours"}
 
     @classmethod
-    def obliquity(cls, a_datetime: datetime) -> np.float64:
+    def obliquity(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates the mean obliquity of the ecliptic in degrees.
 
         US Naval Observatory Astronomical Algorithms.
@@ -304,7 +310,7 @@ class USN(AstronomicalAlgorithms):
         return {"value": obliquity, "units": "degrees"}  # TODO radians?
 
     @classmethod
-    def GAST(cls, a_datetime: datetime) -> np.float64:
+    def GAST(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates Greenwich Apparent Sidereal Time (GAST) in hours from a datetime.
 
         US Naval Observatory Astronomical Algorithms.
@@ -329,7 +335,9 @@ class USN(AstronomicalAlgorithms):
         return {"value": gast, "units": "hours"}
 
     @classmethod
-    def LMST(cls, a_datetime: datetime, a_longitude: float) -> np.float64:
+    def LMST(
+        cls, a_datetime: datetime, a_longitude: float
+    ) -> ValueWithUnits:
         """Calculates Local Mean Sidereal Time (LMST) in hours from a datetime.
 
         Meeus, 2009, p. 88 with obliquity correction from the US Naval Observatory
@@ -348,7 +356,7 @@ class USN(AstronomicalAlgorithms):
         return {"value": lmst, "units": "hours"}
 
     @classmethod
-    def LAST(cls, a_datetime: datetime, a_longitude: float) -> np.float64:
+    def LAST(cls, a_datetime: datetime, a_longitude: float) -> ValueWithUnits:
         """Calculates Local Apparent Sidereal Time (LAST) in hours from a datetime.
 
         Meeus, 2009, p. 88 with obliquity correction from the US Naval Observatory
