@@ -468,5 +468,5 @@ class TestERA:
             expected (str): The expected ERA in hours.
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
-        result = navicomp.time.AstronomicalAlgorithms.ERA(a_datetime)
+        result = navicomp.time.Wikipedia.ERA(a_datetime)
         assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)

@@ -2,6 +2,7 @@
 
 import json
 import logging
+import math
 import re
 from datetime import datetime
 from math import floor
@@ -11,6 +12,8 @@ from zoneinfo import ZoneInfo, available_timezones
 import numpy as np
 
 from navicomp import Space
+from navicomp.transforms import dms_to_decimal
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -131,22 +134,6 @@ class AstronomicalAlgorithms:
         )
 
         return {"value": julian_day, "units": "days"}
-
-    @classmethod
-    def ERA(cls, a_datetime: datetime) -> np.float64:
-        """Calculates Earth Rotation Angle (ERA) in hours from a datetime.
-
-        https://en.wikipedia.org/wiki/Sidereal_time
-
-        Args:
-            a_datetime (datetime): The input datetime in UTC.
-
-        Returns:
-            dict: A dictionary containing the ERA value in degrees.
-        """
-        ut1 = cls.Julian_day(a_datetime)["value"] - cls.JD2k
-        era_radians = 2 * np.pi * (0.7790572732640 + 1.00273781191135448 * ut1)
-        return {"value": np.degrees(era_radians) % 360.0, "units": "degrees"}
 
 
 class Meeus(AstronomicalAlgorithms):
@@ -373,3 +360,44 @@ class USN(AstronomicalAlgorithms):
         gast = cls.GAST(a_datetime)["value"]
         last = (gast + a_longitude / 15.0) % 24.0
         return {"value": last, "units": "hours"}
+
+
+class Wikipedia(AstronomicalAlgorithms):
+
+
+    # from http://en.wikipedia.org/wiki/Axial_tilt
+    obe = list()
+    obe.append(dms_to_decimal(23, 26, 21.45))
+    obe.append(dms_to_decimal(-1, 0, 46.815))
+    obe.append(dms_to_decimal(-1, 0, 0.0006))
+    obe.append(dms_to_decimal(0, 0, 0.00181))
+    # TODO more terms, updated
+
+
+    @classmethod
+    def obliquity(cls, a_datetime: datetime) -> np.float64:
+        """Calculates the obliquity of the ecliptic given the datetime
+
+        a_datetime (coords.datetime): The time of the observation.
+        """
+        T = cls.Julian_day(a_datetime)["value"] - cls.JD2k
+        eps = 0
+        for i in range(len(cls.obe)):
+            eps += cls.obe[i] * math.pow(T, i)
+        return eps
+
+    @classmethod
+    def ERA(cls, a_datetime: datetime) -> dict[str, float | str]:
+        """Calculates Earth Rotation Angle (ERA) in hours from a datetime.
+
+        https://en.wikipedia.org/wiki/Sidereal_time
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+
+        Returns:
+            dict: A dictionary containing the ERA value in degrees.
+        """
+        ut1 = cls.Julian_day(a_datetime)["value"] - cls.JD2k
+        era_radians = 2 * np.pi * (0.7790572732640 + 1.00273781191135448 * ut1)
+        return {"value": np.degrees(era_radians) % 360.0, "units": "degrees"}
