@@ -1,6 +1,7 @@
 import React, { lazy } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { RouteErrorBoundary } from "./components/RouteErrorBoundary";
 import Home from "./components/Home";
 
 const Astronomy = lazy(() => import("./components/Astronomy"));
@@ -13,6 +14,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       { index: true, element: <Home /> },
       { path: "resume", element: <Resume /> },
