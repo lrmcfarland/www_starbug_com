@@ -3,9 +3,15 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import TypedDict
 
 import numpy as np
 from scipy.spatial.transform import Rotation as R
+
+
+class ValueWithUnits(TypedDict):
+    value: float
+    units: str
 
 
 class Space:

@@ -6,12 +6,11 @@ import math
 import re
 from datetime import datetime
 from math import floor
-from typing import TypedDict
 from zoneinfo import ZoneInfo, available_timezones
 
 import numpy as np
 
-from navicomp import Space
+from navicomp import Space, ValueWithUnits
 from navicomp.transforms import dms_to_decimal
 
 logging.basicConfig(
@@ -25,12 +24,7 @@ timezone_pattern = re.compile(
 )
 
 
-class ValueWithUnits(TypedDict):
-    value: float
-    units: str
-
-
-def timezones():
+def timezones() -> str:
     """List of available timezones.
 
     Returns:
@@ -96,7 +90,7 @@ class Transforms:
             a_datetime (datetime): The input datetime.
 
         Returns:
-            dict: A dictionary containing the Julian day.
+            ValueWithUnits: A dictionary containing the Julian day.
         """
         utc_time = a_datetime.astimezone(ZoneInfo("UTC"))
 
@@ -153,7 +147,7 @@ class Meeus(Transforms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            dict: A dictionary containing the GMST value in hours.
+            ValueWithUnits: A dictionary containing the GMST value in hours.
         """
         jd = cls.Julian_day(a_datetime)["value"]
         t = (jd - cls.JD2k) / 36525.0
@@ -215,7 +209,7 @@ class USN(Transforms):
     """
 
     @classmethod
-    def JDo(cls, a_datetime: datetime) -> float:
+    def JDo(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates the Julian date of the previous midnight.
 
         Args:
@@ -230,7 +224,7 @@ class USN(Transforms):
             jdo = jd_floor + 0.5
         else:
             jdo = jd_floor - 0.5
-        return jdo
+        return {"value": jdo, "units": "days"}
 
     @classmethod
     def GMST(cls, a_datetime: datetime) -> ValueWithUnits:
@@ -240,12 +234,12 @@ class USN(Transforms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            dict: A dictionary containing the GMST value in hours.
+            ValueWithUnits: A dictionary containing the GMST value in hours.
         """
         JDtt = cls.Julian_day(a_datetime)["value"]
 
         # Julian date of the previous midnight
-        jdo = cls.JDo(a_datetime)
+        jdo = cls.JDo(a_datetime)["value"]
 
         Dut = jdo - cls.JD2k
         h = (JDtt - jdo) * 24.0
@@ -271,7 +265,7 @@ class USN(Transforms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            dict: A dictionary containing the GMST value in hours.
+            ValueWithUnits: A dictionary containing the GMST value in hours.
         """
         JDtt = cls.Julian_day(a_datetime)["value"]
         gmst = 18.697375 + 24.065709824279 * (JDtt - cls.JD2k)
@@ -288,7 +282,7 @@ class USN(Transforms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            dict: A dictionary containing the mean obliquity of the ecliptic in degrees.
+            ValueWithUnits: the mean obliquity of the ecliptic in degrees.
         """
         JDtt = cls.Julian_day(a_datetime)["value"]
         Dtt = JDtt - cls.JD2k
@@ -305,7 +299,7 @@ class USN(Transforms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            dict: A dictionary containing the GAST value in hours.
+            ValueWithUnits: A dictionary containing the GAST value in hours.
         """
         JDtt = cls.Julian_day(a_datetime)["value"]
         Dtt = JDtt - cls.JD2k
@@ -333,7 +327,7 @@ class USN(Transforms):
             (positive east, negative west).
 
         Returns:
-            dict: A dictionary containing the LMST value in hours.
+            ValueWithUnits: A dictionary containing the LMST value in hours.
         """
         gmst = cls.GMST(a_datetime)["value"]
         lmst = (gmst + a_longitude / 15.0) % 24.0
@@ -352,7 +346,7 @@ class USN(Transforms):
             (positive east, negative west).
 
         Returns:
-            dict: A dictionary containing the LAST value in hours.
+            ValueWithUnits: A dictionary containing the LAST value in hours.
         """
         gast = cls.GAST(a_datetime)["value"]
         last = (gast + a_longitude / 15.0) % 24.0
@@ -388,7 +382,7 @@ class Wikipedia(Transforms):
         return {"value": ε, "units": "degrees"}
 
     @classmethod
-    def ERA(cls, a_datetime: datetime) -> dict[str, float | str]:
+    def ERA(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates Earth Rotation Angle (ERA) in hours from a datetime.
 
         https://en.wikipedia.org/wiki/Sidereal_time
@@ -397,7 +391,7 @@ class Wikipedia(Transforms):
             a_datetime (datetime): The input datetime in UTC.
 
         Returns:
-            dict: A dictionary containing the ERA value in degrees.
+            ValueWithUnits: A dictionary containing the ERA value in degrees.
         """
         ut1 = cls.Julian_day(a_datetime)["value"] - cls.JD2k
         era_radians = 2 * np.pi * (0.7790572732640 + 1.00273781191135448 * ut1)
