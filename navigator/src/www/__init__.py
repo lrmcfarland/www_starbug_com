@@ -154,7 +154,7 @@ def create_app(config_class=None):
         datetime_str = data["datetime"]
         try:
             api_julian_date = datetime.datetime.fromisoformat(datetime_str)
-            julian_day = time.AstronomicalAlgorithms.Julian_day(api_julian_date)
+            julian_day = time.Transforms.Julian_day(api_julian_date)
             return jsonify({"julian_day": julian_day})
         except Exception as e:
             return jsonify({"error": str(e)}), 500

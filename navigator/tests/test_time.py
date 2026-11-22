@@ -83,7 +83,7 @@ class TestJulianDay:
             a_datetime (datetime): The input datetime in UTC.
             expected (np.float64): The expected Modified Julian Date.
         """
-        result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
+        result = navicomp.time.Transforms.Julian_day(a_datetime)
         assert result["value"] == expected
 
     @pytest.mark.parametrize(
@@ -104,7 +104,7 @@ class TestJulianDay:
             a_datetime (datetime): The input datetime in UTC.
             expected (np.float64): The expected Modified Julian Date.
         """
-        result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
+        result = navicomp.time.Transforms.Julian_day(a_datetime)
         assert result["value"] == expected
 
 
@@ -212,7 +212,7 @@ class TestUSN:
             expected (np.float64): The expected Modified Julian Date.
             absolute_tolerance (float): The absolute tolerance for the comparison.
         """
-        result = navicomp.time.AstronomicalAlgorithms.Julian_day(a_datetime)
+        result = navicomp.time.Transforms.Julian_day(a_datetime)
         assert abs(result["value"] - expected) < absolute_tolerance
 
     @pytest.mark.parametrize(

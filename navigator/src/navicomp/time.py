@@ -64,8 +64,8 @@ def timezones():
     return json.dumps(zones)
 
 
-class AstronomicalAlgorithms:
-    """Astronomical Algorithms by Meeus and US Naval Observatory.
+class Transforms:
+    """Time transformations for astronomical calculations.
 
     Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009.
     https://www.willbell.com/math/mc1.htm
@@ -135,7 +135,7 @@ class AstronomicalAlgorithms:
         return {"value": julian_day, "units": "days"}
 
 
-class Meeus(AstronomicalAlgorithms):
+class Meeus(Transforms):
     """Astronomical Algorithms by Meeus.
 
     Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009.
@@ -208,7 +208,7 @@ class Meeus(AstronomicalAlgorithms):
         )
 
 
-class USN(AstronomicalAlgorithms):
+class USN(Transforms):
     """US Naval Observatory Astronomical Algorithms.
 
     https://aa.usno.navy.mil/faq/GAST
@@ -359,7 +359,7 @@ class USN(AstronomicalAlgorithms):
         return {"value": last, "units": "hours"}
 
 
-class Wikipedia(AstronomicalAlgorithms):
+class Wikipedia(Transforms):
     """Astronomical Algorithms from Wikipedia."""
 
     @classmethod
