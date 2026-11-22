@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pytest
 
+from navicomp import ValueWithUnits
 import navicomp.time
 from navicomp.transforms import dms_to_decimal
 
@@ -378,7 +379,7 @@ class TestUSN:
         [
             (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
-                0.0,  # Longitude at Greenwich.
+                ValueWithUnits(value=0.0, units="degrees"),  # Longitude at Greenwich.
                 # AI OG: 13 + 10 / 60 + 46.3668 / 3600,
                 dms_to_decimal(13, 10, 46.3668),
                 1e-5,
@@ -388,7 +389,7 @@ class TestUSN:
     def test_LMST(
         self,
         a_datetime: datetime,
-        a_longitude: float,
+        a_longitude: ValueWithUnits,
         expected: float,
         absolute_tolerance: float,
     ):
@@ -396,7 +397,7 @@ class TestUSN:
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
-            a_longitude (float): The longitude in degrees
+            a_longitude (ValueWithUnits): The longitude in degrees
             (positive east, negative west).
             expected (float): The expected LMST in hours.
             absolute_tolerance (float): The absolute tolerance for the approximation.
@@ -409,7 +410,7 @@ class TestUSN:
         [
             (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
-                0.0,  # Longitude at Greenwich.
+                ValueWithUnits(value=0.0, units="degrees"),  # Longitude at Greenwich.
                 # AI OG: 13 + 10 / 60 + 46.3668 / 3600,
                 dms_to_decimal(13, 10, 46.1351),
                 1e-4,
@@ -419,7 +420,7 @@ class TestUSN:
     def test_LAST(
         self,
         a_datetime: datetime,
-        a_longitude: float,
+        a_longitude: ValueWithUnits,
         expected: float,
         absolute_tolerance: float,
     ):
@@ -427,7 +428,7 @@ class TestUSN:
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
-            a_longitude (float): The longitude in degrees
+            a_longitude (ValueWithUnits): The longitude in degrees
             (positive east, negative west).
             expected (float): The expected LAST in hours.
             absolute_tolerance (float): The absolute tolerance for the approximation.

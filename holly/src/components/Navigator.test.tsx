@@ -158,7 +158,10 @@ describe("Navigator", () => {
       expect(fetchMock.mock.calls.filter(([url]) => url === "/api/lmst")).toHaveLength(1);
     });
     const lmstCalls = () => fetchMock.mock.calls.filter(([url]) => url === "/api/lmst");
-    expect(JSON.parse(String(lmstCalls()[0][1]?.body)).longitude).toBe(0);
+    expect(JSON.parse(String(lmstCalls()[0][1]?.body)).longitude).toEqual({
+      value: 0,
+      units: "degrees",
+    });
 
     fireEvent.change(screen.getByLabelText(/Longitude/), {
       target: { value: "-122.4194" },
@@ -167,7 +170,10 @@ describe("Navigator", () => {
     await waitFor(() => {
       expect(lmstCalls()).toHaveLength(2);
     });
-    expect(JSON.parse(String(lmstCalls()[1][1]?.body)).longitude).toBe(-122.4194);
+    expect(JSON.parse(String(lmstCalls()[1][1]?.body)).longitude).toEqual({
+      value: -122.4194,
+      units: "degrees",
+    });
     expect(fetchMock.mock.calls.filter(([url]) => url === "/api/gmst")).toHaveLength(1);
   });
 

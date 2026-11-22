@@ -315,7 +315,7 @@ class USN(Transforms):
         return {"value": gast, "units": "hours"}
 
     @classmethod
-    def LMST(cls, a_datetime: datetime, a_longitude: float) -> ValueWithUnits:
+    def LMST(cls, a_datetime: datetime, a_longitude: ValueWithUnits) -> ValueWithUnits:
         """Calculates Local Mean Sidereal Time (LMST) in hours from a datetime.
 
         Meeus, 2009, p. 88 with obliquity correction from the US Naval Observatory
@@ -323,18 +323,20 @@ class USN(Transforms):
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
-            a_longitude (float): The longitude in degrees
+            a_longitude (ValueWithUnits): Observer's longitude
             (positive east, negative west).
 
         Returns:
             ValueWithUnits: A dictionary containing the LMST value in hours.
         """
+        if a_longitude["units"] != "degrees":
+            raise ValueError("Longitude must be in degrees.")
         gmst = cls.GMST(a_datetime)["value"]
-        lmst = (gmst + a_longitude / 15.0) % 24.0
+        lmst = (gmst + a_longitude["value"] / 15.0) % 24.0
         return {"value": lmst, "units": "hours"}
 
     @classmethod
-    def LAST(cls, a_datetime: datetime, a_longitude: float) -> ValueWithUnits:
+    def LAST(cls, a_datetime: datetime, a_longitude: ValueWithUnits) -> ValueWithUnits:
         """Calculates Local Apparent Sidereal Time (LAST) in hours from a datetime.
 
         Meeus, 2009, p. 88 with obliquity correction from the US Naval Observatory
@@ -342,14 +344,16 @@ class USN(Transforms):
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
-            a_longitude (float): The longitude in degrees
+            a_longitude (ValueWithUnits): Observer's longitude
             (positive east, negative west).
 
         Returns:
             ValueWithUnits: A dictionary containing the LAST value in hours.
         """
+        if a_longitude["units"] != "degrees":
+            raise ValueError("Longitude must be in degrees.")
         gast = cls.GAST(a_datetime)["value"]
-        last = (gast + a_longitude / 15.0) % 24.0
+        last = (gast + a_longitude["value"] / 15.0) % 24.0
         return {"value": last, "units": "hours"}
 
 

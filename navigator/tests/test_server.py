@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from navicomp import ValueWithUnits
 from www import create_app
 
 
@@ -148,7 +149,7 @@ class TestLMSTAPI:
             "/api/lmst",
             json={
                 "datetime": "1987-04-10T00:00:00+00:00",
-                "longitude": 0.0,
+                "longitude": ValueWithUnits(value=0.0, units="degrees"),
             },
         )
         assert response.status_code == 200
@@ -173,7 +174,7 @@ class TestLASTAPI:
             "/api/last",
             json={
                 "datetime": "1987-04-10T00:00:00+00:00",
-                "longitude": 0.0,
+                "longitude": ValueWithUnits(value=0.0, units="degrees"),
             },
         )
         assert response.status_code == 200

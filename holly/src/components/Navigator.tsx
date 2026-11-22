@@ -692,7 +692,7 @@ function NavigatorDisplay({ timezone = "UTC" }: { timezone?: string }) {
       const response = await fetch("/api/lmst", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ datetime, longitude }),
+        body: JSON.stringify({ datetime, longitude: { value: longitude, units: "degrees" } }),
       });
       const data: { lmst?: { value: number; units: string }; error?: string } =
         await response.json();
@@ -721,7 +721,7 @@ function NavigatorDisplay({ timezone = "UTC" }: { timezone?: string }) {
       const response = await fetch("/api/last", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ datetime, longitude }),
+        body: JSON.stringify({ datetime, longitude: { value: longitude, units: "degrees" } }),
       });
       const data: { last?: { value: number; units: string }; error?: string } =
         await response.json();
