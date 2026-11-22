@@ -837,68 +837,48 @@ function NavigatorDisplay({ timezone = "UTC" }: { timezone?: string }) {
 }
 
 function ReferencesDisplay() {
+  const references: { name: string; url: string }[] = [
+    {
+      name: "IANA Time Zone Database",
+      url: "https://www.iana.org/time-zones",
+    },
+    {
+      name: "USN Julian Date Converter",
+      url: "https://aa.usno.navy.mil/data/JulianDate",
+    },
+    {
+      name: "Wikipedia: Astronomical coordinate system",
+      url: "https://en.wikipedia.org/wiki/Astronomical_coordinate_system",
+    },
+    {
+      name: "Wikipedia: Geographic coordinate system",
+      url: "https://en.wikipedia.org/wiki/Geographic_coordinate_system",
+    },
+    {
+      name: "Wikipedia: Julian day",
+      url: "https://en.wikipedia.org/wiki/Julian_day",
+    },
+    {
+      name: "Wikipedia: Sidereal time",
+      url: "https://en.wikipedia.org/wiki/Sidereal_time",
+    },
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <>
       <div className="navigator-references-header">
         <h2>References</h2>
       </div>
       <div className="navigator-references-content">
-        <ol>
-          <li>
-            <a
-              href="https://www.iana.org/time-zones"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              IANA Time Zone Database
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://aa.usno.navy.mil/data/JulianDate"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              USN Julian Date Converter
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://en.wikipedia.org/wiki/Astronomical_coordinate_system"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Wikipedia: Astronomical coordinate system
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://en.wikipedia.org/wiki/Geographic_coordinate_system"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Wikipedia: Geographic coordinate system
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://en.wikipedia.org/wiki/Julian_day"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Wikipedia: Julian day
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://en.wikipedia.org/wiki/Sidereal_time"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Wikipedia: Sidereal time
-            </a>
-          </li>
-        </ol>
+        <ul>
+          {references.map((ref) => (
+            <li key={ref.url}>
+              <a href={ref.url} target="_blank" rel="noopener noreferrer">
+                {ref.name}
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </>
   );
