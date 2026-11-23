@@ -24,35 +24,35 @@ class Space:
     All angles are assumed to be in radians.
 
     Parameters
-        x (np.float64, optional): Cartesian x coordinate.
+        x (float, optional): Cartesian x coordinate.
             Defaults to 0.
-        y (np.float64, optional): Cartesian y coordinate.
+        y (float, optional): Cartesian y coordinate.
             Defaults to 0.
-        z (np.float64, optional): Cartesian z coordinate.
+        z (float, optional): Cartesian z coordinate.
             Defaults to 0.
-        ρ (np.float64, optional): Spherical physics radial distance
+        ρ (float, optional): Spherical physics radial distance
             (rho). Defaults to 1.
-        r (np.float64, optional): Spherical physics radial distance
+        r (float, optional): Spherical physics radial distance
             (alternative to ρ). Defaults to 1.
-        θ (np.float64, optional): Spherical physics polar angle
+        θ (float, optional): Spherical physics polar angle
             (theta, greek). Defaults to 0.
-        theta (np.float64, optional): Spherical physics polar angle
+        theta (float, optional): Spherical physics polar angle
             (alternative to θ). Defaults to 0.
-        φ (np.float64, optional): Spherical physics azimuthal angle
+        φ (float, optional): Spherical physics azimuthal angle
             (phi, greek). Defaults to 0.
-        phi (np.float64, optional): Spherical physics azimuthal angle
+        phi (float, optional): Spherical physics azimuthal angle
             (alternative to φ). Defaults to 0.
-        h (np.float64, optional): Geographical height/radius.
+        h (float, optional): Geographical height/radius.
             Defaults to 1.
-        az (np.float64, optional): Geographical azimuth.
+        az (float, optional): Geographical azimuth.
             Defaults to 0.
-        el (np.float64, optional): Geographical elevation.
+        el (float, optional): Geographical elevation.
             Defaults to 0.
-        alt (np.float64, optional): Geographical altitude/radius.
+        alt (float, optional): Geographical altitude/radius.
             Defaults to 1.
-        lat (np.float64, optional): Geographical latitude.
+        lat (float, optional): Geographical latitude.
             Defaults to 0.
-        lon (np.float64, optional): Geographical longitude.
+        lon (float, optional): Geographical longitude.
             Defaults to 0.
 
     Raises
@@ -68,32 +68,32 @@ class Space:
     Re = 6.371e6  # mean radius of Earth in meters
 
     @classmethod
-    def deg2rad(cls, an_angle: np.float64) -> np.float64:
+    def deg2rad(cls, an_angle: float) -> float:
         """Convert degrees to radians."""
         return an_angle * cls.π / 180.0
 
     @classmethod
-    def rad2deg(cls, an_angle: np.float64) -> np.float64:
+    def rad2deg(cls, an_angle: float) -> float:
         """Convert radians to degrees."""
         return an_angle * 180.0 / cls.π
 
     def __init__(
         self,
-        x: np.float64 = None,
-        y: np.float64 = None,
-        z: np.float64 = None,
-        ρ: np.float64 = None,
-        r: np.float64 = None,
-        θ: np.float64 = None,  # polar angle range [0, π]
-        theta: np.float64 = None,
-        φ: np.float64 = None,  # azimuth range [0, 2π)
-        phi: np.float64 = None,
-        h: np.float64 = None,
-        az: np.float64 = None,
-        el: np.float64 = None,
-        alt: np.float64 = None,
-        lat: np.float64 = None,
-        lon: np.float64 = None,
+        x: float = None,
+        y: float = None,
+        z: float = None,
+        ρ: float = None,
+        r: float = None,
+        θ: float = None,  # polar angle range [0, π]
+        theta: float = None,
+        φ: float = None,  # azimuth range [0, 2π)
+        phi: float = None,
+        h: float = None,
+        az: float = None,
+        el: float = None,
+        alt: float = None,
+        lat: float = None,
+        lon: float = None,
     ):
         is_cartesian = x is not None or y is not None or z is not None
         is_spherical_physics_1 = ρ is not None or θ is not None or φ is not None
@@ -274,7 +274,7 @@ class Space:
             self._space[1] += other.y
             self._space[2] += other.z
             return self
-        if isinstance(other, (int, float, np.float64)):
+        if isinstance(other, (int, float, float)):
             self._space[0] += other
             self._space[1] += other
             self._space[2] += other
@@ -306,7 +306,7 @@ class Space:
             self._space[1] -= other.y
             self._space[2] -= other.z
             return self
-        if isinstance(other, (int, float, np.float64)):
+        if isinstance(other, (int, float, float)):
             self._space[0] -= other
             self._space[1] -= other
             self._space[2] -= other
@@ -317,20 +317,20 @@ class Space:
 
     # ----- multiply -----
 
-    def __mul__(self, other: np.float64) -> Space:
+    def __mul__(self, other: float) -> Space:
         """Scalar multiplication."""
-        if isinstance(other, (int, float, np.float64)):
+        if isinstance(other, (int, float, float)):
             return Space(other * self.x, other * self.y, other * self.z)
         raise TypeError(
             f"unsupported operand type(s) for *: 'Space' and '{type(other).__name__}'"
         )
 
-    def __rmul__(self, other: np.float64):
+    def __rmul__(self, other: float):
         """Commute scalar multiplication."""
         return self.__mul__(other)
 
     def __imul__(self, other) -> Space:
-        if isinstance(other, (int, float, np.float64)):
+        if isinstance(other, (int, float, float)):
             self._space[0] *= other
             self._space[1] *= other
             self._space[2] *= other
@@ -345,7 +345,7 @@ class Space:
         """Scalar division self / other."""
         if other == 0:
             raise ZeroDivisionError("Division by zero")
-        if isinstance(other, (int, float, np.float64)):
+        if isinstance(other, (int, float, float)):
             return Space(self.x / other, self.y / other, self.z / other)
         raise TypeError(
             f"unsupported operand type(s) for /: 'Space' and '{type(other).__name__}'"
@@ -355,7 +355,7 @@ class Space:
         """Scalar division other / self."""
         if self.x == 0 or self.y == 0 or self.z == 0:
             raise ZeroDivisionError("Division by zero")
-        if isinstance(other, (int, float, np.float64)):
+        if isinstance(other, (int, float, float)):
             return Space(other / self.x, other / self.y, other / self.z)
         raise TypeError(
             f"unsupported operand type(s) for /: '{type(other).__name__}' and 'Space'"
@@ -364,7 +364,7 @@ class Space:
     def __itruediv__(self, other) -> Space:
         if other == 0:
             raise ZeroDivisionError("Inplace division by zero")
-        if isinstance(other, (int, float, np.float64)):
+        if isinstance(other, (int, float, float)):
             self._space[0] /= other
             self._space[1] /= other
             self._space[2] /= other
@@ -376,7 +376,7 @@ class Space:
     def __ifloordiv__(self, other):
         if other == 0:
             raise ZeroDivisionError("Inplace division by zero")
-        if isinstance(other, (int, float, np.float64)):
+        if isinstance(other, (int, float, float)):
             self._space[0] //= other
             self._space[1] //= other
             self._space[2] //= other
@@ -394,39 +394,39 @@ class Space:
         return self._space
 
     @property
-    def x(self) -> np.float64:
+    def x(self) -> float:
         return self._space[0]
 
     @property
-    def y(self) -> np.float64:
+    def y(self) -> float:
         return self._space[1]
 
     @property
-    def z(self) -> np.float64:
+    def z(self) -> float:
         return self._space[2]
 
     # Physics Standard (ISO 80000-2:2019)
     @property
-    def ρ(self) -> np.float64:
+    def ρ(self) -> float:
         return np.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     @property
-    def r(self) -> np.float64:
+    def r(self) -> float:
         return self.ρ
 
     @property
-    def θ(self) -> np.float64:
+    def θ(self) -> float:
         with np.errstate(invalid="ignore", divide="ignore"):
             theta = np.arccos(self.z / self.r)
         theta = np.nan_to_num(theta, nan=0.0)  # Default origin theta to 0
         return theta
 
     @property
-    def theta(self) -> np.float64:
+    def theta(self) -> float:
         return self.θ
 
     @property
-    def φ(self) -> np.float64:
+    def φ(self) -> float:
         phi = np.arctan2(self.y, self.x)
         # Normalize to [0, 2π)
         if phi < 0:
@@ -434,13 +434,13 @@ class Space:
         return phi
 
     @property
-    def phi(self) -> np.float64:
+    def phi(self) -> float:
         return self.φ
 
     # Geography / MATLAB Standard
 
     @property
-    def h(self) -> np.float64:
+    def h(self) -> float:
         """Height or altitude, a.k.a. radius.
 
         This has a rounding difference from r and ρ.
@@ -449,7 +449,7 @@ class Space:
         return np.hypot(hxy, self.z) - self.Re
 
     @property
-    def az(self) -> np.float64:
+    def az(self) -> float:
         """Azimuth."""
         az = np.arctan2(self.y, self.x)
         # Normalize to [0, 2π)
@@ -458,18 +458,18 @@ class Space:
         return az
 
     @property
-    def el(self) -> np.float64:
+    def el(self) -> float:
         """Elevation above the horizon."""
         hxy = np.hypot(self.x, self.y)
         return np.arctan2(self.z, hxy)
 
     @property
-    def alt(self) -> np.float64:
+    def alt(self) -> float:
         """Altitude."""
         return self.ρ - self.Re
 
     @property
-    def lon(self) -> np.float64:
+    def lon(self) -> float:
         """Longitude, -180 to 180."""
         lon = np.arctan2(self.y, self.x)
         # Normalize to [0, 2π)
@@ -478,7 +478,7 @@ class Space:
         return lon
 
     @property
-    def lat(self) -> np.float64:
+    def lat(self) -> float:
         """Latitude, -90 to 90."""
         hxy = np.hypot(self.x, self.y)
         return np.arctan2(self.z, hxy)
@@ -487,7 +487,7 @@ class Space:
     # ----- methods -----
     # -------------------
 
-    def dot(self, other: Space) -> np.float64:
+    def dot(self, other: Space) -> float:
         """Scalar product."""
         return self.x * other.x + self.y * other.y + self.z * other.z
 

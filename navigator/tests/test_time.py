@@ -4,7 +4,6 @@ import json
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-import numpy as np
 import pytest
 
 from navicomp import ValueWithUnits
@@ -75,14 +74,14 @@ class TestJulianDay:
             (datetime(333, 1, 27, 12, 0, tzinfo=ZoneInfo("UTC")), 1842713.0),
         ],
     )
-    def test_Julian_day_AA(self, a_datetime: datetime, expected: np.float64):
+    def test_Julian_day_AA(self, a_datetime: datetime, expected: float):
         """Test Modified Julian Date calculation for various UTC datetimes.
 
         Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 62
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
-            expected (np.float64): The expected Modified Julian Date.
+            expected (float): The expected Modified Julian Date.
         """
         result = navicomp.time.Transforms.Julian_day(a_datetime)
         assert result["value"] == expected
@@ -96,14 +95,14 @@ class TestJulianDay:
             ),  # Sputnik 1 launch, TODO different from AA p.61 2436116.31.
         ],
     )
-    def test_Julian_day_with_timezone(self, a_datetime: datetime, expected: np.float64):
+    def test_Julian_day_with_timezone(self, a_datetime: datetime, expected: float):
         """Test Modified Julian Date calculation for various non-UTC datetimes.
 
         Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 62
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
-            expected (np.float64): The expected Modified Julian Date.
+            expected (float): The expected Modified Julian Date.
         """
         result = navicomp.time.Transforms.Julian_day(a_datetime)
         assert result["value"] == expected
@@ -172,13 +171,13 @@ class TestMeeus:
             (1842713.0, datetime(333, 1, 27, 12, 0, tzinfo=ZoneInfo("UTC"))),
         ],
     )
-    def test_Julian_date(self, a_Julian_day: np.float64, expected: datetime):
+    def test_Julian_date(self, a_Julian_day: float, expected: datetime):
         """Test Modified Julian Date calculation for various UTC datetimes.
 
         Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 62
 
         Args:
-            a_Julian_day (np.float64): The input Modified Julian Date.
+            a_Julian_day (float): The input Modified Julian Date.
             expected (datetime): The expected datetime in UTC.
         """
         result = navicomp.time.Meeus.Julian_date(a_Julian_day)
@@ -200,7 +199,7 @@ class TestUSN:
         ],
     )
     def test_Julian_day_USN(
-        self, a_datetime: datetime, expected: np.float64, absolute_tolerance: float
+        self, a_datetime: datetime, expected: float, absolute_tolerance: float
     ):
         """Test Modified Julian Date calculation for various datetimes.
 
@@ -210,7 +209,7 @@ class TestUSN:
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
-            expected (np.float64): The expected Modified Julian Date.
+            expected (float): The expected Modified Julian Date.
             absolute_tolerance (float): The absolute tolerance for the comparison.
         """
         result = navicomp.time.Transforms.Julian_day(a_datetime)
@@ -238,7 +237,7 @@ class TestUSN:
     )
     def test_Julian_date_USN(
         self,
-        a_Julian_day: np.float64,
+        a_Julian_day: float,
         expected: datetime,
         absolute_tolerance: timedelta,
     ):
@@ -249,7 +248,7 @@ class TestUSN:
         https://aa.usno.navy.mil/data/JulianDate
 
         Args:
-            a_Julian_day (np.float64): The input Modified Julian Date.
+            a_Julian_day (float): The input Modified Julian Date.
             expected (datetime): The expected datetime in UTC.
             absolute_tolerance (timedelta): The absolute tolerance for the comparison.
         """

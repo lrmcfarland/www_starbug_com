@@ -1,6 +1,4 @@
-"""Transformations between degrees, minutes, seconds and decimal degrees."""
-
-import numpy as np
+"""Transformations between various unit formats."""
 
 
 def dms_to_decimal(degrees: int, minutes: int, seconds: np.float64) -> np.float64:
@@ -12,7 +10,7 @@ def dms_to_decimal(degrees: int, minutes: int, seconds: np.float64) -> np.float6
         seconds (np.float64): The seconds component.
 
     Returns:
-        np.float64: The equivalent decimal degrees.
+        float: The equivalent decimal degrees.
     """
     sign = 1 if degrees >= 0 else -1
     return sign * (abs(degrees) + minutes / 60.0 + seconds / 3600.0)
