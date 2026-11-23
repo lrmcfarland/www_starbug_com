@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo, available_timezones
 import numpy as np
 
 from navicomp import Space, ValueWithUnits
-from navicomp.transforms import dms_to_decimal
+from navicomp.transforms import dms_to_degrees
 
 logging.basicConfig(
     level=logging.INFO,
@@ -372,10 +372,10 @@ class Wikipedia(Transforms):
             float: The obliquity of the ecliptic in degrees.
         """
         obe = [
-            dms_to_decimal(23, 26, 21.448),
-            dms_to_decimal(0, 0, -46.815),
-            dms_to_decimal(0, 0, -0.00059),
-            dms_to_decimal(0, 0, 0.001813),
+            dms_to_degrees(23, 26, 21.448),
+            dms_to_degrees(0, 0, -46.815),
+            dms_to_degrees(0, 0, -0.00059),
+            dms_to_degrees(0, 0, 0.001813),
         ]
 
         T = (cls.Julian_day(a_datetime)["value"] - cls.JD2k) / 36525.0

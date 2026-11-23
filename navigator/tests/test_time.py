@@ -8,7 +8,7 @@ import pytest
 
 from navicomp import ValueWithUnits
 import navicomp.time
-from navicomp.transforms import dms_to_decimal
+from navicomp.transforms import dms_to_degrees
 
 
 class TestTimeZones:
@@ -116,22 +116,22 @@ class TestMeeus:
         [
             (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(13, 10, 46.3668),
+                dms_to_degrees(13, 10, 46.3668),
                 1e-7,
             ),  # Meeus p. 88, Example 12.a
             (
                 datetime(1987, 4, 10, 19, 21, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(8, 34, 57.0896),
+                dms_to_degrees(8, 34, 57.0896),
                 1e-7,
             ),  # Meeus p. 89, Example 12.b
             (
                 datetime(1994, 6, 16, 18, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(11, 39, 5.0672),
+                dms_to_degrees(11, 39, 5.0672),
                 1e-7,
             ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
             (
                 datetime(2050, 8, 18, 18, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(15, 49, 11.5745),
+                dms_to_degrees(15, 49, 11.5745),
                 1e-10,
             ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
         ],
@@ -260,22 +260,22 @@ class TestUSN:
         [
             (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(13, 10, 46.3668),
+                dms_to_degrees(13, 10, 46.3668),
                 1e-5,
             ),  # Meeus p. 88, Example 12.a
             (
                 datetime(1987, 4, 10, 19, 21, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(8, 34, 57.0896),
+                dms_to_degrees(8, 34, 57.0896),
                 1e-5,
             ),  # Meeus p. 89, Example 12.b
             (
                 datetime(1994, 6, 16, 18, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(11, 39, 5.0672),
+                dms_to_degrees(11, 39, 5.0672),
                 1e-5,
             ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
             (
                 datetime(2050, 8, 18, 18, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(15, 49, 11.5745),
+                dms_to_degrees(15, 49, 11.5745),
                 1e-5,
             ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
         ],
@@ -296,22 +296,22 @@ class TestUSN:
         [
             (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(13, 10, 46.3668),
+                dms_to_degrees(13, 10, 46.3668),
                 1e-6,
             ),  # Meeus p. 88, Example 12.a
             (
                 datetime(1987, 4, 10, 19, 21, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(8, 34, 57.0896),
+                dms_to_degrees(8, 34, 57.0896),
                 1e-6,
             ),  # Meeus p. 89, Example 12.b
             (
                 datetime(1994, 6, 16, 18, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(11, 39, 5.0672),
+                dms_to_degrees(11, 39, 5.0672),
                 1e-6,
             ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
             (
                 datetime(2050, 8, 18, 18, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(15, 49, 11.5745),
+                dms_to_degrees(15, 49, 11.5745),
                 1e-5,
             ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
         ],
@@ -334,7 +334,7 @@ class TestUSN:
         [
             (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(23, 26, 27.407),
+                dms_to_degrees(23, 26, 27.407),
                 1e-3,
             ),  # Meeus p. 148, Example 22.a
         ],
@@ -357,7 +357,7 @@ class TestUSN:
         [
             (
                 datetime(1994, 6, 16, 18, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(11, 39, 5.8974),
+                dms_to_degrees(11, 39, 5.8974),
                 1e-3,
             ),  # https://www2.arnes.si/~gljsentvid10/sidereal.htm
         ],
@@ -380,7 +380,7 @@ class TestUSN:
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
                 ValueWithUnits(value=0.0, units="degrees"),  # Longitude at Greenwich.
                 # AI OG: 13 + 10 / 60 + 46.3668 / 3600,
-                dms_to_decimal(13, 10, 46.3668),
+                dms_to_degrees(13, 10, 46.3668),
                 1e-5,
             ),  # Meeus, 2009, p. 88.
         ],
@@ -411,7 +411,7 @@ class TestUSN:
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
                 ValueWithUnits(value=0.0, units="degrees"),  # Longitude at Greenwich.
                 # AI OG: 13 + 10 / 60 + 46.3668 / 3600,
-                dms_to_decimal(13, 10, 46.1351),
+                dms_to_degrees(13, 10, 46.1351),
                 1e-4,
             ),  # Meeus, 2009, p. 88.
         ],
@@ -444,7 +444,7 @@ class TestWikipedia:
         [
             (
                 datetime(2017, 1, 1, 0, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(100, 37, 12.4365),
+                dms_to_degrees(100, 37, 12.4365),
                 1e-5,
             ),  # https://en.wikipedia.org/wiki/Sidereal_time
         ],
@@ -465,7 +465,7 @@ class TestWikipedia:
         [
             (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
-                dms_to_decimal(23, 26, 27.407),
+                dms_to_degrees(23, 26, 27.407),
                 1e-5,
             ),  # Meeus p. 148, Example 22.a
         ],

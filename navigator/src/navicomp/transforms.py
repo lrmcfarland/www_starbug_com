@@ -1,13 +1,30 @@
 """Transformations between various unit formats."""
 
 
-def dms_to_decimal(degrees: int, minutes: int, seconds: np.float64) -> np.float64:
+def degrees_to_dms(degrees: float) -> tuple[int, int, float]:
+    """Convert decimal degrees to degrees, minutes, and seconds.
+
+    Args:
+        degrees (float): The decimal degrees.
+
+    Returns:
+        tuple[int, int, float]: The equivalent degrees, minutes, and seconds.
+    """
+    sign = 1 if degrees >= 0 else -1
+    decimal_degrees = abs(degrees)
+    degree_component = int(decimal_degrees)
+    minutes = int((decimal_degrees - degree_component) * 60)
+    seconds = (decimal_degrees - degree_component - minutes / 60) * 3600
+    return sign * degree_component, minutes, seconds
+
+
+def dms_to_degrees(degrees: int, minutes: int, seconds: float) -> float:
     """Convert degrees, minutes, and seconds to decimal degrees.
 
     Args:
-        degrees (int): The degrees component.
-        minutes (int): The minutes component.
-        seconds (np.float64): The seconds component.
+        degrees (int): degrees.
+        minutes (int): minutes.
+        seconds (float): seconds.
 
     Returns:
         float: The equivalent decimal degrees.
@@ -16,18 +33,21 @@ def dms_to_decimal(degrees: int, minutes: int, seconds: np.float64) -> np.float6
     return sign * (abs(degrees) + minutes / 60.0 + seconds / 3600.0)
 
 
-def decimal_to_dms(decimal_degrees: np.float64) -> tuple[int, int, np.float64]:
-    """Convert decimal degrees to degrees, minutes, and seconds.
+def hms_to_hours(hours: int, minutes: int, seconds: float) -> float:
+    """Convert hours, minutes, and seconds to decimal hours.
 
     Args:
-        decimal_degrees (np.float64): The decimal degrees.
-
-    Returns:
-        tuple[int, int, np.float64]: The equivalent degrees, minutes, and seconds.
+        hours (int): hours, e.g. Right Ascension
+        minutes (int): minutes
+        seconds (float): seconds.
     """
-    sign = 1 if decimal_degrees >= 0 else -1
-    decimal_degrees = abs(decimal_degrees)
-    degrees = int(decimal_degrees)
-    minutes = int((decimal_degrees - degrees) * 60)
-    seconds = (decimal_degrees - degrees - minutes / 60) * 3600
-    return sign * degrees, minutes, seconds
+    return dms_to_degrees(degrees=hours, minutes=minutes, seconds=seconds)
+
+
+def hours_to_hms(hours: float) -> tuple[int, int, float]:
+    """Convert degress into hours into hours, minutes, and seconds.
+
+    Args:
+        hours (float): degrees.
+    """
+    return degrees_to_dms(degrees=hours)
