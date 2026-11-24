@@ -183,6 +183,39 @@ class TestMeeus:
         result = navicomp.time.Meeus.Julian_date(a_Julian_day)
         assert result == expected
 
+    @pytest.mark.parametrize(
+        ("a_datetime", "expected", "absolute_tolerance"),
+        [
+            (
+                datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_degrees(23, 26, 27.407),
+                1e-6,
+            ),  # Meeus p. 148, Example 22.a
+            (
+                datetime(2000, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_degrees(23, 26, 21.448),
+                1e-20, # !!
+            ),  # google
+            (
+                datetime(2026, 11, 23, 1, 4, 18, tzinfo=ZoneInfo("UTC")),
+                dms_to_degrees(23, 26, 8.86),
+                1e-6,
+            ),  # google
+        ],
+    )
+    def test_obliquity_mean(
+        self, a_datetime: datetime, expected: str, absolute_tolerance: float
+    ):
+        """Test the mean obliquity of the ecliptic calculation.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (str): The expected obliquity string representation.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.Meeus.obliquity_mean(a_datetime)
+        assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
+
 
 class TestUSN:
     """Test the US Naval Observatory implementation of astronomical calculations."""
@@ -337,19 +370,31 @@ class TestUSN:
                 dms_to_degrees(23, 26, 27.407),
                 1e-3,
             ),  # Meeus p. 148, Example 22.a
+            (
+                datetime(2000, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_degrees(23, 26, 21.448),
+                1e-5,
+            ),  # google
+            (
+                datetime(2026, 11, 23, 1, 4, 18, tzinfo=ZoneInfo("UTC")),
+                dms_to_degrees(23, 26, 8.86),
+                1e-3,
+            ),  # google
         ],
     )
-    def test_obliquity(
+    def test_obliquity_mean(
         self, a_datetime: datetime, expected: str, absolute_tolerance: float
     ):
         """Test the mean obliquity of the ecliptic calculation.
+
+        Approximate of what IAU uses.
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
             expected (str): The expected obliquity string representation.
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
-        result = navicomp.time.USN.obliquity(a_datetime)
+        result = navicomp.time.USN.obliquity_mean(a_datetime)
         assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
 
     @pytest.mark.parametrize(
@@ -466,11 +511,21 @@ class TestWikipedia:
             (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
                 dms_to_degrees(23, 26, 27.407),
-                1e-5,
+                1e-6,
             ),  # Meeus p. 148, Example 22.a
+            (
+                datetime(2000, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC")),
+                dms_to_degrees(23, 26, 21.448),
+                1e-99, # !!
+            ),  # google
+            (
+                datetime(2026, 11, 23, 1, 4, 18, tzinfo=ZoneInfo("UTC")),
+                dms_to_degrees(23, 26, 8.86),
+                1e-6,
+            ),  # google
         ],
     )
-    def test_obliquity(
+    def test_obliquity_mean(
         self,
         a_datetime: datetime,
         expected: float,
@@ -483,6 +538,6 @@ class TestWikipedia:
             expected (float): The expected obliquity in degrees.
             absolute_tolerance (float): The absolute tolerance for the approximation.
         """
-        result = navicomp.time.Wikipedia.obliquity(a_datetime)
+        result = navicomp.time.Wikipedia.obliquity_mean(a_datetime)
         assert result["value"] == pytest.approx(expected, abs=absolute_tolerance)
         assert result["units"] == "degrees"

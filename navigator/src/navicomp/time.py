@@ -201,6 +201,33 @@ class Meeus(Transforms):
             year, month, int(day), hour, minute, second, tzinfo=ZoneInfo("UTC")
         )
 
+    @classmethod
+    def obliquity_mean(cls, a_datetime: datetime) -> ValueWithUnits:
+        """Calculates the mean obliquity of the ecliptic given the datetime
+
+        from Meeus, 2nd. 22.2 matches IAU
+
+        TODO 22.3
+
+        a_datetime (coords.datetime): The time of the observation.
+
+        Returns:
+            ValueWithUnits: obliquity in degrees
+        """
+        obe = [
+            dms_to_degrees(23, 26, 21.448),
+            dms_to_degrees(0, 0, -46.815),
+            dms_to_degrees(0, 0, -0.00059),
+            dms_to_degrees(0, 0, 0.001813),
+        ]
+
+        T = (cls.Julian_day(a_datetime)["value"] - cls.JD2k) / 36525.0
+        ε = 0
+        for i in range(len(obe)):
+            ε += obe[i] * math.pow(T, i)
+
+        return {"value": ε, "units": "degrees"}
+
 
 class USN(Transforms):
     """US Naval Observatory Astronomical Algorithms.
@@ -273,7 +300,7 @@ class USN(Transforms):
         return {"value": gmst, "units": "hours"}
 
     @classmethod
-    def obliquity(cls, a_datetime: datetime) -> ValueWithUnits:
+    def obliquity_mean(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates the mean obliquity of the ecliptic in degrees.
 
         US Naval Observatory Astronomical Algorithms.
@@ -304,7 +331,7 @@ class USN(Transforms):
         JDtt = cls.Julian_day(a_datetime)["value"]
         Dtt = JDtt - cls.JD2k
         gmst = cls.GMST(a_datetime)["value"]
-        obliquity = cls.obliquity(a_datetime)["value"]
+        obliquity = cls.obliquity_mean(a_datetime)["value"]
         ε = Space.deg2rad(obliquity)
         Ω = Space.deg2rad(125.04 - 0.052954 * Dtt)
         L = Space.deg2rad(280.47 + 0.98565 * Dtt)
@@ -318,8 +345,7 @@ class USN(Transforms):
     def LMST(cls, a_datetime: datetime, a_longitude: ValueWithUnits) -> ValueWithUnits:
         """Calculates Local Mean Sidereal Time (LMST) in hours from a datetime.
 
-        Meeus, 2009, p. 88 with obliquity correction from the US Naval Observatory
-        Astronomical Algorithms.
+        Meeus, 2009, p. 88
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
@@ -339,8 +365,7 @@ class USN(Transforms):
     def LAST(cls, a_datetime: datetime, a_longitude: ValueWithUnits) -> ValueWithUnits:
         """Calculates Local Apparent Sidereal Time (LAST) in hours from a datetime.
 
-        Meeus, 2009, p. 88 with obliquity correction from the US Naval Observatory
-        Astronomical Algorithms.
+        Meeus, 2009, p. 88
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
@@ -361,15 +386,15 @@ class Wikipedia(Transforms):
     """Astronomical Algorithms from Wikipedia."""
 
     @classmethod
-    def obliquity(cls, a_datetime: datetime) -> ValueWithUnits:
-        """Calculates the obliquity of the ecliptic given the datetime
+    def obliquity_mean(cls, a_datetime: datetime) -> ValueWithUnits:
+        """Calculates the mean obliquity of the ecliptic given the datetime
 
         from http://en.wikipedia.org/wiki/Axial_tilt
 
         a_datetime (coords.datetime): The time of the observation.
 
         Returns:
-            float: The obliquity of the ecliptic in degrees.
+            ValueWithUnits: obliquity in degrees
         """
         obe = [
             dms_to_degrees(23, 26, 21.448),
