@@ -85,7 +85,7 @@ class Transforms:
 
         Meeus, 2009, p. 62 eq. 7.1
 
-        modified with fractional day.
+        modified with fractional day for Julian Day Ephemeris.
 
         4716 has been added for negative years but they are not supported
         by datetime.
@@ -127,7 +127,7 @@ class Transforms:
             - 1524.5
         )
 
-        # Add the time of day as a fraction of a day
+        # Add the time of day as a fraction of a day for JDE
         julian_day += (
             (utc_time.hour / 24.0)
             + (utc_time.minute / 1440.0)
@@ -146,10 +146,25 @@ class Meeus(Transforms):
     """
 
     @classmethod
+    def nutations_simple(cls, a_datetime: datetime):
+        """Nutations of longitude and obliquity simplified.
+
+        Meeus, 2nd, p. 144
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+
+        Returns:
+            ValueWithUnits: A dictionary containing the nutations
+            of longitude and obliquity.
+        """
+        pass
+
+    @classmethod
     def GMST(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
 
-        Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 87-88, eq. 12.4
+        Meeus, 2nd, p. 87-88, eq. 12.4
 
         Args:
             a_datetime (datetime): The input datetime in UTC.

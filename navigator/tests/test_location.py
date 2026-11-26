@@ -148,9 +148,7 @@ class TestLocationMeeus:
                 datetime.datetime(1987, 4, 10, 19, 21, tzinfo=ZoneInfo("UTC")),
                 {
                     "azimuth": ValueWithUnits(value=64.352133, units="degrees"),
-                    "altitude": ValueWithUnits(
-                        value=15.1249, units="degrees"
-                    ),
+                    "altitude": ValueWithUnits(value=15.1249, units="degrees"),
                 },
                 1e-6,
             ),  # Meeus ex. 13.b
