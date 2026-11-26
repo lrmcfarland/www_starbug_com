@@ -79,12 +79,16 @@ class Transforms:
     GREGORIAN_EPOCH = datetime(1582, 10, 15, tzinfo=ZoneInfo("UTC"))
     MJD_EPOCH = datetime(1858, 11, 17, tzinfo=ZoneInfo("UTC"))
 
-    @staticmethod
-    def Julian_day(a_datetime: datetime) -> ValueWithUnits:
+    @classmethod
+    def Julian_day(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates Julian day number from a datetime adjusted to UTC.
 
-        Meeus, 2009, p. 62
-        Montenbruck and Pfleger, p. 15
+        Meeus, 2009, p. 62 eq. 7.1
+
+        modified with fractional day.
+
+        4716 has been added for negative years but they are not supported
+        by datetime.
 
         Args:
             a_datetime (datetime): The input datetime.
@@ -94,17 +98,21 @@ class Transforms:
         """
         utc_time = a_datetime.astimezone(ZoneInfo("UTC"))
 
-        if utc_time.month <= 2:
-            year = utc_time.year - 1
-            month = utc_time.month + 12
-        else:
+        if utc_time.month > 2:
             year = utc_time.year
             month = utc_time.month
+        else:
+            year = utc_time.year - 1
+            month = utc_time.month + 12
 
         if (
-            utc_time.year < 1582
-            or (utc_time.year == 1582 and utc_time.month < 10)
-            or (utc_time.year == 1582 and utc_time.month == 10 and utc_time.day < 15)
+            utc_time.year < cls.GREGORIAN_EPOCH.year
+            or (utc_time.year == cls.GREGORIAN_EPOCH.year and utc_time.month < 10)
+            or (
+                utc_time.year == cls.GREGORIAN_EPOCH.year
+                and utc_time.month == cls.GREGORIAN_EPOCH.month
+                and utc_time.day < cls.GREGORIAN_EPOCH.day
+            )
         ):
             b = 0
         else:
@@ -141,7 +149,7 @@ class Meeus(Transforms):
     def GMST(cls, a_datetime: datetime) -> ValueWithUnits:
         """Calculates Greenwich Mean Sidereal Time (GMST) in hours from a datetime.
 
-        Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 87-88
+        Astronomical Algorithms, 2nd Edition, Jean Meeus, 2009, p. 87-88, eq. 12.4
 
         Args:
             a_datetime (datetime): The input datetime in UTC.
@@ -150,14 +158,14 @@ class Meeus(Transforms):
             ValueWithUnits: A dictionary containing the GMST value in hours.
         """
         jd = cls.Julian_day(a_datetime)["value"]
-        t = (jd - cls.JD2k) / 36525.0
+        t = (jd - cls.JD2k) / 36525.0  # eq. 12.1
         gmst = (
             280.46061837
             + 360.98564736629 * (jd - cls.JD2k)
             + 0.000387933 * t**2
             - t**3 / 38710000
-        )
-        gmst = gmst % 360.0
+        )  # eq. 12.4
+        gmst %= 360.0
         return {"value": gmst / 15.0, "units": "hours"}  # Convert degrees to hours
 
     @staticmethod

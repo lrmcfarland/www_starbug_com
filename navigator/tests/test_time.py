@@ -194,7 +194,7 @@ class TestMeeus:
             (
                 datetime(2000, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC")),
                 dms_to_degrees(23, 26, 21.448),
-                1e-20, # !!
+                1e-20,  # !!
             ),  # google
             (
                 datetime(2026, 11, 23, 1, 4, 18, tzinfo=ZoneInfo("UTC")),
@@ -516,7 +516,7 @@ class TestWikipedia:
             (
                 datetime(2000, 1, 1, 12, 0, tzinfo=ZoneInfo("UTC")),
                 dms_to_degrees(23, 26, 21.448),
-                1e-99, # !!
+                1e-99,  # !!
             ),  # google
             (
                 datetime(2026, 11, 23, 1, 4, 18, tzinfo=ZoneInfo("UTC")),
