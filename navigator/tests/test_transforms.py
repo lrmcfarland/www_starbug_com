@@ -1,12 +1,16 @@
 """tests for navicomp.transforms module."""
 
+import numpy as np
 import pytest
 
+from navicomp import ValueWithUnits
 from navicomp.transforms import (
     degrees_to_dms,
     dms_to_degrees,
     hms_to_hours,
     hours_to_hms,
+    Error,
+    find_radians,
 )
 
 
@@ -172,3 +176,38 @@ class TestHMS:
         assert result[0] == expected[0]
         assert result[1] == expected[1]
         assert result[2] == pytest.approx(expected[2], abs=absolute_tolerance)
+
+
+class TestFindRadians:
+
+    @pytest.mark.parametrize(
+        "α",
+        [
+            ValueWithUnits(value=0, units="odds"),
+            ValueWithUnits(value=0, units="sods"),
+        ],
+    )
+    def test_find_unsupported_radians(
+        self,
+        α: ValueWithUnits,
+    ):
+        """Test unsupported type errors."""
+        with pytest.raises(
+            Error, match="Test values must be in radians, degrees or hours."
+        ):
+            find_radians(α, "Test")
+
+    @pytest.mark.parametrize(
+        "α, expected",
+        [
+            (ValueWithUnits(value=np.pi, units="radians"), np.pi),
+            (ValueWithUnits(value=180, units="degrees"), np.pi),
+            (ValueWithUnits(value=12, units="hours"), np.pi),
+            (ValueWithUnits(value=90, units="DeGrees"), np.pi / 2),
+            (ValueWithUnits(value=24, units="hrs"), 2 * np.pi),
+            (ValueWithUnits(value=2 * np.pi, units="Rad"), 2 * np.pi),
+        ],
+    )
+    def test_find_radians(self, α: ValueWithUnits, expected: float):
+        """Test find radians from valid value with units."""
+        assert find_radians(α) == expected

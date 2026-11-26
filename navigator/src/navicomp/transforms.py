@@ -1,5 +1,15 @@
 """Transformations between various unit formats."""
 
+import numpy as np
+
+from navicomp import ValueWithUnits
+
+
+class Error(Exception):
+    """Base class for exceptions in this module."""
+
+    pass
+
 
 def degrees_to_dms(degrees: float) -> tuple[int, int, float]:
     """Convert decimal degrees to degrees, minutes, and seconds.
@@ -51,3 +61,25 @@ def hours_to_hms(hours: float) -> tuple[int, int, float]:
         hours (float): degrees.
     """
     return degrees_to_dms(degrees=hours)
+
+
+def find_radians(vwu: ValueWithUnits, emsg: str = "Unsupported") -> float:
+    """Find the radians in the ValueWithUnits.
+
+    Args:
+        vwu (ValueWithUnits): a value with units
+        emsg (str): message to raise
+
+    Returns:
+        value in radians
+
+    Raises: Error if not supported
+    """
+    if vwu["units"].lower() == "radians" or vwu["units"].lower() == "rad":
+        return vwu["value"]
+    elif vwu["units"].lower() == "degrees" or vwu["units"].lower() == "deg":
+        return np.radians(vwu["value"])
+    elif vwu["units"].lower() == "hours" or vwu["units"].lower() == "hrs":
+        return np.radians(15.0 * vwu["value"])
+    else:
+        raise Error(f"{emsg} values must be in radians, degrees or hours.")
