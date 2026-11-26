@@ -115,6 +115,54 @@ class TestMeeus:
         ("a_datetime", "expected", "absolute_tolerance"),
         [
             (
+                datetime(1987, 4, 10, 19, 21, tzinfo=ZoneInfo("UTC")),
+                {
+                    "nutation longitude": ValueWithUnits(
+                        value=dms_to_degrees(0, 0, -3.868), units="degrees"
+                    ),
+                    "true obliquity": ValueWithUnits(
+                        value=dms_to_degrees(23, 26, 36.87), units="degrees"
+                    ),
+                },
+                1e-7,
+            ),  # Meeus ex 13.b
+        ],
+    )
+    def test_nutations_simple(
+        self, a_datetime: datetime, expected: str, absolute_tolerance: float
+    ):
+        """Test Meeus nutation simplified calculations.
+
+        Args:
+            a_datetime (datetime): The input datetime in UTC.
+            expected (str): The expected nutations.
+            absolute_tolerance (float): The absolute tolerance for the approximation.
+        """
+        result = navicomp.time.Meeus.nutations_simple(a_datetime)
+
+        assert "nutation longitude" in result
+        assert "nutation obliquity" in result
+
+        assert (
+            result["nutation longitude"]["units"]
+            == expected["nutation longitude"]["units"]
+        )
+        assert result["nutation longitude"]["value"] == pytest.approx(
+            expected["nutation longitude"]["value"], abs=absolute_tolerance
+        )
+
+        assert (
+            result["nutation obliquity"]["units"]
+            == expected["nutation obliquity"]["units"]
+        )
+        assert result["nutation obliquity"]["value"] == pytest.approx(
+            expected["nutation obliquity"]["value"], abs=absolute_tolerance
+        )
+
+    @pytest.mark.parametrize(
+        ("a_datetime", "expected", "absolute_tolerance"),
+        [
+            (
                 datetime(1987, 4, 10, 0, 0, tzinfo=ZoneInfo("UTC")),
                 dms_to_degrees(13, 10, 46.3668),
                 1e-7,

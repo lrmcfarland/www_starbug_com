@@ -146,7 +146,7 @@ class Meeus(Transforms):
     """
 
     @classmethod
-    def nutations_simple(cls, a_datetime: datetime):
+    def nutations_simple(cls, a_datetime: datetime) -> dict[str, ValueWithUnits]:
         """Nutations of longitude and obliquity simplified.
 
         Meeus, 2nd, p. 144
@@ -158,7 +158,36 @@ class Meeus(Transforms):
             ValueWithUnits: A dictionary containing the nutations
             of longitude and obliquity.
         """
-        pass
+        JDE = cls.Julian_day(a_datetime)["value"]
+        T = (JDE - cls.JD2k) / 36525
+        Ω = (
+            125.04452
+            - 1934.136261 * T
+            + 0.0020708 * math.pow(T, 2)
+            + math.pow(T, 3) / 450000
+        )
+        Ωrad = np.radians(Ω)
+
+        Lsun_rad = np.radians(280.4665 + 36000.7698 * T)
+        Lmoon_rad = np.radians(218.3165 + 481267.8813 * T)
+
+        Δψ = (
+            dms_to_degrees(0, 0, -17.2) * np.sin(Ωrad)
+            - dms_to_degrees(0, 0, 1.32) * np.sin(2 * Lsun_rad)
+            - dms_to_degrees(0, 0, 0.23) * np.sin(2 * Lmoon_rad)
+            + dms_to_degrees(0, 0, 0.21) * np.sin(2 * Ωrad)
+        )
+        Δε = (
+            dms_to_degrees(0, 0, 9.2) * np.cos(Ωrad)
+            + dms_to_degrees(0, 0, 0.57) * np.cos(2 * Lsun_rad)
+            + dms_to_degrees(0, 0, 0.1) * np.cos(2 * Lmoon_rad)
+            - dms_to_degrees(0, 0, 0.09) * np.cos(2 * Ωrad)
+        )
+
+        return {
+            "nutation longitude": ValueWithUnits(value=np.degrees(Δψ), units="degrees"),
+            "nutation obliquity": ValueWithUnits(value=np.degrees(Δε), units="degrees"),
+        }
 
     @classmethod
     def GMST(cls, a_datetime: datetime) -> ValueWithUnits:
